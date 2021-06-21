@@ -19,6 +19,7 @@ public class ClientHandler implements Runnable {
 	private BufferedReader in;
 	private PrintWriter out;
 	private String name;
+	private String geVersion;
 	private static ArrayList<ClientHandler> clients;
 	private boolean afk;
 	private boolean ready;
@@ -61,6 +62,7 @@ public class ClientHandler implements Runnable {
 		setClientList (aClientListModel);
 		setGameList (aGameListModel);
 		setLogger (serverFrame.getLogger ());
+		setGEVersion ("");
 		if (aSetupInOut) {
 			SetupSocketInOut ();
 		}
@@ -216,6 +218,8 @@ public class ClientHandler implements Runnable {
 			serverBroadcast (name + " has aborted", SEND_TO.AllButRequestor);
 		} else if (aMessage.startsWith ("name")) {
 			aContinue = handleNewPlayer (aContinue, aMessage);
+		} else if (aMessage.startsWith ("GEVersion")) {
+			aContinue = handleGEVersion (aContinue, aMessage);
 		} else if (aMessage.startsWith ("say")) {
 			playerBroadcast (aMessage);
 		} else if (startsAndEndsWith (aMessage, GAME_ACTIVITY_PREFIX, GAME_ACTIVITY_SUFFFIX)) {
@@ -255,7 +259,6 @@ public class ClientHandler implements Runnable {
 
 	public void handleClientIsStarting () {
 		setClientIsReady (true);
-//		serverBroadcast (name + " Starts the Game", SEND_TO.AllButRequestor);
 	}
 
 	public void handleClientIsReady () {
@@ -359,6 +362,14 @@ public class ClientHandler implements Runnable {
 		return tHandledGameSupport;
 	}
 
+	private boolean handleGEVersion (boolean aContinue, String aMessage) {
+		if (! setGEVersionFromMessage (aMessage) ) {
+			aContinue = false;		
+		}
+		
+		return aContinue;
+	}
+	
 	private boolean handleNewPlayer (boolean aContinue, String aMessage) {
 		String tResponse;
 		
@@ -382,6 +393,14 @@ public class ClientHandler implements Runnable {
     	logger.error(aMessage + " [" + name + "]", aException);
     }
 
+    public void setGEVersion (String aGEVersion) {
+    	geVersion = aGEVersion;
+    }
+    
+    public String getGEVersion () {
+    	return geVersion;
+    }
+    
 	public String getName () {
 		return name;
 	}
@@ -392,6 +411,10 @@ public class ClientHandler implements Runnable {
 	
 	public String getReadyName (String aName) {
 		return aName + " [READY]";
+	}
+	
+	public String getActiveName (String aName) {
+		return aName + " [ACTIVE]";
 	}
 	
 	public String getAFKName () {
@@ -409,6 +432,8 @@ public class ClientHandler implements Runnable {
 			tFullName = getReadyName (tFullName);
 		}
 		
+		tFullName += " " + geVersion;
+		
 		return tFullName;
 	}
 	
@@ -419,10 +444,14 @@ public class ClientHandler implements Runnable {
 		ready = aIsReady;
 		tNewName = getFullName ();
 		
-		removeUser (tCurrentName);
-		addNewUser (tNewName);
+		swapUser (tCurrentName, tNewName);
 	}
 
+	private void swapUser (String aCurrentName, String aNewName) {
+		removeUser (aCurrentName);
+		addNewUser (aNewName);
+	}
+	
 	private void removeUser (String aCurrentName) {
 		clientListModel.removeElement (aCurrentName);
 	}
@@ -433,8 +462,7 @@ public class ClientHandler implements Runnable {
 		tCurrentName = getFullName ();
 		afk = aIsAFK;
 		tNewName = getFullName ();
-		removeUser (tCurrentName);
-		addNewUser (tNewName);
+		swapUser (tCurrentName, tNewName);
 	}
 	
 	public boolean getClientIsReady () {
@@ -467,16 +495,37 @@ public class ClientHandler implements Runnable {
 		}
 	}
 	
+	private boolean setGEVersionFromMessage (String aMessage) {
+		boolean tAccepted = false;
+		String tGEVersion;
+		int tSpaceIndex = aMessage.indexOf (" ");
+		String tCurrentName, tNewName;
+		
+		if (tSpaceIndex > 0) {
+			tGEVersion = aMessage.substring (tSpaceIndex + 1);
+			tCurrentName = getFullName ();
+			setGEVersion (tGEVersion);
+			tNewName = getFullName ();
+			swapUser (tCurrentName, tNewName);
+			tAccepted = true;
+		} else {
+			logger.error (">> No Space in GEVersion Command [" + aMessage + "] <<");
+		}
+		
+		return tAccepted;
+	}
+	
 	private boolean setNameFromMessage (String aMessage) {
 		boolean tAccepted = false;
-		String tName;
+		String tName, tFullName;
 		
 		int tSpaceIndex = aMessage.indexOf (" ");
 		if (tSpaceIndex > 0) {
 			tName = aMessage.substring (tSpaceIndex + 1);
 			if (! (clientListModel.contains (tName) || clientListModel.contains (getAFKName (tName)))) {
 				setName (tName);
-				addNewUser (name);
+				tFullName = getFullName ();
+				addNewUser (tFullName);
 				tAccepted = true;
 				serverBroadcast (name + " has joined", SEND_TO.AllButRequestor);
 			}
