@@ -281,6 +281,7 @@ public class ClientHandler implements Runnable {
 	
 	public void setGameSupport (GameSupport aGameSupport) {
 		gameSupport = aGameSupport;
+		gameSupport.setClientHandlers (clients);
 	}
 	
 	public void setNewGameSupport (Logger aLogger) {

@@ -247,6 +247,7 @@ public class GameSupport {
 			tNetworkAction = networkActions.getLastNetworkAction ();
 			tNetworkAction.setActionXML (tAction);
 			tNetworkAction.setStatus (STATUS_COMPLETE);
+			autoSave ();
 		} else {
 
 		}
@@ -757,5 +758,9 @@ public class GameSupport {
 
 	public int getLastActionNumber() {
 		return networkActions.getLastNetworkActionNumber ();
+	}
+	
+	public void setClientHandlers (ArrayList<ClientHandler> aClients) {
+		clients = aClients;
 	}
 }
