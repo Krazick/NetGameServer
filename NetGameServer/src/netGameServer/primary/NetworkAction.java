@@ -1,5 +1,7 @@
 package netGameServer.primary;
 
+import netGameServer.utilities.FileUtils;
+
 public class NetworkAction {
 	public static final NetworkAction NO_ACTION = null;
 	public static final String NO_STATUS = null;
@@ -38,5 +40,9 @@ public class NetworkAction {
 	
 	public void setActionXML (String aActionXML) {
 		actionXML = aActionXML;
+	}
+	
+	public void writeAction (FileUtils aFileUtils) {
+		aFileUtils.outputToFile (actionXML);
 	}
 }

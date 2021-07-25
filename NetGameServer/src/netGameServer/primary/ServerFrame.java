@@ -1,6 +1,7 @@
 package netGameServer.primary;
 
 import java.awt.HeadlessException;
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -29,6 +30,8 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.apache.logging.log4j.Logger;
 
+import netGameServer.utilities.FileUtils;
+
 public class ServerFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private final int MAX_THREADS = 12;
@@ -48,10 +51,13 @@ public class ServerFrame extends JFrame {
 	private ServerThread serverThread;
 	private ServerSocket serverSocket;
 	private Logger logger;
-	
+	private SavedGames games;
+
 	public ServerFrame (String aName, int aServerPort, ArrayList<String> aGameNames, ServerThread aServerThread) 
 			throws HeadlessException, IOException {
 		super ("");
+		
+		String tAutoSavesDirectory;
 				
 		setName (aName);
 		setPort (aServerPort);
@@ -61,11 +67,18 @@ public class ServerFrame extends JFrame {
 		setupJFrame (name + " Server Monitor Frame");
 		setupActions ();
 		activeGames = new LinkedList<GameSupport> ();
-		
+		setupAutoSaveDirectory ();
+		tAutoSavesDirectory = getFullASDirectory ();
+		games = new SavedGames (tAutoSavesDirectory);
+
 		serverSocket = null;
 		serverThread.setIsRunning (false);
 	}
 	
+	public SavedGames getSavedGames () {
+		return games;
+	}
+
 	public Logger getLogger () {
 		return logger;
 	}
@@ -74,17 +87,55 @@ public class ServerFrame extends JFrame {
 		logger = aLogger;
 	}
 	
+	public String getSavedGamesFor (String aPlayerName) {
+		String tSavedGamesFor;
+		
+		tSavedGamesFor = games.getSavedGamesFor (aPlayerName);
+		
+		return tSavedGamesFor;
+	}
+
 	public GameSupport createNewGameSupport (ClientHandler aClientHandler) {
 		String tNewGameID;
 		GameSupport tNewGameSupport;
 		
 		tNewGameID = generateNewGameID ();
-		tNewGameSupport = new GameSupport (tNewGameID, logger);
+		tNewGameSupport = new GameSupport (this, tNewGameID, logger);
 		activeGames.add (tNewGameSupport);
 		
 		return tNewGameSupport;
 	}
 	
+	// -----------------  Auto Save Functions ---------------
+	
+	public void setupAutoSaveDirectory () {
+		String tDirectoryName;
+		String tSubDirPath;
+		
+		tDirectoryName = getBaseASDirectory ();
+		FileUtils.createDirectory (tDirectoryName);
+		tSubDirPath = getFullASDirectory ();
+		FileUtils.createDirectory (tSubDirPath);
+	}
+	
+	public String getFullASDirectory () {
+		String tFullPath;
+		
+		tFullPath = getBaseASDirectory () + File.separator + getName ();
+		
+		return tFullPath;
+	}
+	
+	public String getBaseASDirectory () {
+		String tDirectoryName;
+		
+		tDirectoryName = "NetworkAutoSaves";
+		
+		return tDirectoryName;
+	}
+	
+	// -------------------- End Auto Save Functions ----------------
+
 	public String generateNewGameID () {
 		String tNewGameID;
 		

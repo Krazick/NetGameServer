@@ -1,12 +1,18 @@
 package netGameServer.primary;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.Logger;
+import netGameServer.utilities.FileUtils;
 
 public class GameSupport {
 	NetworkActions networkActions;
+	private ArrayList<ClientHandler> clients;
+	ServerFrame serverFrame;
+	String gameStatus;
 	int actionNumber;
 	String gameID;
 	Logger logger;
@@ -27,6 +33,8 @@ public class GameSupport {
 	private final static String REQUEST_HEARTBEAT = "<Heartbeat>";
 	private final static Pattern REQUEST_HEARTBEAT_PATTERN = Pattern.compile (REQUEST_HEARTBEAT);
 	private final String REQUEST_ACTION_NUMBER = "<ActionNumber requestNew=\"TRUE\">";
+	private final static String REQUEST_SAVED_GAMES_FOR = "<RequestSavedGames player=\"([A-Za-z][A-Za-z0-9]+)\"/?>";
+	private final static Pattern REQUEST_SAVED_GAMES_FOR_PATTERN = Pattern.compile (REQUEST_SAVED_GAMES_FOR);
 	private final String REQUEST_LAST_ACTION = "<ActionNumber requestLast=\"TRUE\">";
 	private final String REQUEST_LAST_ACTION_COMPLETE = "<LastAction isComplete=\"TRUE\">";
 	private final String REQUEST_LAST_ACTION_PENDING = "<ActionNumber requestPending=\"TRUE\">";
@@ -39,18 +47,43 @@ public class GameSupport {
 	private final String PLAYER_READY = "<Ready>";
 	private final String GAME_START = "<Start>";
 	private final int NO_ACTION_NUMBER = -1;
+	public final String STATUS_PREPARED = "PREPARED";
 	private final String STATUS_COMPLETE = "Complete";
 	private final String STATUS_PENDING = "Pending";
-	private final String STATUS_RECEIVED = "Recieved";
+	private final String STATUS_RECEIVED = "Received";
 	private final int MIN_ACTION_NUMBER = 100;
 	public final static String NO_GAME_ID = "NOID";
 	public static final GameSupport NO_GAME_SUPPORT = null;
+	public static String NO_FILE_NAME = "";
+	String autoSaveFileName = NO_FILE_NAME;
+	File autoSaveFile = null;
+	FileUtils fileUtils;
+	boolean goodFileWriter = false;
 	
-	public GameSupport (String aNewGameID, Logger aLogger) {
+	public GameSupport (ServerFrame aServerFrame, String aNewGameID, Logger aLogger) {
+		setServerFrame (aServerFrame);
 		networkActions = new NetworkActions ();
 		setActionNumber (MIN_ACTION_NUMBER);
 		setGameID (aNewGameID);
 		setLogger (aLogger);
+		setupAllAutoSaveFunctionality (aLogger);
+		setGameStatus (STATUS_PREPARED);
+	}
+	
+	public void setServerFrame (ServerFrame aServerFrame) {
+		serverFrame = aServerFrame;
+	}
+	
+	public ServerFrame getServerFrame () {
+		return serverFrame;
+	}
+
+	public void setGameStatus (String aGameStatus) {
+		gameStatus = aGameStatus;
+	}
+	
+	public String getGameStatus () {
+		return gameStatus;
 	}
 
 	public void setLogger (Logger aLogger) {
@@ -68,7 +101,86 @@ public class GameSupport {
 		
 		return tWhoGetsResponse;
 	}
+	// -----------------  Auto Save Functions ---------------
 	
+	public void setupAllAutoSaveFunctionality (Logger aLogger) {
+		FileUtils tFileUtils;
+		String tGameID;
+		
+		tFileUtils = new FileUtils (logger);
+		setFileUtils (tFileUtils);
+		tGameID = getGameID ();
+		setupAutoSaveFile (tGameID);
+	}
+	
+	public void setFileUtils (FileUtils aFileUtils) {
+		fileUtils = aFileUtils;
+	}
+	
+	public void setupAutoSaveFile (String aGameID) {
+		String tDirectoryName;
+		
+		if (autoSaveFile == null) {
+			tDirectoryName = serverFrame.getFullASDirectory ();
+			autoSaveFileName = constructAutoSaveFileName (tDirectoryName, aGameID);
+			if (! autoSaveFileName.equals (NO_FILE_NAME)) {
+				setAutoSaveFile (new File (autoSaveFileName));	
+			}
+		}
+	}
+	
+	private String constructAutoSaveFileName (String tDirectoryName, String aGameID) {
+		String tAutoSaveFileName = NO_FILE_NAME;
+		
+		// When running via Eclipse, will save AutoSaves to
+		// /Volumes/Public/GIT/NetGameServer/NetGameServer/NetworkAutoSaves/18XX
+		// on Drobo
+		
+		if (! GameSupport.NO_GAME_ID.equals (aGameID) ) {
+			tAutoSaveFileName = tDirectoryName + File.separator + aGameID + ".autoSave";			
+		}
+		
+		return tAutoSaveFileName;
+	}
+	
+	public void setAutoSaveFile (File aFile) {
+		autoSaveFile = aFile;
+		fileUtils.setFile (aFile);
+	}
+	
+	// -------------------- End Auto Save Functions ----------------
+	
+	public void autoSave () {
+		if (! fileUtils.fileWriterIsSetup ()) {
+			goodFileWriter = fileUtils.setupFileWriter ();
+		}
+		if (goodFileWriter) {
+			fileUtils.startXMLFileOutput ();
+			fileUtils.outputToFile ("<NetworkSaveGame gameID=\"" + getGameID () + "\" status=\"" + 
+					getGameStatus () + "\" lastActionNumber=\"" + getLastActionNumber () +"\">");
+			writeClientsInXML ();
+			networkActions.writeAllActions (fileUtils);
+			fileUtils.closeFile ();
+		}
+	}
+	
+	private void writeClientsInXML () {
+		String tPlayerName;
+		String tPlayerStatus;
+		
+		fileUtils.outputToFile ("<Players>");
+		for (ClientHandler tClientHandler : clients) {
+			tPlayerName = tClientHandler.getName ();
+			tPlayerStatus = tClientHandler.getPlayerStatus ();
+			if (tPlayerName.length () > 0) {
+				tPlayerName = "<Player name=\"" + tPlayerName + "\" status=\"" + tPlayerStatus + "\">";
+				fileUtils.outputToFile (tPlayerName);
+			}
+		}
+
+		fileUtils.outputToFile ("</Players>");
+	}
+		
 	public String handleGameSupportRequest (String aRequest, ClientHandler aClientHandler) {
 		String tBaseRequest;
 		String tGSResponse = BAD_REQUEST;
@@ -168,6 +280,8 @@ public class GameSupport {
 			tGSResponse = generateGSResponseReconnect (aClientHandler);
 		} else if (isRequestForGameLoadSetup (aRequest)) {
 			tGSResponse = handleGSResponseGameLoadSetup (aRequest, aClientHandler);
+		} else if (isRequestForSavedGamesFor (aRequest)) {
+			tGSResponse = handleGSResponseRequestSavedGamesFor (aRequest);
 		}
 		
 		return tGSResponse;
@@ -374,6 +488,17 @@ public class GameSupport {
 	public boolean isRequestForGameLoadSetup (String aRequest) {
 		boolean tRequestIsValid = false;
 		Matcher tMatcher = REQUEST_WITH_GAME_LOAD_SETUP_PATTERN.matcher (aRequest);
+		
+		if (tMatcher.matches ()) {
+			tRequestIsValid = true;
+		}
+		
+		return tRequestIsValid;
+	}
+
+	public boolean isRequestForSavedGamesFor (String aRequest) {
+		boolean tRequestIsValid = false;
+		Matcher tMatcher = REQUEST_SAVED_GAMES_FOR_PATTERN.matcher (aRequest);
 		
 		if (tMatcher.matches ()) {
 			tRequestIsValid = true;
@@ -605,6 +730,26 @@ public class GameSupport {
 			networkActions.addNetworkAction (tDummyNetworkAction);
 			aClientHandler.addGameNameToList (tGameName);
 			tGSResponse = wrapWithGSResponse ("<GOOD>");
+		}
+		
+		return tGSResponse;
+	}
+
+	public String handleGSResponseRequestSavedGamesFor (String aRequest) {
+		String tGSResponse = BAD_REQUEST;
+		Matcher tMatcher = REQUEST_SAVED_GAMES_FOR_PATTERN.matcher (aRequest);
+		String tPlayerName;
+		String tAllSavedGamesFor;
+		String tSavedGamesFor;
+		
+		if (tMatcher.find ()) {
+			tPlayerName = tMatcher.group (1);
+			tSavedGamesFor = serverFrame.getSavedGamesFor (tPlayerName);
+			if (tSavedGamesFor == null) {
+				tSavedGamesFor = "";
+			}
+			tAllSavedGamesFor = "<SavedGames name=\"" + tPlayerName + "\">" + tSavedGamesFor + "</SavedGames>";
+			tGSResponse = wrapWithGSResponse (tAllSavedGamesFor);
 		}
 		
 		return tGSResponse;

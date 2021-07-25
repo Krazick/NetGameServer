@@ -286,7 +286,7 @@ public class ClientHandler implements Runnable {
 	public void setNewGameSupport (Logger aLogger) {
 		GameSupport tNewGameSupport;
 		
-		tNewGameSupport = new GameSupport (GameSupport.NO_GAME_ID, aLogger);
+		tNewGameSupport = new GameSupport (serverFrame, GameSupport.NO_GAME_ID, aLogger);
 		setGameSupport (tNewGameSupport);
 	}
 	
@@ -405,6 +405,19 @@ public class ClientHandler implements Runnable {
 		return name;
 	}
 	
+	public String getPlayerStatus () {
+		String tPlayerStatus;
+		
+		tPlayerStatus = "NotConnected";
+		if (isClientReady ()) {
+			tPlayerStatus = "READY";
+		} else if (isClientAFK ()) {
+			tPlayerStatus = "AFK";
+		}
+		
+		return tPlayerStatus;
+	}
+
 	public String getAFKName (String aName) {
 		return aName + " [AFK]";
 	}

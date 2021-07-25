@@ -30,14 +30,20 @@ class GameSupportTests {
     ClientHandler mClientHandler;
 	Logger logger;
 	
+	@Mock
+	ServerFrame mServerFrame;
+	
 	@BeforeEach
 	void setUp() throws Exception {
 		String tGameID;
 		
+		
 		setupLogger ();
 		tGameID = "2020-02-26-1001";
-		gameSupport = new GameSupport (tGameID, logger);
-		gameSupportNoID = new GameSupport ("NOID", logger);
+		Mockito.doReturn ("NetworkAutoSaves/Tests").when (mServerFrame).getFullASDirectory ();
+
+		gameSupport = new GameSupport (mServerFrame, tGameID, logger);
+		gameSupportNoID = new GameSupport (mServerFrame, "NOID", logger);
 	}
 	
 	private void setupLogger () {
@@ -389,10 +395,10 @@ class GameSupportTests {
 			tGSResponsePending = gameSupport.generateGSReponseRequestLast ();
 			assertEquals ("<GSResponse><LastAction actionNumber=\"101\" status=\"Pending\"></GSResponse>", tGSResponsePending);
 			
-			tStatusUpdated = gameSupport.setStatus ("Recieved");
+			tStatusUpdated = gameSupport.setStatus ("Received");
 			if (tStatusUpdated) {
 				tGSResponseReceived = gameSupport.generateGSReponseRequestLast ();
-				assertEquals ("<GSResponse><LastAction actionNumber=\"101\" status=\"Recieved\"></GSResponse>", tGSResponseReceived);
+				assertEquals ("<GSResponse><LastAction actionNumber=\"101\" status=\"Received\"></GSResponse>", tGSResponseReceived);
 			} else {
 				fail ("Status was not Updated to Received");
 			}

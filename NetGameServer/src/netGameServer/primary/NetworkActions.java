@@ -3,6 +3,8 @@ package netGameServer.primary;
 import java.util.LinkedList;
 import java.util.List;
 
+import netGameServer.utilities.FileUtils;
+
 public class NetworkActions {
 	List<NetworkAction> actions;
 	
@@ -94,6 +96,14 @@ public class NetworkActions {
 		}
 		
 		return tStatus;
-		
 	}
+	
+	public void writeAllActions (FileUtils aFileUtils) {
+		aFileUtils.outputToFile ("<NetworkActions>");
+		for (NetworkAction tNetworkAction : actions) {
+			tNetworkAction.writeAction (aFileUtils);
+		}
+		aFileUtils.outputToFile ("</NetworkActions>");
+	}
+
 }
