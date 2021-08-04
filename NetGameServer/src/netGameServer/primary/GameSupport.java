@@ -668,7 +668,7 @@ public class GameSupport {
 	
 	public String generateGSResponseRequestAction (String aRequest) {
 		String tGSResponse = BAD_REQUEST;
-		String tNumberMatched;
+		String tNumberMatched, tBadResponse;
 		int tActionNumber;
 		Matcher tMatcher = REQUEST_ACTION_PATTERN.matcher (aRequest);
 		
@@ -678,7 +678,9 @@ public class GameSupport {
 			if ((tActionNumber > MIN_ACTION_NUMBER) && (tActionNumber <= actionNumber)) {
 				tGSResponse = wrapWithGSResponse (getThisAction (tActionNumber));
 			} else {
-				tGSResponse = wrapWithGSResponse ("<ActionOutOfRange>");
+				tBadResponse = "<ActionOutOfRange find=\"" + tActionNumber + "\" min=\""
+						+ MIN_ACTION_NUMBER + "\" max=\"" + actionNumber + "\" />";
+				tGSResponse = wrapWithGSResponse (tBadResponse);
 			}
 		}
 
