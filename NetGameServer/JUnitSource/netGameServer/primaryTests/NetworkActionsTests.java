@@ -44,7 +44,7 @@ class NetworkActionsTests {
 		assertEquals ("Complete", tStatusAction);
 		
 		tActionXML = networkActions.getActionXMLAt (0);
-		assertEquals ("<ActionNotRecieved>", tActionXML);
+		assertEquals ("<ActionNotRecieved/>", tActionXML);
 		
 		tStatusAction = networkActions.getStatusAt (0);
 		assertNull (tStatusAction);
@@ -101,7 +101,7 @@ class NetworkActionsTests {
 			tActionNumber = networkActions.getLastNetworkActionNumber ();
 			assertEquals (102, tActionNumber);
 			tActionXML = networkActions.getActionXMLAt (1);
-			assertEquals ("<ActionNotRecieved>", tActionXML);
+			assertEquals ("<ActionNotRecieved/>", tActionXML);
 			
 			tActionXML = networkActions.getActionXMLAt (0);
 			assertEquals ("<Action actor=\"GameServer\" class=\"ge18xx.round.action.Action\" number=\"100\">", tActionXML);

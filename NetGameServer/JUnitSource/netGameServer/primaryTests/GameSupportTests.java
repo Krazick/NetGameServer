@@ -537,14 +537,14 @@ class GameSupportTests {
 			gameSupport.handleGameSupportRequest (tNewActionRequest, mClientHandler);
 			//"<Action actor=\"GameServer\" class=\"ge18xx.round.action.Action\" number=\"100\">"
 			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
-			assertEquals ("<GSResponse><ActionNotRecieved></GSResponse>", tGSResponse);
+			assertEquals ("<GSResponse><ActionNotRecieved/></GSResponse>", tGSResponse);
 					
 			gameSupport.setStatus("Complete");
 			
 			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandler);
-			assertEquals ("<GSResponse><ActionOutOfRange></GSResponse>", tGSResponse);
+			assertEquals ("<GSResponse><ActionOutOfRange find=\"92\" min=\"100\" max=\"101\" /></GSResponse>", tGSResponse);
 			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest2, mClientHandler);
-			assertEquals ("<GSResponse><ActionOutOfRange></GSResponse>", tGSResponse);
+			assertEquals ("<GSResponse><ActionOutOfRange find=\"201\" min=\"100\" max=\"101\" /></GSResponse>", tGSResponse);
 		}
 		
 		@Test

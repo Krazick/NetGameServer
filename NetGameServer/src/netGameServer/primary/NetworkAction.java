@@ -5,8 +5,7 @@ import netGameServer.utilities.FileUtils;
 public class NetworkAction {
 	public static final NetworkAction NO_ACTION = null;
 	public static final String NO_STATUS = null;
-//	public static final String NO_ACTION_XML = null;
-	public static final String NO_ACTION_RECIEVED_XML = "<ActionNotRecieved>";
+	public static final String NO_ACTION_RECIEVED_XML = "<ActionNotRecieved/>";
 	public static final int NO_ACTION_NUMBER = -1;
 	public static final int MIN_ACTION_NUMBER = 100;
 	public static final String ACTION_COMPLETE = "Complete";
@@ -17,6 +16,7 @@ public class NetworkAction {
 	String status;
 	
 	public NetworkAction (int aActionNumber, String aStatus) {
+		
 		actionNumber = aActionNumber;
 		setStatus (aStatus);
 		setActionXML (NO_ACTION_RECIEVED_XML);
