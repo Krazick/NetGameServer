@@ -1,8 +1,13 @@
 package netGameServer.primary;
 
+import netGameServer.utilities.AttributeName;
+import netGameServer.utilities.ElementName;
 import netGameServer.utilities.FileUtils;
+import netGameServer.utilities.XMLNode;
 
 public class NetworkAction {
+	public static final ElementName EN_ACTION = new ElementName ("Action");
+	public static final AttributeName AN_NUMBER = new AttributeName ("number");
 	public static final NetworkAction NO_ACTION = null;
 	public static final String NO_STATUS = null;
 	public static final String NO_ACTION_RECIEVED_XML = "<ActionNotRecieved/>";
@@ -16,10 +21,20 @@ public class NetworkAction {
 	String status;
 	
 	public NetworkAction (int aActionNumber, String aStatus) {
-		
 		actionNumber = aActionNumber;
 		setStatus (aStatus);
 		setActionXML (NO_ACTION_RECIEVED_XML);
+	}
+	
+	public NetworkAction (XMLNode aXMLAction) {
+		String tAction;
+		
+		actionNumber = aXMLAction.getThisIntAttribute (AN_NUMBER);
+		setStatus (ACTION_COMPLETE);
+		tAction = aXMLAction.toString ();
+		tAction = tAction.replaceAll ("\r", "").replaceAll ("\n", "");
+		System.out.println ("Adding Action [" + tAction + "]");
+		setActionXML (tAction);
 	}
 	
 	public void setStatus (String aStatus) {
