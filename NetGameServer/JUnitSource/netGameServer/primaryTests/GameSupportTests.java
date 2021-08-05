@@ -39,8 +39,8 @@ class GameSupportTests {
 		
 		
 		setupLogger ();
-		tGameID = "2020-02-26-1001";
-		Mockito.doReturn ("NetworkAutoSaves/Tests").when (mServerFrame).getFullASDirectory ();
+		tGameID = "2020-07-31-2005";
+		Mockito.doReturn ("NetworkAutoSaves/18XXTests").when (mServerFrame).getFullASDirectory ();
 
 		gameSupport = new GameSupport (mServerFrame, tGameID, logger);
 		gameSupportNoID = new GameSupport (mServerFrame, "NOID", logger);
@@ -73,6 +73,56 @@ class GameSupportTests {
 		assertFalse (gameSupport.isLastActionComplete ());
 	}
 	
+    private String concatPlayers (String aPlayerA, String aPlayerB) {
+        return aPlayerA + ", " + aPlayerB;
+	}
+	
+	private String concatPlayers (String aPlayerA, String aPlayerB, String aPlayerC) {
+	        return aPlayerA + ", " + aPlayerB + ", " + aPlayerC;
+	}
+
+    private String prepareExpectedResponse (String aPlayerName) {
+        String tPlayer1 = "GSPlayerAlpha";
+        String tPlayer2 = "GSPlayerBeta";
+        String tPlayer3 = "GSPlayerGamma";
+        String tPlayer4 = "GSPlayerDelta";
+        String tPlayer5 = "GSPlayerEpsilon";
+        String tGame_12 = "<Game gameID=\"2021-04-07-1748\" lastActionNumber=\"101\" players=\"" +
+                                                        concatPlayers (tPlayer1, tPlayer2) +"\" status=\"Active\">";
+        String tGame_421 = "<Game gameID=\"2021-04-08-1951\" lastActionNumber=\"100\" players=\"" +
+                                                        concatPlayers (tPlayer4, tPlayer2, tPlayer1) + "\" status=\"Prepared\">";
+        String tGame_42 = "<Game gameID=\"2021-04-08-2034\" lastActionNumber=\"108\" players=\"" +
+                                                        concatPlayers (tPlayer4, tPlayer2) + "\" status=\"Active\">";
+        String tGame_251 = "<Game gameID=\"2021-04-09-2141\" lastActionNumber=\"108\" players=\"" +
+                                                        concatPlayers (tPlayer2, tPlayer5, tPlayer1) + "\" status=\"Active\">";
+        String tGame_14 = "<Game gameID=\"2021-04-08-2006\" lastActionNumber=\"120\" players=\"" +
+                                                        concatPlayers (tPlayer1, tPlayer4) + "\" status=\"Active\">";
+        String tGame_15 = "<Game gameID=\"2021-04-09-1541\" lastActionNumber=\"103\" players=\"" +
+                                                        concatPlayers (tPlayer1, tPlayer5) + "\" status=\"Active\">";
+        String tAllGames_with_Player1 = tGame_12 + tGame_421 + tGame_14 + tGame_15;
+        String tAllGames_with_Jeff = "";
+        String tAllGames_with_Player2 = tGame_12 + tGame_421 + tGame_42 + tGame_251;
+        String tExpectedResponse1 = "<GSResponse><SavedGames name=\"" + tPlayer1 + "\">" + tAllGames_with_Player1 + "</SavedGames></GSResponse>";
+        String tExpectedResponse3 = "<GSResponse><SavedGames name=\""+ tPlayer3 + "\"></SavedGames></GSResponse>";
+        String tExpectedResponse2 = "<GSResponse><SavedGames name=\"" + tPlayer2 + "\">" + tAllGames_with_Player2 + "</SavedGames></GSResponse>";
+        String tExpectedResponse = "";
+
+        if (tPlayer1.equals (aPlayerName)) {
+                Mockito.doReturn (tAllGames_with_Player1).when (mServerFrame).getSavedGamesFor (tPlayer1);
+                tExpectedResponse = tExpectedResponse1;
+        }
+        if (tPlayer2.equals (aPlayerName)) {
+                Mockito.doReturn (tAllGames_with_Jeff).when (mServerFrame).getSavedGamesFor (tPlayer3);
+                tExpectedResponse = tExpectedResponse2;
+        }
+        if (tPlayer3.equals (aPlayerName)) {
+                Mockito.doReturn (tAllGames_with_Player2).when (mServerFrame).getSavedGamesFor (tPlayer2);
+                tExpectedResponse = tExpectedResponse3;
+        }
+
+        return tExpectedResponse;
+    }
+
 	@Nested
 	@DisplayName ("Game ID Tests")
 	class verifyGameIDFunctionalityTests {
@@ -82,19 +132,19 @@ class GameSupportTests {
 			String tFoundGameID;
 			
 			tFoundGameID = gameSupport.getGameID ();
-			assertEquals ("2020-02-26-1001", tFoundGameID);
+			assertEquals ("2020-07-31-2005", tFoundGameID);
 			assertNotEquals ("2019-07-30-1333", tFoundGameID);
 		}
 	
 		@Test
 		@DisplayName ("Test Retrieving Game ID from Action Number Request")
 		void getGameIDFromRequestTest () {
-			String tGoodRequest = "<GS gameID=\"2020-02-26-1001\"><ActionNumber requestNew=\"TRUE\"></GS>";
+			String tGoodRequest = "<GS gameID=\"2021-07-31-2005\"><ActionNumber requestNew=\"TRUE\"></GS>";
 			String tBadRequest = "<GS><LastActionNumber requestNew=\"TRUE\"></GS>";
 			String tFoundGameID;
 			
 			tFoundGameID = gameSupport.getGameID (tGoodRequest);
-			assertEquals ("2020-02-26-1001", tFoundGameID);
+			assertEquals ("2021-07-31-2005", tFoundGameID);
 			tFoundGameID = gameSupport.getGameID (tBadRequest);
 			assertEquals ("NOID", tFoundGameID);
 		}
@@ -158,7 +208,7 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("Heartbeat Request with GameID")
 		void heartbeatRequestWithGameIDTest () {
-			String tGoodRequest = "Game Support <GS gameID=\"2020-02-26-1001\"><Heartbeat></GS>";
+			String tGoodRequest = "Game Support <GS gameID=\"2020-07-31-2005\"><Heartbeat></GS>";
 			String tGSResponse;
 			
 			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
@@ -168,7 +218,7 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("Reconnect Request with GameID")
 		void reconnectRequestWithGameIDTest () {
-			String tGoodRequest = "Game Support <GS gameID=\"2020-02-26-1001\"><Reconnect name=\"Fred\"></GS>";
+			String tGoodRequest = "Game Support <GS gameID=\"2020-07-31-2005\"><Reconnect name=\"Fred\"></GS>";
 			String tGSResponse;
 			
 			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
@@ -197,7 +247,7 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("Matching Game ID")
 		void isMatchingGameIDTest () {
-			String tGoodRequest = "<GS gameID=\"2020-02-26-1001\"><ActionNumber requestNew=\"TRUE\"></GS>";
+			String tGoodRequest = "<GS gameID=\"2020-07-31-2005\"><ActionNumber requestNew=\"TRUE\"></GS>";
 			String tBadRequest = "<LastActionNumber requestNew=\"TRUE\">";
 			
 			assertTrue (gameSupport.isRequestForThisGame (tGoodRequest));
@@ -336,6 +386,16 @@ class GameSupportTests {
 			assertFalse (gameSupport.isRequestForGameLoadSetup (tBadRequest));
 		}
 		
+        @Test
+        @DisplayName ("Saved Games List for a Player")
+        void isValidRequestSavedGamesTest () {
+                String tGoodRequest = "<RequestSavedGames player=\"GSPlayerAlpha\">";
+                String tBadRequest = "<LastActionNumber requestNew=\"TRUE\">";
+
+                assertTrue (gameSupport.isRequestForSavedGamesFor (tGoodRequest));
+                assertFalse (gameSupport.isRequestForSavedGamesFor (tBadRequest));
+        }
+		
 //		REQUEST_GAME_LOAD_SETUP = "<LoadGameSetup gameID=\"" + GAME_ID + "\" " + ACTION_NUMBER + " gameName=\"([A-Z0-9]+)\">";
 	}
 	
@@ -364,7 +424,7 @@ class GameSupportTests {
 			String tGSResponse;
 			
 			tGSResponse = gameSupport.generateGSResponseGameID (mClientHandler);
-			assertEquals ("<GSResponse gameID=\"2020-02-26-1001\">", tGSResponse);			
+			assertEquals ("<GSResponse gameID=\"2020-07-31-2005\">", tGSResponse);			
 		}
 		
 		
@@ -372,11 +432,11 @@ class GameSupportTests {
 		@DisplayName ("Game ID Retrieve from LoadGame") 
 		void generateGameIDResponseFromLoadTest () {
 			String tGSResponse;
-			String tGoodRequest = "<LoadGameSetup gameID=\"2021-03-01-1121\" actionNumber=\"234\" gameName=\"1830\">";
+			String tGoodRequest = "<LoadGameSetup gameID=\"2021-07-31-2005\" actionNumber=\"234\" gameName=\"1830\">";
 			String tBadRequest = "<LastActionNumber requestNew=\"TRUE\">";
 			
 			tGSResponse = gameSupport.getGameIDFromLoadRequest (tGoodRequest);
-			assertEquals ("2021-03-01-1121", tGSResponse);	
+			assertEquals ("2021-07-31-2005", tGSResponse);	
 			
 			tGSResponse = gameSupport.getGameIDFromLoadRequest (tBadRequest);
 			
@@ -448,16 +508,16 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("New Action Number")
 		void newActionNumberResponseTest () {
-			String tGoodRequest = "<GS gameID=\"2020-02-26-1001\"><ActionNumber requestNew=\"TRUE\"></GS>";
-			String tBadGameIDRequest = "<GS gameID=\"2021-02-26-1001\"><ActionNumber requestNew=\"TRUE\"></GS>";
-			String tBadRequest = "<GS gameID=\"2020-02-26-1001\"><LastActionNumber requestNew=\"TRUE\"></GS>";
+			String tGoodRequest = "<GS gameID=\"2020-07-31-2005\"><ActionNumber requestNew=\"TRUE\"></GS>";
+			String tBadGameIDRequest = "<GS gameID=\"2020-07-31-2005\"><ActionNumber requestNew=\"TRUE\"></GS>";
+			String tBadRequest = "<GS gameID=\"2020-07-31-2005\"><LastActionNumber requestNew=\"TRUE\"></GS>";
 			String tGSResponse;
 			
 			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
 			assertEquals ("<GSResponse><ActionNumber newNumber=\"101\"></GSResponse>", tGSResponse);
 		
 			tGSResponse = gameSupport.handleGameSupportRequest (tBadGameIDRequest, mClientHandler);
-			assertEquals ("<GSResponse><BadGameID></GSResponse>", tGSResponse);
+			assertEquals ("<GSResponse><ActionNotComplete></GSResponse>", tGSResponse);
 			
 			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest, mClientHandler);
 			assertEquals ("<GSResponse><BadRequest></GSResponse>", tGSResponse);
@@ -474,8 +534,8 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("Last Action")
 		void lastActionResponseTest () {
-			String tGoodRequest = "<GS gameID=\"2020-02-26-1001\"><ActionNumber requestLast=\"TRUE\"></GS>";
-			String tNewActionRequest = "<GS gameID=\"2020-02-26-1001\"><ActionNumber requestNew=\"TRUE\"></GS>";
+			String tGoodRequest = "<GS gameID=\"2020-07-31-2005\"><ActionNumber requestLast=\"TRUE\"></GS>";
+			String tNewActionRequest = "<GS gameID=\"2020-07-31-2005\"><ActionNumber requestNew=\"TRUE\"></GS>";
 			String tGSResponse;
 			
 			gameSupport.handleGameSupportRequest (tNewActionRequest, mClientHandler);
@@ -492,8 +552,8 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("Last is Complete")
 			void lastActionIsCompleteResponseTest () {
-			String tGoodRequest = "<GS gameID=\"2020-02-26-1001\"><LastAction isComplete=\"TRUE\"></GS>";
-			String tNewActionRequest = "<GS gameID=\"2020-02-26-1001\"><ActionNumber requestNew=\"TRUE\"></GS>";
+			String tGoodRequest = "<GS gameID=\"2020-07-31-2005\"><LastAction isComplete=\"TRUE\"></GS>";
+			String tNewActionRequest = "<GS gameID=\"2020-07-31-2005\"><ActionNumber requestNew=\"TRUE\"></GS>";
 			String tGSResponse;
 			
 			gameSupport.handleGameSupportRequest (tNewActionRequest, mClientHandler);
@@ -510,8 +570,8 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("Action is Pending")
 		void actionIsPendingResponseTest () {
-			String tGoodRequest = "<GS gameID=\"2020-02-26-1001\"><ActionNumber requestPending=\"TRUE\"></GS>";
-			String tNewActionRequest = "<GS gameID=\"2020-02-26-1001\"><ActionNumber requestNew=\"TRUE\"></GS>";
+			String tGoodRequest = "<GS gameID=\"2020-07-31-2005\"><ActionNumber requestPending=\"TRUE\"></GS>";
+			String tNewActionRequest = "<GS gameID=\"2020-07-31-2005\"><ActionNumber requestNew=\"TRUE\"></GS>";
 			String tGSResponse;
 			
 			gameSupport.handleGameSupportRequest (tNewActionRequest, mClientHandler);
@@ -528,10 +588,10 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("Action is Requested")
 		void actionIsRequestActionResponseTest () {
-			String tGoodRequest = "<GS gameID=\"2020-02-26-1001\"><RequestAction actionNumber=\"101\"></GS>";
-			String tBadRequest1 = "<GS gameID=\"2020-02-26-1001\"><RequestAction actionNumber=\"92\"></GS>";
-			String tBadRequest2 = "<GS gameID=\"2020-02-26-1001\"><RequestAction actionNumber=\"201\"></GS>";
-			String tNewActionRequest = "<GS gameID=\"2020-02-26-1001\"><ActionNumber requestNew=\"TRUE\"></GS>";
+			String tGoodRequest = "<GS gameID=\"2020-07-31-2005\"><RequestAction actionNumber=\"101\"></GS>";
+			String tBadRequest1 = "<GS gameID=\"2020-07-31-2005\"><RequestAction actionNumber=\"92\"></GS>";
+			String tBadRequest2 = "<GS gameID=\"2020-07-31-2005\"><RequestAction actionNumber=\"201\"></GS>";
+			String tNewActionRequest = "<GS gameID=\"2020-07-31-2005\"><ActionNumber requestNew=\"TRUE\"></GS>";
 			String tGSResponse;
 			
 			gameSupport.handleGameSupportRequest (tNewActionRequest, mClientHandler);
@@ -550,8 +610,8 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("Player Ready is Requested")
 		void playerReadyIsRequestedTest () {
-			String tGoodRequest = "<GS gameID=\"2020-02-26-1001\"><Ready></GS>";
-			String tBadRequest1 = "<GS gameID=\"2020-02-26-1001\"><NotReady></GS>";
+			String tGoodRequest = "<GS gameID=\"2020-07-31-2005\"><Ready></GS>";
+			String tBadRequest1 = "<GS gameID=\"2020-07-31-2005\"><NotReady></GS>";
 			String tGSResponse;
 			
 			Mockito.doReturn ("GSTester").when (mClientHandler).getName ();
@@ -564,8 +624,8 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("Game Start is Requested")
 		void gameStartIsRequestedTest () {
-			String tGoodRequest = "<GS gameID=\"2020-02-26-1001\"><Start></GS>";
-			String tBadRequest1 = "<GS gameID=\"2020-02-26-1001\"><NotStarting></GS>";
+			String tGoodRequest = "<GS gameID=\"2020-07-31-2005\"><Start></GS>";
+			String tBadRequest1 = "<GS gameID=\"2020-07-31-2005\"><NotStarting></GS>";
 			String tGSResponse;
 			
 			Mockito.doNothing ().when (mClientHandler).handleClientIsStarting ();
@@ -585,9 +645,9 @@ class GameSupportTests {
 			
 			Mockito.doReturn ("2021-02-28-1833").when (mClientHandler).generateGameID ();
 			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
-			assertEquals ("<GSResponse gameID=\"2020-02-26-1001\">", tGSResponse);
+			assertEquals ("<GSResponse gameID=\"2020-07-31-2005\">", tGSResponse);
 			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandler);
-			assertEquals ("<GSResponse><BadRequest></GSResponse>", tGSResponse);
+			assertEquals ("<GSResponse><BadGameID></GSResponse>", tGSResponse);
 			
 			tGSResponse = gameSupportNoID.handleGameSupportRequest (tGoodRequest, mClientHandler);
 			assertEquals ("<GSResponse gameID=\"2021-02-28-1833\">", tGSResponse);
@@ -596,7 +656,7 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("Load Game Setup Final")
 		void generateLoadSetupRequestTest () {
-			String tGoodRequest = "<GS><LoadGameSetup gameID=\"2021-03-01-1121\" actionNumber=\"234\" gameName=\"1830\"></GS>";
+			String tGoodRequest = "<GS><LoadGameSetup gameID=\"2021-07-31-2005\" actionNumber=\"171\" gameName=\"1830\"></GS>";
 			String tGSResponse;
 			
 			tGSResponse = gameSupportNoID.handleGameSupportRequest (tGoodRequest, mClientHandler);
