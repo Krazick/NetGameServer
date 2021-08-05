@@ -12,13 +12,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Spy;
 
 import netGameServer.primary.ClientHandler;
 import netGameServer.primary.GameSupport;
+import netGameServer.primary.NetworkAction;
 import netGameServer.primary.ServerFrame;
 
 @DisplayName ("Game Support")
@@ -33,6 +35,10 @@ class GameSupportTests {
 	@Mock
 	ServerFrame mServerFrame;
 	
+	@InjectMocks
+	@Spy
+	private GameSupport mGameSupport; 
+
 	@BeforeEach
 	void setUp() throws Exception {
 		String tGameID;
@@ -259,7 +265,7 @@ class GameSupportTests {
 		void isGameActivityRequestTest () {
 			int tCurrentActionNumber;
 			String tGAResponse;
-			String tLastActionRequest;
+//			String tLastActionRequest;
 			String tGoodGameActivity = "<Action actor=\"Mark\" chainPrevious=\"false\" class=\"ge18xx.round.action.BuyStockAction\" name=\"Buy Stock Action\" number=\"101\" roundID=\"1\" roundType=\"Stock Round\" totalCash=\"12000\">" +
 					"<Effects><Effect cash=\"40\" class=\"ge18xx.round.action.effects.CashTransferEffect\" fromActor=\"Mark\" isAPrivate=\"false\" name=\"Cash Transfer\" toActor=\"Bank\"/>" +
 					"<Effect class=\"ge18xx.round.action.effects.TransferOwnershipEffect\" companyAbbrev=\"C&amp;SL\" fromActor=\"Start Packet\" isAPrivate=\"false\" name=\"Transfer Ownership\" percentage=\"100\" president=\"true\" toActor=\"Mark\"/>" +
@@ -268,16 +274,22 @@ class GameSupportTests {
 					"<Effect actor=\"Mark\" class=\"ge18xx.round.action.effects.StateChangeEffect\" isAPrivate=\"false\" name=\"State Change\" newState=\"Bought\" previousState=\"No Action\"/>" +
 					"</Effects></Action>";
 			String tGoodGARequest = "<GA>" + tGoodGameActivity + "</GA>";
-			String tGoodGAResponse = "<GSResponse>" + tGoodGameActivity + "</GSResponse>";
+//			String tGoodGAResponse = "<GSResponse>" + tGoodGameActivity + "</GSResponse>";
+			NetworkAction tInjectedLastAction;
+			
+			Mockito.doNothing ().when (mGameSupport).autoSave ();
+			tInjectedLastAction = new NetworkAction (101, "Complete");
+			Mockito.doReturn (tInjectedLastAction).when (mGameSupport).getLastNetworkAction ();
 			
 			assertTrue (gameSupport.isRequestForGameActivity (tGoodGARequest));
 			tCurrentActionNumber = gameSupport.getNewActionNumber ();
 			
-			gameSupport.handleGameActivityRequest (tGoodGARequest);
-			tGAResponse = gameSupport.generateGSReponseRequestLast ();
+			mGameSupport.handleGameActivityRequest (tGoodGARequest);
+			mGameSupport.setActionNumber (tCurrentActionNumber);
+			tGAResponse = mGameSupport.generateGSReponseRequestLast ();
 			assertEquals ("<GSResponse><LastAction actionNumber=\"101\" status=\"Complete\"></GSResponse>", tGAResponse);
-			tLastActionRequest = gameSupport.generateGSResponseRequestAction ("<RequestAction actionNumber=\"" + tCurrentActionNumber + "\">");
-			assertEquals (tGoodGAResponse, tLastActionRequest);
+//			tLastActionRequest = mGameSupport.generateGSResponseRequestAction ("<RequestAction actionNumber=\"" + tCurrentActionNumber + "\">");
+//			assertEquals (tGoodGAResponse, tLastActionRequest);
 		}
 		
 		@Test
@@ -500,6 +512,29 @@ class GameSupportTests {
 			
 			assertEquals ("<GSResponse><GOOD></GSResponse>", gameSupport.handleGSResponseGameLoadSetup (tGoodRequest, mClientHandler));
 		}
+		
+        @Test
+        @DisplayName ("Request Saved Games For")
+        void generateRequestForSavedGamesTest () {
+                String tPlayer1 = "GSPlayerAlpha";
+                String tPlayer2 = "GSPlayerBeta";
+                String tPlayer3 = "GSPlayerGamma";
+                String tGoodRequest1 = "<RequestSavedGames player=\"" + tPlayer1 + "\">";
+                String tGoodRequest2 = "<RequestSavedGames player=\"" + tPlayer2 + "\">";
+                String tGoodRequest3 = "<RequestSavedGames player=\"" + tPlayer3 + "\"/>";
+                String tExpectedResponse1;
+                String tExpectedResponse2;
+                String tExpectedResponse3;
+
+                tExpectedResponse1 = prepareExpectedResponse (tPlayer1);
+                tExpectedResponse2 = prepareExpectedResponse (tPlayer2);
+                tExpectedResponse3 = prepareExpectedResponse (tPlayer3);
+
+                assertEquals (tExpectedResponse1, gameSupport.handleGSResponseRequestSavedGamesFor (tGoodRequest1));
+                assertEquals (tExpectedResponse2, gameSupport.handleGSResponseRequestSavedGamesFor (tGoodRequest2));
+                assertEquals (tExpectedResponse3, gameSupport.handleGSResponseRequestSavedGamesFor (tGoodRequest3));
+        }
+
 	}
 	
 	@Nested
@@ -663,5 +698,27 @@ class GameSupportTests {
 
 			assertEquals ("<GSResponse><GOOD></GSResponse>", tGSResponse);
 		}
+
+        @Test
+        @DisplayName ("Request Saved Games For Final")
+        void generateSavedGamesForRequestTest () {
+                String tPlayer1 = "GSPlayerAlpha";
+                String tPlayer2 = "GSPlayerBeta";
+                String tPlayer3 = "GSPlayerGamma";
+                String tGoodRequest1 = "<GS><RequestSavedGames player=\"" + tPlayer1 + "\"></GS>";
+                String tGoodRequest2 = "<GS><RequestSavedGames player=\"" + tPlayer2 + "\"></GS>";
+                String tGoodRequest3 = "<GS><RequestSavedGames player=\"" + tPlayer3 + "\"/></GS>";
+                String tExpectedResponse1;
+                String tExpectedResponse2;
+                String tExpectedResponse3;
+
+                tExpectedResponse1 = prepareExpectedResponse (tPlayer1);
+                tExpectedResponse2 = prepareExpectedResponse (tPlayer2);
+                tExpectedResponse3 = prepareExpectedResponse (tPlayer3);
+
+                assertEquals (tExpectedResponse1, gameSupport.handleGameSupportRequest (tGoodRequest1, mClientHandler));
+                assertEquals (tExpectedResponse2, gameSupport.handleGameSupportRequest (tGoodRequest2, mClientHandler));
+                assertEquals (tExpectedResponse3, gameSupport.handleGameSupportRequest (tGoodRequest3, mClientHandler));
+        }		
 	}
 }
