@@ -3,9 +3,14 @@ package netGameServer.primary;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.w3c.dom.NodeList;
+
+import netGameServer.utilities.ElementName;
 import netGameServer.utilities.FileUtils;
+import netGameServer.utilities.XMLNode;
 
 public class NetworkActions {
+	public static final ElementName EN_NETWORK_ACTIONS = new ElementName ("NetworkActions");
 	List<NetworkAction> actions;
 	
 	public NetworkActions () {
@@ -64,10 +69,18 @@ public class NetworkActions {
 	
 	public String getActionXMLFor (int aActionNumber) {
 		String tActionXMLFor = NetworkAction.NO_ACTION_RECIEVED_XML;
+		int tActionNumber, tCount, tIndex;
+		NetworkAction tNetworkAction;
 		
-		for (NetworkAction networkAction : actions) {
-			if (aActionNumber == networkAction.getNumber ()) {
-				tActionXMLFor = networkAction.getActionXML ();
+		tCount = actions.size ();
+		for (tIndex = tCount - 1; 
+				(tIndex > 0) && 
+				(tActionXMLFor == NetworkAction.NO_ACTION_RECIEVED_XML); 
+				tIndex--) {
+			tNetworkAction = actions.get (tIndex);
+			tActionNumber = tNetworkAction.getNumber ();
+			if (aActionNumber == tActionNumber) {
+				tActionXMLFor = tNetworkAction.getActionXML ();
 			}
 		}
 		
@@ -99,11 +112,29 @@ public class NetworkActions {
 	}
 	
 	public void writeAllActions (FileUtils aFileUtils) {
-		aFileUtils.outputToFile ("<NetworkActions>");
+		aFileUtils.outputToFile ("<" + EN_NETWORK_ACTIONS + ">");
 		for (NetworkAction tNetworkAction : actions) {
 			tNetworkAction.writeAction (aFileUtils);
 		}
-		aFileUtils.outputToFile ("</NetworkActions>");
+		aFileUtils.outputToFile ("</" + EN_NETWORK_ACTIONS + ">");
 	}
 
+	public void loadSavedActions (XMLNode aXMLNetworkActions) {
+		XMLNode tChildNode;
+		NodeList tChildren;
+		int tChildrenCount, tIndex;
+		String tChildName;
+		NetworkAction tNetworkAction;
+		
+		tChildren = aXMLNetworkActions.getChildNodes ();
+		tChildrenCount = tChildren.getLength ();
+		for (tIndex = 0; tIndex < tChildrenCount; tIndex++) {
+			tChildNode = new XMLNode (tChildren.item (tIndex));
+			tChildName = tChildNode.getNodeName ();
+			if (NetworkAction.EN_ACTION.equals (tChildName)) {
+				tNetworkAction = new NetworkAction (tChildNode);
+				addNetworkAction (tNetworkAction);
+			}
+		}
+	}
 }
