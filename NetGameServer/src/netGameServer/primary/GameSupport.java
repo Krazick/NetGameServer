@@ -287,17 +287,30 @@ public class GameSupport {
 	public void handleGameActivityRequest (String aRequest) {
 		String tAction;
 		Matcher tMatcher = GA_WITH_NO_GAME_ID_PATTERN.matcher (aRequest);
-		NetworkAction tNetworkAction;
 
 		if (tMatcher.find ()) {
 			tAction = tMatcher.group (1);
-			tNetworkAction = networkActions.getLastNetworkAction ();
-			tNetworkAction.setActionXML (tAction);
-			tNetworkAction.setStatus (STATUS_COMPLETE);
+			updateLastAction (tAction);
 			autoSave ();
 		} else {
 
 		}
+	}
+
+	public void updateLastAction (String aAction) {
+		NetworkAction tNetworkAction;
+		
+		tNetworkAction = getLastNetworkAction ();
+		tNetworkAction.setActionXML (aAction);
+		tNetworkAction.setStatus (STATUS_COMPLETE);
+	}
+	
+	public NetworkAction getLastNetworkAction () {
+		NetworkAction tNetworkAction;
+		
+		tNetworkAction = networkActions.getLastNetworkAction ();
+		
+		return tNetworkAction;
 	}
 	
 	public String generateGSResponse (String aRequest, ClientHandler aClientHandler) {
@@ -580,7 +593,7 @@ public class GameSupport {
 		return tNewActionNumber;
 	}
 	
-	private void setActionNumber (int aActionNumber) {
+	public void setActionNumber (int aActionNumber) {
 		actionNumber = aActionNumber;
 	}
 	
