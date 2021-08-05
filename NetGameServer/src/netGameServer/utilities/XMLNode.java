@@ -10,6 +10,15 @@ package netGameServer.utilities;
 
 import org.w3c.dom.*;
 
+import java.io.StringWriter;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 public class XMLNode {
 	Node node;
 	
@@ -153,5 +162,26 @@ public class XMLNode {
 		} else {
 			return Integer.parseInt (tValue);
 		}
+	}
+	
+	public String toString () {
+		return convertNodeToString (node);
+	}
+	
+	private static String convertNodeToString (Node aNode) {
+	     try {
+	        StringWriter writer = new StringWriter();
+
+	        Transformer trans = TransformerFactory.newInstance ().newTransformer ();
+	        trans.setOutputProperty (OutputKeys.OMIT_XML_DECLARATION, "yes");
+	        trans.setOutputProperty (OutputKeys.INDENT, "yes");
+	        trans.transform(new DOMSource (aNode), new StreamResult (writer));
+
+	        return writer.toString ();
+	    } catch (TransformerException te) {
+	        te.printStackTrace ();
+	    }
+
+	    return "";
 	}
 }
