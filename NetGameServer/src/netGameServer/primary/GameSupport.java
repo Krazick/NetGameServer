@@ -6,7 +6,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.Logger;
+import org.w3c.dom.NodeList;
+
+import netGameServer.utilities.XMLNode;
 import netGameServer.utilities.FileUtils;
+import netGameServer.utilities.XMLDocument;
 
 public class GameSupport {
 	NetworkActions networkActions;
@@ -160,6 +164,7 @@ public class GameSupport {
 					getGameStatus () + "\" lastActionNumber=\"" + getLastActionNumber () +"\">");
 			writeClientsInXML ();
 			networkActions.writeAllActions (fileUtils);
+			fileUtils.outputToFile ("</NetworkSaveGame>");
 			fileUtils.closeFile ();
 		}
 	}
@@ -173,14 +178,55 @@ public class GameSupport {
 			tPlayerName = tClientHandler.getName ();
 			tPlayerStatus = tClientHandler.getPlayerStatus ();
 			if (tPlayerName.length () > 0) {
-				tPlayerName = "<Player name=\"" + tPlayerName + "\" status=\"" + tPlayerStatus + "\">";
+				tPlayerName = "<Player name=\"" + tPlayerName + "\" status=\"" + tPlayerStatus + "\"/>";
 				fileUtils.outputToFile (tPlayerName);
 			}
 		}
 
 		fileUtils.outputToFile ("</Players>");
 	}
+	
+	public void loadAutoSave () {
+		XMLDocument tXMLAutoSaveDocument;
 		
+		if (autoSaveFile == null) {
+			logger.error ("AutoSave File not set yet");
+		} else {
+			tXMLAutoSaveDocument = fileUtils.loadXMLFile (autoSaveFile);
+			if (tXMLAutoSaveDocument != FileUtils.NO_VALID_XML_DOCUMENT) {
+				System.out.println ("Ready to parse Loaded AutoSaved NetGame Network Actions");
+				loadXMLNetworkActions (tXMLAutoSaveDocument);
+			} else {
+				logger.error("Loading of AutoSave File failed to get Valid XML Document");
+			}
+		}
+	}
+	
+	public void loadXMLNetworkActions (XMLDocument aXMLAutoSaveDocument) {
+		XMLNode tXMLSaveGame, tChildNode;
+		NodeList tChildren;
+		int tChildrenCount, tIndex, tTotalActions, tLastActionNumber;
+		String tChildName;
+		
+		tXMLSaveGame = aXMLAutoSaveDocument.getDocumentElement ();
+		tChildren = tXMLSaveGame.getChildNodes ();
+		tChildrenCount = tChildren.getLength ();
+		tTotalActions = 0;
+		tLastActionNumber = 0;
+		for (tIndex = 0; tIndex < tChildrenCount; tIndex++) {
+			tChildNode = new XMLNode (tChildren.item (tIndex));
+			tChildName = tChildNode.getNodeName ();
+			if (NetworkActions.EN_NETWORK_ACTIONS.equals (tChildName)) {
+				System.out.println ("Have Node with NetworkActions - Now to Parse them");
+				networkActions.loadSavedActions (tChildNode);
+				tTotalActions = networkActions.getCount ();
+				tLastActionNumber = networkActions.getLastNetworkActionNumber ();
+				setActionNumber (tLastActionNumber);
+			}
+		}
+		System.out.println ("Total Actions Found " + tTotalActions + " Last Action Number " + tLastActionNumber);
+	}
+			
 	public String handleGameSupportRequest (String aRequest, ClientHandler aClientHandler) {
 		String tBaseRequest;
 		String tGSResponse = BAD_REQUEST;
@@ -719,7 +765,7 @@ public class GameSupport {
 		Matcher tMatcher = REQUEST_WITH_GAME_LOAD_SETUP_PATTERN.matcher (aRequest);
 		String tGameID, tGameName, tActionNumberText;
 		int tActionNumber;
-		NetworkAction tDummyNetworkAction;
+//		NetworkAction tDummyNetworkAction;
 		
 		if (tMatcher.find ()) {
 			tGameID = tMatcher.group (1);
@@ -728,9 +774,11 @@ public class GameSupport {
 			setGameID (tGameID);
 			tActionNumber = Integer.parseInt (tActionNumberText);
 			setActionNumber (tActionNumber);
-			tDummyNetworkAction = new NetworkAction (tActionNumber, "Complete");
-			tDummyNetworkAction.setActionXML("<Action actionNumber=\"" + tActionNumber + "\"/>");
-			networkActions.addNetworkAction (tDummyNetworkAction);
+//			tDummyNetworkAction = new NetworkAction (tActionNumber, "Complete");
+//			tDummyNetworkAction.setActionXML("<Action actionNumber=\"" + tActionNumber + "\"/>");
+//			networkActions.addNetworkAction (tDummyNetworkAction);
+			setupAutoSaveFile (tGameID);
+			loadAutoSave ();
 			aClientHandler.addGameNameToList (tGameName);
 			tGSResponse = wrapWithGSResponse ("<GOOD>");
 		}
