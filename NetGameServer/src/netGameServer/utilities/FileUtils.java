@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 public class FileUtils {
 	public static final FileWriter NO_FILE_WRITER = null;
+	public static final XMLDocument NO_VALID_XML_DOCUMENT = null;
 	private Logger logger;
 	private FileWriter fileWriter;
 	private File file;
@@ -41,7 +42,7 @@ public class FileUtils {
 			fileWriter = new FileWriter (file, false); // Overwrite the file if it exists
 			tGoodFileWriter = true;
 		} catch (IOException tException) {
-			logger.error("FileUtils problem creating FileWriter", tException);
+			logger.error ("FileUtils problem creating FileWriter", tException);
 		}
 		
 		return tGoodFileWriter;
@@ -78,9 +79,29 @@ public class FileUtils {
 				fileWriter.write (aDataString + "\n");
 				fileWriter.flush ();
 			} catch (Exception tException) {
-				logger.error("FileUtils problem Writing to FileWriter", tException);
+				logger.error ("FileUtils problem Writing to FileWriter", tException);
 			}
 		}
+	}
+	
+	public XMLDocument loadXMLFile (File aSaveGame) {
+		XMLDocument tXMLDocument = NO_VALID_XML_DOCUMENT;
+		
+		if (aSaveGame != null) {
+			try {
+				tXMLDocument = new XMLDocument (aSaveGame);
+				if (! tXMLDocument.ValidDocument ()) {
+					logger.error ("XML Document for the Saved File did not load a Valid Document");
+				}
+			} catch (Exception tException) {
+				logger.error ("Oops, mucked up the XML AutoSaved File [" + aSaveGame.getName () + "].");
+				logger.error ("Exception Message [" + tException.getMessage () + "].", tException);
+			}
+		} else {
+			logger.error ("No File Object for XML AutoSaved Game");
+		}
+		
+		return tXMLDocument;
 	}
 
 }
