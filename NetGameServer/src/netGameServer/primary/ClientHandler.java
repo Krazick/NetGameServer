@@ -37,6 +37,8 @@ public class ClientHandler implements Runnable {
 	private boolean inBufferGood = false;
 	private boolean outBufferGood = false;
 	GameSupport gameSupport;
+	public static final ClientHandler NO_CLIENT_HANDLER = null;
+	public static final ArrayList<ClientHandler> NO_CLIENT_HANDLERS = null;
 	public static enum SEND_TO { Requestor, AllClients, AllButRequestor };
 	Logger logger;
 
