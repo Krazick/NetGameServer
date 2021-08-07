@@ -3,6 +3,7 @@ package netGameServer.primaryTests;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,9 +29,13 @@ import netGameServer.primary.ServerFrame;
 class GameSupportTests {
 	GameSupport gameSupport;
 	GameSupport gameSupportNoID;
-    @Mock
-    ClientHandler mClientHandler;
 	Logger logger;
+	
+    @Mock
+    ClientHandler mClientHandlerAlpha;
+    
+    @Mock
+    ClientHandler mClientHandlerBeta;
 	
 	@Mock
 	ServerFrame mServerFrame;
@@ -129,6 +134,83 @@ class GameSupportTests {
         return tExpectedResponse;
     }
 
+    @Nested
+    @DisplayName ("Game Support ClientHandler Tests")
+    class verifyGameSupportClientHandlerTests {
+    	@Test
+    	@DisplayName ("Adding a ClientName to the List")
+    	void addClientNameTest () {
+    		String tPlayerName1 = "GSTesterAlpha";
+    		String tPlayerName2 = "GSTesterBeta";
+   		
+    		gameSupport.addClientName (tPlayerName1);
+    		assertEquals (1, gameSupport.getPlayerCount ());
+    		
+    		gameSupport.addClientName (tPlayerName1);
+    		assertEquals (1, gameSupport.getPlayerCount ());
+    		
+    		gameSupport.addClientName (tPlayerName2);
+    		assertEquals (2, gameSupport.getPlayerCount ());
+    	}
+    	
+    	@Test
+    	@DisplayName ("Getting ClientName by Index")
+    	void getClientNameByIndexText () {
+    		String tPlayerName1 = "GSTesterAlpha";
+    		String tPlayerName2 = "GSTesterBeta";
+   		
+    		gameSupport.addClientName (tPlayerName1);
+    		gameSupport.addClientName (tPlayerName2);
+    		assertEquals ("GSTesterAlpha", gameSupport.getPlayerIndex (0));
+       		assertEquals ("GSTesterBeta", gameSupport.getPlayerIndex (1));
+
+    	}
+    	
+    	@Test
+    	@DisplayName ("Getting ClientHandler by Name")
+    	void getClientHandlerByNameTest () {
+    		String tPlayerName1 = "GSTesterAlpha";
+    		ClientHandler tFoundClientHandler;
+
+    		tFoundClientHandler = gameSupport.getClientHandlerFor (tPlayerName1);
+    		assertEquals (ClientHandler.NO_CLIENT_HANDLER, tFoundClientHandler);
+    	}
+    	
+    	@Test
+    	@DisplayName ("Setting ClientHandlers 1 in Game Support")
+    	void setClientHandlerTest1 () {
+    		gameSupport.setClientHandlers (ClientHandler.NO_CLIENT_HANDLERS);
+       		assertEquals (0, gameSupport.getPlayerCount ());
+    	}
+    	
+       	@Test
+    	@DisplayName ("Setting ClientHandlers 2 in Game Support")
+    	void setClientHandlerTest2 () {
+    		ArrayList<ClientHandler> tClientHandlers;
+    		ClientHandler tFoundClientHandler;
+    		
+        	tClientHandlers = new ArrayList<ClientHandler> ();
+        	
+			Mockito.doReturn ("GSTesterAlpha").when (mClientHandlerAlpha).getName ();
+			tClientHandlers.add (mClientHandlerAlpha);
+ 
+			Mockito.doReturn ("GSTesterBeta").when (mClientHandlerBeta).getName ();
+			tClientHandlers.add (mClientHandlerBeta);
+
+			gameSupport.setClientHandlers (tClientHandlers);
+      		assertEquals (2, gameSupport.getPlayerCount ());
+      		
+      		tFoundClientHandler = gameSupport.getClientHandlerFor ("GSTesterAlpha");
+      		assertEquals (mClientHandlerAlpha, tFoundClientHandler);
+      		
+      		tFoundClientHandler = gameSupport.getClientHandlerFor ("GSTesterBeta");
+      		assertEquals (mClientHandlerBeta, tFoundClientHandler);
+      		
+      		tFoundClientHandler = gameSupport.getClientHandlerFor ("GSTesterGamma");
+      		assertNotEquals (mClientHandlerAlpha, tFoundClientHandler);
+    	}
+  }
+    
 	@Nested
 	@DisplayName ("Game ID Tests")
 	class verifyGameIDFunctionalityTests {
@@ -194,8 +276,8 @@ class GameSupportTests {
 			String tGSResponse;
 			String tGameID;
 			
-			Mockito.doReturn ("GSTester").when (mClientHandler).getName ();
-			tGSResponse = gameSupportNoID.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			Mockito.doReturn ("GSTester").when (mClientHandlerAlpha).getName ();
+			tGSResponse = gameSupportNoID.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("GSTester is Ready to play the Game", tGSResponse);
 			tGameID = gameSupportNoID.getGameID ();
 			assertEquals ("2021-02-26-1001", tGameID);
@@ -207,7 +289,7 @@ class GameSupportTests {
 			String tGoodRequest = "Game Support <GS><Heartbeat></GS>";
 			String tGSResponse;
 			
-			tGSResponse = gameSupportNoID.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupportNoID.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><Heartbeat></GSResponse>", tGSResponse);
 		}
 		
@@ -217,7 +299,7 @@ class GameSupportTests {
 			String tGoodRequest = "Game Support <GS gameID=\"2020-07-31-2005\"><Heartbeat></GS>";
 			String tGSResponse;
 			
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><Heartbeat></GSResponse>", tGSResponse);
 		}
 		
@@ -227,7 +309,7 @@ class GameSupportTests {
 			String tGoodRequest = "Game Support <GS gameID=\"2020-07-31-2005\"><Reconnect name=\"Fred\"></GS>";
 			String tGSResponse;
 			
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><Reconnected></GSResponse>", tGSResponse);
 		}
 		
@@ -435,7 +517,7 @@ class GameSupportTests {
 		void generateGameIDResponseTest () {
 			String tGSResponse;
 			
-			tGSResponse = gameSupport.generateGSResponseGameID (mClientHandler);
+			tGSResponse = gameSupport.generateGSResponseGameID (mClientHandlerAlpha);
 			assertEquals ("<GSResponse gameID=\"2020-07-31-2005\">", tGSResponse);			
 		}
 		
@@ -510,7 +592,7 @@ class GameSupportTests {
 		void generateLoadSetupRequestTest () {
 			String tGoodRequest = "<LoadGameSetup gameID=\"2021-03-01-1121\" actionNumber=\"234\" gameName=\"1830\">";
 			
-			assertEquals ("<GSResponse><GOOD></GSResponse>", gameSupport.handleGSResponseGameLoadSetup (tGoodRequest, mClientHandler));
+			assertEquals ("<GSResponse><GOOD></GSResponse>", gameSupport.handleGSResponseGameLoadSetup (tGoodRequest, mClientHandlerAlpha));
 		}
 		
         @Test
@@ -548,21 +630,21 @@ class GameSupportTests {
 			String tBadRequest = "<GS gameID=\"2020-07-31-2005\"><LastActionNumber requestNew=\"TRUE\"></GS>";
 			String tGSResponse;
 			
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><ActionNumber newNumber=\"101\"></GSResponse>", tGSResponse);
 		
-			tGSResponse = gameSupport.handleGameSupportRequest (tBadGameIDRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tBadGameIDRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><ActionNotComplete></GSResponse>", tGSResponse);
 			
-			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><BadRequest></GSResponse>", tGSResponse);
 			
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><ActionNotComplete></GSResponse>", tGSResponse);
 			
 			gameSupport.setStatus ("Complete");
 			
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><ActionNumber newNumber=\"102\"></GSResponse>", tGSResponse);
 		}
 		
@@ -573,14 +655,14 @@ class GameSupportTests {
 			String tNewActionRequest = "<GS gameID=\"2020-07-31-2005\"><ActionNumber requestNew=\"TRUE\"></GS>";
 			String tGSResponse;
 			
-			gameSupport.handleGameSupportRequest (tNewActionRequest, mClientHandler);
+			gameSupport.handleGameSupportRequest (tNewActionRequest, mClientHandlerAlpha);
 			
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><LastAction actionNumber=\"101\" status=\"Pending\"></GSResponse>", tGSResponse);
 					
 			gameSupport.setStatus("Complete");
 			
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><LastAction actionNumber=\"101\" status=\"Complete\"></GSResponse>", tGSResponse);
 		}
 		
@@ -591,14 +673,14 @@ class GameSupportTests {
 			String tNewActionRequest = "<GS gameID=\"2020-07-31-2005\"><ActionNumber requestNew=\"TRUE\"></GS>";
 			String tGSResponse;
 			
-			gameSupport.handleGameSupportRequest (tNewActionRequest, mClientHandler);
+			gameSupport.handleGameSupportRequest (tNewActionRequest, mClientHandlerAlpha);
 			
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><LastAction actionNumber=\"101\" status=\"Pending\"></GSResponse>", tGSResponse);
 					
 			gameSupport.setStatus("Complete");
 			
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><LastAction actionNumber=\"101\" status=\"Complete\"></GSResponse>", tGSResponse);
 		}
 		
@@ -609,14 +691,14 @@ class GameSupportTests {
 			String tNewActionRequest = "<GS gameID=\"2020-07-31-2005\"><ActionNumber requestNew=\"TRUE\"></GS>";
 			String tGSResponse;
 			
-			gameSupport.handleGameSupportRequest (tNewActionRequest, mClientHandler);
+			gameSupport.handleGameSupportRequest (tNewActionRequest, mClientHandlerAlpha);
 			
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><ActionNumber pendingNumber=\"101\"></GSResponse>", tGSResponse);
 					
 			gameSupport.setStatus("Complete");
 			
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><ActionNotPending></GSResponse>", tGSResponse);
 		}
 		
@@ -629,16 +711,16 @@ class GameSupportTests {
 			String tNewActionRequest = "<GS gameID=\"2020-07-31-2005\"><ActionNumber requestNew=\"TRUE\"></GS>";
 			String tGSResponse;
 			
-			gameSupport.handleGameSupportRequest (tNewActionRequest, mClientHandler);
+			gameSupport.handleGameSupportRequest (tNewActionRequest, mClientHandlerAlpha);
 			//"<Action actor=\"GameServer\" class=\"ge18xx.round.action.Action\" number=\"100\">"
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><ActionNotRecieved/></GSResponse>", tGSResponse);
 					
 			gameSupport.setStatus("Complete");
 			
-			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><ActionOutOfRange find=\"92\" min=\"100\" max=\"101\" /></GSResponse>", tGSResponse);
-			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest2, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest2, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><ActionOutOfRange find=\"201\" min=\"100\" max=\"101\" /></GSResponse>", tGSResponse);
 		}
 		
@@ -649,10 +731,10 @@ class GameSupportTests {
 			String tBadRequest1 = "<GS gameID=\"2020-07-31-2005\"><NotReady></GS>";
 			String tGSResponse;
 			
-			Mockito.doReturn ("GSTester").when (mClientHandler).getName ();
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			Mockito.doReturn ("GSTester").when (mClientHandlerAlpha).getName ();
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("GSTester is Ready to play the Game", tGSResponse);
-			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><BadRequest></GSResponse>", tGSResponse);
 		}
 		
@@ -663,11 +745,11 @@ class GameSupportTests {
 			String tBadRequest1 = "<GS gameID=\"2020-07-31-2005\"><NotStarting></GS>";
 			String tGSResponse;
 			
-			Mockito.doNothing ().when (mClientHandler).handleClientIsStarting ();
-			Mockito.doReturn ("GSTester").when (mClientHandler).getName ();
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			Mockito.doNothing ().when (mClientHandlerAlpha).handleClientIsStarting ();
+			Mockito.doReturn ("GSTester").when (mClientHandlerAlpha).getName ();
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("GSTester Starts the Game", tGSResponse);
-			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><BadRequest></GSResponse>", tGSResponse);	
 		}
 		
@@ -678,13 +760,13 @@ class GameSupportTests {
 			String tBadRequest1 = "<GS gameID=\"2020-02-26-1001\"><NotStarting></GS>";
 			String tGSResponse;
 			
-			Mockito.doReturn ("2021-02-28-1833").when (mClientHandler).generateGameID ();
-			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			Mockito.doReturn ("2021-02-28-1833").when (mClientHandlerAlpha).generateGameID ();
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse gameID=\"2020-07-31-2005\">", tGSResponse);
-			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandler);
+			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><BadGameID></GSResponse>", tGSResponse);
 			
-			tGSResponse = gameSupportNoID.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupportNoID.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse gameID=\"2021-02-28-1833\">", tGSResponse);
 		}
 		
@@ -694,7 +776,7 @@ class GameSupportTests {
 			String tGoodRequest = "<GS><LoadGameSetup gameID=\"2021-07-31-2005\" actionNumber=\"171\" gameName=\"1830\"></GS>";
 			String tGSResponse;
 			
-			tGSResponse = gameSupportNoID.handleGameSupportRequest (tGoodRequest, mClientHandler);
+			tGSResponse = gameSupportNoID.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 
 			assertEquals ("<GSResponse><GOOD></GSResponse>", tGSResponse);
 		}
@@ -716,9 +798,9 @@ class GameSupportTests {
                 tExpectedResponse2 = prepareExpectedResponse (tPlayer2);
                 tExpectedResponse3 = prepareExpectedResponse (tPlayer3);
 
-                assertEquals (tExpectedResponse1, gameSupport.handleGameSupportRequest (tGoodRequest1, mClientHandler));
-                assertEquals (tExpectedResponse2, gameSupport.handleGameSupportRequest (tGoodRequest2, mClientHandler));
-                assertEquals (tExpectedResponse3, gameSupport.handleGameSupportRequest (tGoodRequest3, mClientHandler));
+                assertEquals (tExpectedResponse1, gameSupport.handleGameSupportRequest (tGoodRequest1, mClientHandlerAlpha));
+                assertEquals (tExpectedResponse2, gameSupport.handleGameSupportRequest (tGoodRequest2, mClientHandlerAlpha));
+                assertEquals (tExpectedResponse3, gameSupport.handleGameSupportRequest (tGoodRequest3, mClientHandlerAlpha));
         }		
 	}
 }

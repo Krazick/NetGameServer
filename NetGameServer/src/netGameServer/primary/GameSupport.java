@@ -2,6 +2,7 @@ package netGameServer.primary;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,18 +10,25 @@ import org.apache.logging.log4j.Logger;
 import org.w3c.dom.NodeList;
 
 import netGameServer.utilities.XMLNode;
+import netGameServer.utilities.ElementName;
+import netGameServer.utilities.AttributeName;
 import netGameServer.utilities.FileUtils;
 import netGameServer.utilities.XMLDocument;
 
 public class GameSupport {
 	NetworkActions networkActions;
 	private ArrayList<ClientHandler> clients;
+	private LinkedList<String> clientNames;
 	ServerFrame serverFrame;
 	String gameStatus;
 	int actionNumber;
 	String gameID;
 	Logger logger;
 	
+	public static final ElementName EN_PLAYERS = new ElementName ("Players");
+	public static final ElementName EN_PLAYER = new ElementName ("Player");
+	public static final AttributeName AN_NAME = new AttributeName ("name");
+	public final String NOT_CONNECTED = "Not Connected";
 	private final String BAD_REQUEST = "<GSResponse><BadRequest></GSResponse>";
 	private final String BAD_GAME_ID = "<GSResponse><BadGameID></GSResponse>";
 	private final static String ACTION_NUMBER = "actionNumber=\"(\\d+)\"";
@@ -67,6 +75,7 @@ public class GameSupport {
 	public GameSupport (ServerFrame aServerFrame, String aNewGameID, Logger aLogger) {
 		setServerFrame (aServerFrame);
 		networkActions = new NetworkActions ();
+		clientNames = new LinkedList<String> ();
 		setActionNumber (MIN_ACTION_NUMBER);
 		setGameID (aNewGameID);
 		setLogger (aLogger);
@@ -133,12 +142,14 @@ public class GameSupport {
 		}
 	}
 	
-	private String constructAutoSaveFileName (String tDirectoryName, String aGameID) {
+	public String constructAutoSaveFileName (String tDirectoryName, String aGameID) {
 		String tAutoSaveFileName = NO_FILE_NAME;
 		
 		// When running via Eclipse, will save AutoSaves to
 		// /Volumes/Public/GIT/NetGameServer/NetGameServer/NetworkAutoSaves/18XX
 		// on Drobo
+		// /Users/marksmith/git/NetGameServer/NetGameServer/NetworkAutoSaves/18XX
+		// on Local Mac
 		
 		if (! GameSupport.NO_GAME_ID.equals (aGameID) ) {
 			tAutoSaveFileName = tDirectoryName + File.separator + aGameID + ".autoSave";			
@@ -155,6 +166,8 @@ public class GameSupport {
 	// -------------------- End Auto Save Functions ----------------
 	
 	public void autoSave () {
+		SavedGame tSavedGame;
+		
 		if (! fileUtils.fileWriterIsSetup ()) {
 			goodFileWriter = fileUtils.setupFileWriter ();
 		}
@@ -166,17 +179,20 @@ public class GameSupport {
 			networkActions.writeAllActions (fileUtils);
 			fileUtils.outputToFile ("</NetworkSaveGame>");
 			fileUtils.closeFile ();
+			tSavedGame = serverFrame.getSavedGameFor (gameID);
+			tSavedGame.setLastActionNumber (actionNumber);
 		}
 	}
 	
 	private void writeClientsInXML () {
-		String tPlayerName;
+//		String tPlayerName;
 		String tPlayerStatus;
 		
 		fileUtils.outputToFile ("<Players>");
-		for (ClientHandler tClientHandler : clients) {
-			tPlayerName = tClientHandler.getName ();
-			tPlayerStatus = tClientHandler.getPlayerStatus ();
+		for (String tPlayerName : clientNames) {
+//		 for (ClientHandler tClientHandler : clients) {
+//			tPlayerName = tClientHandler.getName ();
+			tPlayerStatus = getPlayerStatus (tPlayerName);
 			if (tPlayerName.length () > 0) {
 				tPlayerName = "<Player name=\"" + tPlayerName + "\" status=\"" + tPlayerStatus + "\"/>";
 				fileUtils.outputToFile (tPlayerName);
@@ -196,7 +212,7 @@ public class GameSupport {
 				tXMLAutoSaveDocument = fileUtils.loadXMLFile (autoSaveFile);
 				if (tXMLAutoSaveDocument != FileUtils.NO_VALID_XML_DOCUMENT) {
 					System.out.println ("Ready to parse Loaded AutoSaved NetGame Network Actions");
-					loadXMLNetworkActions (tXMLAutoSaveDocument);
+					loadXMLAutoSave (tXMLAutoSaveDocument);
 				} else {
 					logger.error("Loading of AutoSave File failed to get Valid XML Document");
 				}
@@ -206,7 +222,7 @@ public class GameSupport {
 		}
 	}
 	
-	public void loadXMLNetworkActions (XMLDocument aXMLAutoSaveDocument) {
+	public void loadXMLAutoSave (XMLDocument aXMLAutoSaveDocument) {
 		XMLNode tXMLSaveGame, tChildNode;
 		NodeList tChildren;
 		int tChildrenCount, tIndex, tLastActionNumber;
@@ -223,6 +239,8 @@ public class GameSupport {
 				networkActions.loadSavedActions (tChildNode);
 				tLastActionNumber = networkActions.getLastNetworkActionNumber ();
 				setActionNumber (tLastActionNumber);
+			} else if (EN_PLAYERS.equals (tChildName)) {
+				loadClientNames (tChildNode);
 			}
 		}
 		System.out.println ("Total Actions Found " + networkActions.getCount () + " Last Action Number " + tLastActionNumber);
@@ -820,7 +838,76 @@ public class GameSupport {
 		return networkActions.getLastNetworkActionNumber ();
 	}
 	
+	public int getPlayerCount () {
+		return clientNames.size ();
+	}
+	
+	public String getPlayerIndex (int aIndex) {
+		return clientNames.get (aIndex);
+	}
+	
+	public String getPlayerStatus (String aPlayerName) {
+		ClientHandler tFoundClientHandler;
+		String tPlayerStatus = NOT_CONNECTED;
+		
+		tFoundClientHandler = getClientHandlerFor (aPlayerName);
+		if (tFoundClientHandler != ClientHandler.NO_CLIENT_HANDLER) {
+			tPlayerStatus = tFoundClientHandler.getPlayerStatus ();
+		}
+		
+		return tPlayerStatus;
+	}
+	public ClientHandler getClientHandlerFor (String aClientName) {
+		ClientHandler tFoundClientHandler = ClientHandler.NO_CLIENT_HANDLER;
+		String tClientName;
+		
+		if (clients != ClientHandler.NO_CLIENT_HANDLERS) {
+			for (ClientHandler tClientHandler : clients) {
+				tClientName = tClientHandler.getName ();
+				if (tClientName.equals(aClientName)) {
+					tFoundClientHandler = tClientHandler;
+				}
+			}
+		}
+		
+		return tFoundClientHandler;
+	}
+	
 	public void setClientHandlers (ArrayList<ClientHandler> aClients) {
+		String tClientName;
+		
 		clients = aClients;
+		if (clients != ClientHandler.NO_CLIENT_HANDLERS) {
+			for (ClientHandler tClientHandler : clients) {
+				tClientName = tClientHandler.getName ();
+				addClientName (tClientName);
+			}
+		}
+	}
+	
+	public void addClientName (String aClientName) {
+		if (! clientNames.contains (aClientName)) {
+			clientNames.add (aClientName);
+		}
+	}
+	
+	public void loadClientNames (XMLNode aClientNames) {
+		XMLNode tChildNode;
+		NodeList tChildren;
+		int tChildrenCount, tIndex;
+		String tChildName;
+		String tPlayerName;
+		
+		tChildren = aClientNames.getChildNodes ();
+		tChildrenCount = tChildren.getLength ();
+		for (tIndex = 0; tIndex < tChildrenCount; tIndex++) {
+			tChildNode = new XMLNode (tChildren.item (tIndex));
+			tChildName = tChildNode.getNodeName ();
+			if (EN_PLAYER.equals (tChildName)) {
+				tPlayerName = tChildNode.getThisAttribute (AN_NAME);
+				addClientName (tPlayerName);
+			}
+		}
+
 	}
 }
