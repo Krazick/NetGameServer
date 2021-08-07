@@ -19,6 +19,7 @@ public class SavedGame {
 	private final static Pattern NSG_WITH_GAME_ID_PATTERN = Pattern.compile (NSG_WITH_GAME_ID);
 	private final static String PLAYER_WITH_NAME = "<Player name=\"(.*)\" status=\"(.*)\"\s*/>";
 	private final static Pattern PLAYER_WITH_NAME_PATTERN = Pattern.compile (PLAYER_WITH_NAME);
+	public final static SavedGame NO_GAME = null;
 	public final static String NO_GAME_ID = "NOID";
 	public final static String NO_NAME = "NO_NAME";
 	public final static String NO_STATUS = "NO_STATUS";
