@@ -10,7 +10,6 @@ public class SavedGames {
 	public SavedGames (String aDirectoryName) {
 		File tDirectory;
 		String [] tFiles;
-		SavedGame tGame;
 		String tFilePath;
 		
 		tDirectory = new File (aDirectoryName);
@@ -19,16 +18,33 @@ public class SavedGames {
 		for (String tFileName : tFiles) {
 			if (tFileName.endsWith (".autoSave")) {
 				tFilePath = aDirectoryName + File.separator + tFileName;
-				try {
-					tGame = new SavedGame (tFilePath);
-					games.add (tGame);
-				} catch (FileNotFoundException tException) {
-					tException.printStackTrace ();
-				}
+				addSavedGame (tFilePath);
 			}
 		}
 	}
+
+	public void addSavedGame (String aFilePath) {
+		SavedGame tGame;
+		try {
+			tGame = new SavedGame (aFilePath);
+			games.add (tGame);
+		} catch (FileNotFoundException tException) {
+			tException.printStackTrace ();
+		}
+	}
 	
+	public SavedGame getSavedGameFor (String aGameID) {
+		SavedGame tFoundSavedGame = SavedGame.NO_GAME;
+		
+		for (SavedGame tSavedGame : games) {
+			if (aGameID.equals (tSavedGame.getGameID ())) {
+				tFoundSavedGame = tSavedGame;
+			}
+		}
+		
+		return tFoundSavedGame;
+	}
+
 	public String getSavedGamesFor (String aPlayerName) {
 		String tSavedGames = "";
 		String tSavedGameXML = "";
