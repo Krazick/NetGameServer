@@ -87,6 +87,14 @@ public class ServerFrame extends JFrame {
 		logger = aLogger;
 	}
 	
+	public SavedGame getSavedGameFor (String aGameID) {
+		SavedGame tSavedGame;
+		
+		tSavedGame = games.getSavedGameFor (aGameID);
+		
+		return tSavedGame;
+	}
+	
 	public String getSavedGamesFor (String aPlayerName) {
 		String tSavedGamesFor;
 		
@@ -98,10 +106,13 @@ public class ServerFrame extends JFrame {
 	public GameSupport createNewGameSupport (ClientHandler aClientHandler) {
 		String tNewGameID;
 		GameSupport tNewGameSupport;
+		String tFilePath;
 		
 		tNewGameID = generateNewGameID ();
 		tNewGameSupport = new GameSupport (this, tNewGameID, logger);
 		activeGames.add (tNewGameSupport);
+		tFilePath = tNewGameSupport.constructAutoSaveFileName (getFullASDirectory (), tNewGameID);
+		games.addSavedGame(tFilePath);
 		
 		return tNewGameSupport;
 	}
