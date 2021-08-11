@@ -23,6 +23,13 @@ public class SavedGames {
 		}
 	}
 
+	public void addNewSavedGame (String aFilePath, String aGameID, String aPlayerName) {
+		SavedGame tGame;
+
+		tGame = new SavedGame (aFilePath, aGameID, aPlayerName);
+		games.add (tGame);
+	}
+	
 	public void addSavedGame (String aFilePath) {
 		SavedGame tGame;
 		try {
