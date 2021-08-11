@@ -7,6 +7,8 @@ import java.io.IOException;
 import org.apache.logging.log4j.Logger;
 
 public class FileUtils {
+	public static final File NO_FILE = null;
+	public static final FileUtils NO_FILE_UTILS = null;
 	public static final FileWriter NO_FILE_WRITER = null;
 	public static final XMLDocument NO_VALID_XML_DOCUMENT = null;
 	private Logger logger;
@@ -23,6 +25,24 @@ public class FileUtils {
 
 	public void setFile (File aFile) {
 		file = aFile;
+	}
+	
+	public void printInfo () {
+		if (file != NO_FILE) {
+			System.out.println ("File is NOT NULL");
+		} else {
+			System.out.println ("File is NULL");
+		}
+		if (fileWriter != NO_FILE_WRITER) {
+			System.out.println ("File Writer is NOT NULL");
+		} else {
+			System.out.println ("File Writer is NULL");
+		}
+		if (logger != null) {
+			System.out.println ("Logger is NOT NULL");
+		} else {
+			System.out.println ("Logger is NULL");
+		}
 	}
 	
 	public static void createDirectory (String aDirectoryName) {
@@ -46,6 +66,16 @@ public class FileUtils {
 		}
 		
 		return tGoodFileWriter;
+	}
+	
+	public boolean fileIsSetup () {
+		boolean tFileIsSetup = false;
+		
+		if (file != NO_FILE) {
+			tFileIsSetup = true;
+		}
+		
+		return tFileIsSetup;
 	}
 	
 	public boolean fileWriterIsSetup () {
