@@ -37,6 +37,7 @@ public class ClientHandler implements Runnable {
 	private boolean inBufferGood = false;
 	private boolean outBufferGood = false;
 	GameSupport gameSupport;
+	public static final String NO_CLIENT_NAME = null;
 	public static final ClientHandler NO_CLIENT_HANDLER = null;
 	public static final ArrayList<ClientHandler> NO_CLIENT_HANDLERS = null;
 	public static enum SEND_TO { Requestor, AllClients, AllButRequestor };
@@ -321,7 +322,7 @@ public class ClientHandler implements Runnable {
 			tGameID = gameSupport.getGameIdFromRequest (aGameSupportText);
 			if ( ! tGameID.equals (GameSupport.NO_GAME_ID)) {
 				if (gameSupport.getGameID ().equals (GameSupport.NO_GAME_ID)) {
-					updateGameSupport(tGameID);					
+					updateGameSupport (tGameID);					
 				}
 			}
 		}
@@ -712,14 +713,18 @@ public class ClientHandler implements Runnable {
 	public void printAllClientHandlerNames () {
 		String tClientName;
 		Socket tSocket;
+		String tGameName;
+		
 		logger.info ("There are " + clients.size () + " Clients in the list");
 		for (ClientHandler tClientHandler : clients) {
 			tClientName = tClientHandler.getName ();
 			tSocket = tClientHandler.getSocket ();
+			tGameName = tClientHandler.getGameID ();
 			if (tClientName == null) {
 				logger.info ("Client Name is NULL - Replacing this one");
 			} else {
-				logger.info ("Client Name is " + tClientName + " Socket on Port " + tSocket.getPort ());
+				logger.info ("Client Name is " + tClientName + " Socket on Port " + 
+						tSocket.getPort () + " Game Name " + tGameName);
 			}
 		}
 	}
@@ -734,6 +739,7 @@ public class ClientHandler implements Runnable {
 		
 		logger.info ("Before Updating Client Handlers:");
 		printAllClientHandlerNames ();
+		aGameSupport.printInfo();
 		tClientCount = clients.size ();
 		for (tClientIndex = 0; tClientIndex < tClientCount; tClientIndex++) {
 			tClientHandler = clients.get (tClientIndex);
@@ -760,7 +766,7 @@ public class ClientHandler implements Runnable {
 			}
 		}
 		if (! tSuccessfulUpdate) {
-			this.setName (aClientName);
+			setName (aClientName);
 			addNewUser (name);
 			serverBroadcast (name + " has reconnected", SEND_TO.AllButRequestor);
 			// Need to attach GameSupport Object to this Client Handler.
@@ -774,6 +780,7 @@ public class ClientHandler implements Runnable {
 		}
 		logger.info ("After Updating Client Handlers:");
 		printAllClientHandlerNames ();
+		aGameSupport.printInfo();
 		
 		return tSuccessfulUpdate;
 		// TODO --
