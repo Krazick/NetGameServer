@@ -16,15 +16,6 @@ import netGameServer.utilities.FileUtils;
 import netGameServer.utilities.XMLDocument;
 
 public class GameSupport {
-	NetworkActions networkActions;
-	private ArrayList<ClientHandler> clients;
-	private LinkedList<String> clientNames;
-	ServerFrame serverFrame;
-	String gameStatus;
-	int actionNumber;
-	String gameID;
-	Logger logger;
-	
 	public static final ElementName EN_PLAYERS = new ElementName ("Players");
 	public static final ElementName EN_PLAYER = new ElementName ("Player");
 	public static final AttributeName AN_NAME = new AttributeName ("name");
@@ -67,10 +58,37 @@ public class GameSupport {
 	public final static String NO_GAME_ID = "NOID";
 	public static final GameSupport NO_GAME_SUPPORT = null;
 	public static String NO_FILE_NAME = "";
+
+	NetworkActions networkActions;
+	private ArrayList<ClientHandler> clients;
+	private LinkedList<String> clientNames;
+	ServerFrame serverFrame;
+	String gameStatus;
+	int actionNumber;
+	String gameID;
+	Logger logger;
 	String autoSaveFileName = NO_FILE_NAME;
-	File autoSaveFile = null;
-	FileUtils fileUtils;
+	File autoSaveFile = FileUtils.NO_FILE;
+	FileUtils fileUtils = FileUtils.NO_FILE_UTILS;
 	boolean goodFileWriter = false;
+	
+	public void printInfo () {
+		System.out.println ("Game Support Info");
+		System.out.println ("Game ID " + gameID + " Status " + gameStatus + " Last Action Number " + actionNumber);
+		System.out.println ("Client Handler Count " + clients.size () + " Client Names count " + clientNames.size ());
+		System.out.println ("Network Action Count " + networkActions.getCount ());
+		if (autoSaveFileName == NO_FILE_NAME) {
+			System.out.println ("Auto Save File Name NOT SET");
+		} else {
+			System.out.println ("Auto Save File Name [" + autoSaveFileName);
+		}
+		System.out.println ("Good File Writer " + goodFileWriter);
+		if (fileUtils == FileUtils.NO_FILE_UTILS) {
+			System.out.println ("File Utils NOT Set");
+		} else {
+			fileUtils.printInfo ();
+		}
+	}
 	
 	public GameSupport (ServerFrame aServerFrame, String aNewGameID, Logger aLogger) {
 		setServerFrame (aServerFrame);
@@ -168,7 +186,8 @@ public class GameSupport {
 	public void autoSave () {
 		SavedGame tSavedGame;
 		
-		if (! fileUtils.fileWriterIsSetup ()) {
+		if (! fileUtils.fileWriterIsSetup () || ! fileUtils.fileIsSetup ()) {
+			setupAutoSaveFile (gameID);
 			goodFileWriter = fileUtils.setupFileWriter ();
 		}
 		if (goodFileWriter) {
@@ -319,8 +338,10 @@ public class GameSupport {
 		NetworkAction tNetworkAction;
 		
 		tNetworkAction = getLastNetworkAction ();
-		tNetworkAction.setActionXML (aAction);
-		tNetworkAction.setStatus (STATUS_COMPLETE);
+		if (tNetworkAction != NetworkAction.NO_ACTION) {
+			tNetworkAction.setActionXML (aAction);
+			tNetworkAction.setStatus (STATUS_COMPLETE);
+		}
 	}
 	
 	public NetworkAction getLastNetworkAction () {
@@ -335,32 +356,34 @@ public class GameSupport {
 		int tNewActionNumber;
 		String tGSResponse = BAD_REQUEST;
 		
-		if (isRequestForActionNumber (aRequest)) {
-			tNewActionNumber = getNewActionNumber ();
-			tGSResponse = generateGSReponseNewAN (tNewActionNumber);
-		} else if (isRequestForLastAction (aRequest) || isRequestForLastActionIsComplete (aRequest)) {
-			tGSResponse = generateGSReponseRequestLast ();
-		} else if (isRequestForLastActionIsPending (aRequest)) {
-			tGSResponse = generateGSReponsePending (actionNumber);
-		} else if (isRequestForAction (aRequest)) {
-			tGSResponse = generateGSResponseRequestAction (aRequest);
-		} else if (isRequestForGameID (aRequest)) {
-			tGSResponse = generateGSResponseGameID (aClientHandler);
-		} else if (isRequestForHeartbeat (aRequest)) {
+		if (isRequestForHeartbeat (aRequest)) {
 			tGSResponse = generateGSResponseHearbeat (aClientHandler);
-		} else if (isRequestForStart (aRequest)) {
-			aClientHandler.handleClientIsStarting ();
-			tGSResponse = aClientHandler.getName () + " Starts the Game";
-		} else if (isRequestForReady (aRequest)) {
-			aClientHandler.handleClientIsReady ();
-			tGSResponse = aClientHandler.getName () + " is Ready to play the Game";
-		} else if (isRequestForReconnect (aRequest)) {
-			updateClientHandlers (aRequest, aClientHandler);
-			tGSResponse = generateGSResponseReconnect (aClientHandler);
-		} else if (isRequestForGameLoadSetup (aRequest)) {
-			tGSResponse = handleGSResponseGameLoadSetup (aRequest, aClientHandler);
-		} else if (isRequestForSavedGamesFor (aRequest)) {
-			tGSResponse = handleGSResponseRequestSavedGamesFor (aRequest);
+		} else {
+			if (isRequestForActionNumber (aRequest)) {
+				tNewActionNumber = getNewActionNumber ();
+				tGSResponse = generateGSReponseNewAN (tNewActionNumber);
+			} else if (isRequestForLastAction (aRequest) || isRequestForLastActionIsComplete (aRequest)) {
+				tGSResponse = generateGSReponseRequestLast ();
+			} else if (isRequestForLastActionIsPending (aRequest)) {
+				tGSResponse = generateGSReponsePending (actionNumber);
+			} else if (isRequestForAction (aRequest)) {
+				tGSResponse = generateGSResponseRequestAction (aRequest);
+			} else if (isRequestForGameID (aRequest)) {
+				tGSResponse = generateGSResponseGameID (aClientHandler);
+			} else if (isRequestForStart (aRequest)) {
+				aClientHandler.handleClientIsStarting ();
+				tGSResponse = aClientHandler.getName () + " Starts the Game";
+			} else if (isRequestForReady (aRequest)) {
+				aClientHandler.handleClientIsReady ();
+				tGSResponse = aClientHandler.getName () + " is Ready to play the Game";
+			} else if (isRequestForReconnect (aRequest)) {
+				updateClientHandlers (aRequest, aClientHandler);
+				tGSResponse = generateGSResponseReconnect (aClientHandler);
+			} else if (isRequestForGameLoadSetup (aRequest)) {
+				tGSResponse = handleGSResponseGameLoadSetup (aRequest, aClientHandler);
+			} else if (isRequestForSavedGamesFor (aRequest)) {
+				tGSResponse = handleGSResponseRequestSavedGamesFor (aRequest);
+			}
 		}
 		
 		return tGSResponse;
@@ -886,8 +909,10 @@ public class GameSupport {
 	}
 	
 	public void addClientName (String aClientName) {
-		if (! clientNames.contains (aClientName)) {
-			clientNames.add (aClientName);
+		if (aClientName != ClientHandler.NO_CLIENT_NAME) {
+			if (! clientNames.contains (aClientName)) {
+				clientNames.add (aClientName);
+			}
 		}
 	}
 	
