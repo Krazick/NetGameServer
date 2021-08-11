@@ -35,6 +35,14 @@ public class SavedGame {
 		}
 	}
 
+	public SavedGame (String aFilePath, String aGameID, String aPlayerName) {
+		players = new ArrayList<String> ();
+		setGameID (aGameID);
+		addPlayer (aPlayerName);
+		setGameStatus (NO_STATUS);
+		setLastActionNumber (0);
+	}
+	
 	private void readFile (String aFileName) {
 		FileReader tFile;
 		BufferedReader tReader;
