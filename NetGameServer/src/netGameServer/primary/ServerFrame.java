@@ -107,12 +107,15 @@ public class ServerFrame extends JFrame {
 		String tNewGameID;
 		GameSupport tNewGameSupport;
 		String tFilePath;
+		String tPlayerName;
 		
 		tNewGameID = generateNewGameID ();
 		tNewGameSupport = new GameSupport (this, tNewGameID, logger);
 		activeGames.add (tNewGameSupport);
 		tFilePath = tNewGameSupport.constructAutoSaveFileName (getFullASDirectory (), tNewGameID);
-		games.addSavedGame(tFilePath);
+		tPlayerName = aClientHandler.getName ();
+		games.addNewSavedGame (tFilePath, tNewGameID, tPlayerName);
+//		games.addSavedGame (tFilePath);
 		
 		return tNewGameSupport;
 	}
