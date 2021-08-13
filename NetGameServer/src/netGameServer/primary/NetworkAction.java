@@ -36,6 +36,11 @@ public class NetworkAction {
 		setActionXML (tAction);
 	}
 	
+	public void printInfo () {
+		System.out.println ("Action Number " + actionNumber + " Status " + status);
+		System.out.println ("XML [" + actionXML + "]");
+	}
+	
 	public void setStatus (String aStatus) {
 		status = aStatus;
 	}

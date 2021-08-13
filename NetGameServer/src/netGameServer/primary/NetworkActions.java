@@ -17,6 +17,17 @@ public class NetworkActions {
 		actions = new LinkedList<NetworkAction> ();
 	}
 
+	public void printInfo () {
+		if (actions != null) {
+			System.out.println ("Network Action Count is " + actions.size ());
+			for (NetworkAction tAction : actions) {
+				tAction.printInfo ();
+			}
+		} else {
+			System.err.println ("No Network Actions");
+		}
+			
+	}
 	public void addNetworkAction (NetworkAction aNetworkAction) {
 		actions.add (aNetworkAction);
 	}
