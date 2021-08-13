@@ -256,8 +256,8 @@ public class ClientHandler implements Runnable {
 		return aContinue;
 	}
 
-	private void handleUnrecognizedDataReceived(String aMessage) {
-		System.err.println ("+++++ UNRECOGNIZED DATA RECEUVED [" + aMessage + "]");
+	private void handleUnrecognizedDataReceived (String aMessage) {
+		logger.error ("+++++ UNRECOGNIZED DATA RECEUVED [" + aMessage + "]");
 	}
 
 	public void handleClientIsStarting () {
@@ -284,14 +284,20 @@ public class ClientHandler implements Runnable {
 	
 	public void setGameSupport (GameSupport aGameSupport) {
 		gameSupport = aGameSupport;
-		gameSupport.setClientHandlers (clients);
+	}
+	
+	public void setClientHandlers (ArrayList<ClientHandler> aClientHandlers) {
+		gameSupport.setClientHandlers (aClientHandlers);
 	}
 	
 	public void setNewGameSupport (Logger aLogger) {
 		GameSupport tNewGameSupport;
+		ArrayList<ClientHandler> tClientHandlers;
 		
+		tClientHandlers = clients;
 		tNewGameSupport = new GameSupport (serverFrame, GameSupport.NO_GAME_ID, aLogger);
 		setGameSupport (tNewGameSupport);
+		setClientHandlers (tClientHandlers);
 	}
 	
 	public GameSupport getMatchingGameSupport (String aGameID) {
@@ -328,7 +334,7 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
-	private void updateGameSupport (String aGameID) {
+	public void updateGameSupport (String aGameID) {
 		GameSupport tFoundGameSupport;
 		
 		tFoundGameSupport = getMatchingGameSupport (aGameID);
@@ -586,7 +592,7 @@ public class ClientHandler implements Runnable {
 		String tPrefix = getGameSelectPrefix ();
 		String tShort;
 		
-		if (aGameActivity.startsWith (tPrefix )) {
+		if (aGameActivity.startsWith (tPrefix)) {
 			tShort = aGameActivity.substring (tPrefix.length ());
 			tShort = tShort.substring (0, tShort.indexOf ("\""));
 			tGameIndex = Integer.parseInt (tShort);
