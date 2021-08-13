@@ -75,12 +75,22 @@ public class GameSupport {
 	public void printInfo () {
 		System.out.println ("Game Support Info");
 		System.out.println ("Game ID " + gameID + " Status " + gameStatus + " Last Action Number " + actionNumber);
-		System.out.println ("Client Handler Count " + clients.size () + " Client Names count " + clientNames.size ());
+		if (clients != null) {
+			System.out.println ("Client Handler Count is " + clients.size ());
+		} else {
+			System.out.println ("Client Handler Count is ZERO");
+		}
+		if (clientNames != null) {
+			System.out.println ("Client Names count is " + clientNames.size ());
+			
+		} else {
+			System.out.println ("Client Names count is ZERO");
+		}
 		System.out.println ("Network Action Count " + networkActions.getCount ());
 		if (autoSaveFileName == NO_FILE_NAME) {
 			System.out.println ("Auto Save File Name NOT SET");
 		} else {
-			System.out.println ("Auto Save File Name [" + autoSaveFileName);
+			System.out.println ("Auto Save File Name [" + autoSaveFileName + "]");
 		}
 		System.out.println ("Good File Writer " + goodFileWriter);
 		if (fileUtils == FileUtils.NO_FILE_UTILS) {
@@ -88,6 +98,7 @@ public class GameSupport {
 		} else {
 			fileUtils.printInfo ();
 		}
+		networkActions.printInfo ();
 	}
 	
 	public GameSupport (ServerFrame aServerFrame, String aNewGameID, Logger aLogger) {
@@ -330,7 +341,7 @@ public class GameSupport {
 			updateLastAction (tAction);
 			autoSave ();
 		} else {
-
+			System.err.println ("Handle Action not matched [" + aRequest+"]");
 		}
 	}
 
@@ -340,7 +351,10 @@ public class GameSupport {
 		tNetworkAction = getLastNetworkAction ();
 		if (tNetworkAction != NetworkAction.NO_ACTION) {
 			tNetworkAction.setActionXML (aAction);
+			printInfo ();
 			tNetworkAction.setStatus (STATUS_COMPLETE);
+		} else {
+			System.err.println("Found No Last Action");
 		}
 	}
 	
@@ -646,10 +660,14 @@ public class GameSupport {
 		if (isLastActionComplete ()) {
 			tNewActionNumber++;
 			tNewNetworkAction = new NetworkAction (tNewActionNumber, NetworkAction.ACTION_PENDING);
-			networkActions.addNetworkAction (tNewNetworkAction);
+			addNewNetworkAction (tNewNetworkAction);
 		}
 		
 		return tNewActionNumber;
+	}
+	
+	public void addNewNetworkAction (NetworkAction aNewNetworkAction) {
+		networkActions.addNetworkAction (aNewNetworkAction);	
 	}
 	
 	public boolean isLastActionComplete () {
@@ -769,15 +787,17 @@ public class GameSupport {
 	
 	public String generateGSResponseRequestAction (String aRequest) {
 		String tGSResponse = BAD_REQUEST;
-		String tNumberMatched, tBadResponse;
+		String tNumberMatched, tBadResponse, tActionFound;
 		int tActionNumber;
 		Matcher tMatcher = REQUEST_ACTION_PATTERN.matcher (aRequest);
 		
+		printInfo ();
 		if (tMatcher.find ()) {
 			tNumberMatched = tMatcher.group (1);
 			tActionNumber = Integer.parseInt (tNumberMatched);
 			if ((tActionNumber > MIN_ACTION_NUMBER) && (tActionNumber <= actionNumber)) {
-				tGSResponse = wrapWithGSResponse (getThisAction (tActionNumber));
+				tActionFound = getThisAction (tActionNumber);
+				tGSResponse = wrapWithGSResponse (tActionFound);
 			} else {
 				tBadResponse = "<ActionOutOfRange find=\"" + tActionNumber + "\" min=\""
 						+ MIN_ACTION_NUMBER + "\" max=\"" + actionNumber + "\" />";
