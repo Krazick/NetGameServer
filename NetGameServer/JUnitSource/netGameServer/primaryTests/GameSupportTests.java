@@ -24,7 +24,7 @@ import netGameServer.primary.GameSupport;
 import netGameServer.primary.NetworkAction;
 import netGameServer.primary.ServerFrame;
 
-@DisplayName ("Game Support")
+@DisplayName ("Game Support Tests")
 @ExtendWith (MockitoExtension.class)
 class GameSupportTests {
 	GameSupport gameSupport;
@@ -361,15 +361,17 @@ class GameSupportTests {
 			
 			Mockito.doNothing ().when (mGameSupport).autoSave ();
 			tInjectedLastAction = new NetworkAction (101, "Complete");
+			mGameSupport.addNewNetworkAction (tInjectedLastAction);
 			Mockito.doReturn (tInjectedLastAction).when (mGameSupport).getLastNetworkAction ();
 			
-			assertTrue (gameSupport.isRequestForGameActivity (tGoodGARequest));
-			tCurrentActionNumber = gameSupport.getNewActionNumber ();
+			assertTrue (mGameSupport.isRequestForGameActivity (tGoodGARequest));
+			tCurrentActionNumber = 101;
 			
 			mGameSupport.handleGameActivityRequest (tGoodGARequest);
 			mGameSupport.setActionNumber (tCurrentActionNumber);
 			tGAResponse = mGameSupport.generateGSReponseRequestLast ();
 			assertEquals ("<GSResponse><LastAction actionNumber=\"101\" status=\"Complete\"></GSResponse>", tGAResponse);
+
 //			tLastActionRequest = mGameSupport.generateGSResponseRequestAction ("<RequestAction actionNumber=\"" + tCurrentActionNumber + "\">");
 //			assertEquals (tGoodGAResponse, tLastActionRequest);
 		}
