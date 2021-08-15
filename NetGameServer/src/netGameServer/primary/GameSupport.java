@@ -916,11 +916,17 @@ public class GameSupport {
 		return tFoundClientHandler;
 	}
 	
+	public ArrayList<ClientHandler> getClientHandlers () {
+		return clients;
+	}
+	
 	public void setClientHandlers (ArrayList<ClientHandler> aClients) {
 		String tClientName;
 		
 		clients = aClients;
+		System.out.println ("Setting Client Handlers in Game Support");
 		if (clients != ClientHandler.NO_CLIENT_HANDLERS) {
+			System.out.println ("There are " + clients.size () + " Clients saved and " + aClients.size () + " Clients sent");
 			for (ClientHandler tClientHandler : clients) {
 				tClientName = tClientHandler.getName ();
 				addClientName (tClientName);
