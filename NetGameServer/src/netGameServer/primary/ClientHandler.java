@@ -15,18 +15,6 @@ import javax.swing.DefaultListModel;
 import org.apache.logging.log4j.Logger;
 
 public class ClientHandler implements Runnable {
-	private Socket socket;
-	private BufferedReader in;
-	private PrintWriter out;
-	private String name;
-	private String geVersion;
-	private static ArrayList<ClientHandler> clients;
-	private boolean afk;
-	private boolean ready;
-	private String gameName;
-	private DefaultListModel<String> clientListModel;
-	private DefaultListModel<String> gameListModel;
-	private ServerFrame serverFrame;
 	public final static String GAME_ACTIVITY_PREFIX = "Game Activity <GA>";
 	public final static String GAME_ACTIVITY_SUFFFIX = "</GA>";
 	public final static String GAME_SUPPORT_PREFIX = "Game Support ";
@@ -34,13 +22,25 @@ public class ClientHandler implements Runnable {
 	public static final String GAME_INDEX = "gameIndex";
 	public static final String GAME_SELECTION = "GameSelection";
 	public static final int NO_GAME_INDEX = -1;
-	private boolean inBufferGood = false;
-	private boolean outBufferGood = false;
-	GameSupport gameSupport;
 	public static final String NO_CLIENT_NAME = null;
 	public static final ClientHandler NO_CLIENT_HANDLER = null;
 	public static final ArrayList<ClientHandler> NO_CLIENT_HANDLERS = null;
 	public static enum SEND_TO { Requestor, AllClients, AllButRequestor };
+	private static ArrayList<ClientHandler> clients;
+	private DefaultListModel<String> clientListModel;
+	private DefaultListModel<String> gameListModel;
+	private Socket socket;
+	private BufferedReader in;
+	private PrintWriter out;
+	private String name;
+	private String geVersion;
+	private String gameName;
+	private ServerFrame serverFrame;
+	private boolean afk;
+	private boolean ready;
+	private boolean inBufferGood = false;
+	private boolean outBufferGood = false;
+	GameSupport gameSupport;
 	Logger logger;
 
 	public ClientHandler (ServerFrame aServerFrame, Socket aClientSocket, 
@@ -61,7 +61,7 @@ public class ClientHandler implements Runnable {
 		} catch (IOException tException) {
 			logger.error ("Creating Client Handler, Setting Socket throwing Exception", tException);
 		}
-		clients = aClients;
+		setClientHandlers (aClients);
 		setClientList (aClientListModel);
 		setGameList (aGameListModel);
 		setLogger (serverFrame.getLogger ());
@@ -69,6 +69,10 @@ public class ClientHandler implements Runnable {
 		if (aSetupInOut) {
 			SetupSocketInOut ();
 		}
+	}
+
+	public void setClientHandlers (ArrayList<ClientHandler> aClients) {
+		clients = aClients;
 	}
 	
 	private void setSocket (Socket aSocket) throws IOException {
@@ -286,7 +290,8 @@ public class ClientHandler implements Runnable {
 		gameSupport = aGameSupport;
 	}
 	
-	public void setClientHandlers (ArrayList<ClientHandler> aClientHandlers) {
+	public void setGSClientHandlers (ArrayList<ClientHandler> aClientHandlers) {
+		System.out.println ("Ready to set Game Support Client Handlers");
 		gameSupport.setClientHandlers (aClientHandlers);
 	}
 	
@@ -297,7 +302,7 @@ public class ClientHandler implements Runnable {
 		tClientHandlers = clients;
 		tNewGameSupport = new GameSupport (serverFrame, GameSupport.NO_GAME_ID, aLogger);
 		setGameSupport (tNewGameSupport);
-		setClientHandlers (tClientHandlers);
+		setGSClientHandlers (tClientHandlers);
 	}
 	
 	public GameSupport getMatchingGameSupport (String aGameID) {
