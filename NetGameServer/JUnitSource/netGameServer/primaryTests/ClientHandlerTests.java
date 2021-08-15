@@ -100,6 +100,18 @@ class ClientHandlerTests {
 		return tClientHandler;
 	}
 	
+	private ClientHandler buildClientHandler (String aClientName) {
+		ClientHandler tClientHandler;
+		
+		Mockito.doReturn (logger).when (mServerFrame).getLogger ();
+
+		tClientHandler = new ClientHandler (mServerFrame, mClientSocket, ClientHandler.NO_CLIENT_HANDLERS,
+				mClientListModel, mGameListModel, false);
+		tClientHandler.setName (aClientName);
+		
+		return tClientHandler;
+	}
+	
 	@Test
 	@DisplayName ("Test getting a GameID") 
 	void testGettingGameID () {
@@ -210,6 +222,29 @@ class ClientHandlerTests {
 			tFoundGameSupport = tClientHandlerTesterLambda.getGameSupport ();
 			assertEquals (mGameSupport1, tFoundGameSupport);
 		}
+		
+		@Test
+		@DisplayName ("Setting ClientHandlers in GameSupport")
+		void testSettingClientHandlersInGameSupport () {
+			ClientHandler tClientHandlerTesterAlpha;
+			ClientHandler tClientHandlerTesterBeta;
+			ClientHandler tClientHandlerTesterLambda;
+			GameSupport tFoundGameSupport;
+			GameSupport tGameSupport;
+			
+			tClientHandlerTesterAlpha = buildClientHandler (clients, "TesterAlpha");
+			clients.add (tClientHandlerTesterAlpha);
+			tClientHandlerTesterBeta = buildClientHandler (clients, "TesterBeta");
+			clients.add (tClientHandlerTesterBeta);
+			tClientHandlerTesterLambda = buildClientHandler ("TesterLambda");
+			tGameSupport = new GameSupport (mServerFrame, "Client Handler 1", logger);
+			tClientHandlerTesterLambda.setGameSupport (tGameSupport);
+			
+			tClientHandlerTesterLambda.setGSClientHandlers (clients);
+			tFoundGameSupport = tClientHandlerTesterLambda.getGameSupport ();
+			assertEquals (clients, tFoundGameSupport.getClientHandlers ());
+		}
+
 	}
 	// Need to build configureMockSocket
 	
