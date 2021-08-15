@@ -97,7 +97,7 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
-	private boolean setupOutPrintWriter() {
+	private boolean setupOutPrintWriter () {
 		boolean tOutBufferGood = false;
 		PrintWriter tPrintWriter;
 		OutputStream tOutputStream;
@@ -228,7 +228,7 @@ public class ClientHandler implements Runnable {
 		} else if (aMessage.startsWith ("GEVersion")) {
 			aContinue = handleGEVersion (aContinue, aMessage);
 		} else if (aMessage.startsWith ("say")) {
-			playerBroadcast (aMessage);
+			aContinue = playerBroadcast (aMessage);
 		} else if (startsAndEndsWith (aMessage, GAME_ACTIVITY_PREFIX, GAME_ACTIVITY_SUFFFIX)) {
 			gameSupport.handleGameActivityRequest (aMessage);
 			broadcastGameActivity (aMessage);
@@ -291,7 +291,6 @@ public class ClientHandler implements Runnable {
 	}
 	
 	public void setGSClientHandlers (ArrayList<ClientHandler> aClientHandlers) {
-		System.out.println ("Ready to set Game Support Client Handlers");
 		gameSupport.setClientHandlers (aClientHandlers);
 	}
 	
@@ -648,8 +647,9 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
-	private void playerBroadcast (String aMessage) {
+	private boolean playerBroadcast (String aMessage) {
 		String tMessage;
+		boolean tSuccess = false;
 		
 		int tSpaceIndex = aMessage.indexOf (" ");
 		if (tSpaceIndex > 0) {
@@ -658,12 +658,16 @@ public class ClientHandler implements Runnable {
 				if (name != null) {
 					if (! name.equals (tClientHandler.getName ())) {
 						tClientHandler.out.println (name + ": " + tMessage);
+						tSuccess = tSuccess || true;
 					}
 				}
 			}
 		} else {
 			logger.error (">> No Space in Say Command [" + aMessage + "] <<");
+			tSuccess = false;
 		}
+		
+		return tSuccess;
 	}
 
 	private void serverMessage (String aMessage) {
