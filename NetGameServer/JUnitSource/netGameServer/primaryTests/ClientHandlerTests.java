@@ -103,6 +103,19 @@ class ClientHandlerTests {
 		return tClientHandler;
 	}
 	
+	private ClientHandler buildClientHandler1 (ArrayList <ClientHandler> aClients,
+			String aClientName) {
+		ClientHandler tClientHandler;
+		DefaultListModel<String> tClientListModel = new DefaultListModel<String> ();
+		Mockito.doReturn (logger).when (mServerFrame).getLogger ();
+
+		tClientHandler = new ClientHandler (mServerFrame, mClientSocket, aClients,
+				tClientListModel, mGameListModel, false);
+		tClientHandler.setName (aClientName);
+		
+		return tClientHandler;
+	}
+	
 	private ClientHandler buildClientHandler (String aClientName) {
 		ClientHandler tClientHandler;
 		
@@ -257,7 +270,8 @@ class ClientHandlerTests {
 		@Test
 		@DisplayName ("Handle New Player Test")
 		void handleNewPlayerTest () {
-			String tMessageGood = "name TesterAlpha";
+			String tMessageGood1 = "name TesterAlpha";
+			String tMessageGood2 = "name TesterBeta";
 			String tMessage1Bad = "name";
 			String tMessage2Bad = "nameTesterBeta";
 			ClientHandler tClientHandlerTesterAlpha;
@@ -265,17 +279,24 @@ class ClientHandlerTests {
 			ClientHandler tClientHandlerTesterDelta;
 			boolean tHandleResult;
 			
-			tClientHandlerTesterAlpha = buildClientHandler (clients, "TesterAlpha");
-			tHandleResult = tClientHandlerTesterAlpha.handleMessage (true, tMessageGood);
-			assertEquals (true, tHandleResult);
-		
-			tHandleResult = tClientHandlerTesterAlpha.handleMessage (true, tMessageGood);
-			assertEquals (true, tHandleResult);
-		
 			Mockito.doNothing ().when (mPrintWriter).println (Mockito.anyString ());
+			
+			tClientHandlerTesterAlpha = buildClientHandler1 (clients, "");
+			tClientHandlerTesterAlpha.setOutputWriter (mPrintWriter);
+			
+			tHandleResult = tClientHandlerTesterAlpha.handleMessage (true, tMessageGood1);
+			assertTrue (tHandleResult);
+		
+			tHandleResult = tClientHandlerTesterAlpha.handleMessage (true, tMessageGood1);
+			assertFalse (tHandleResult);
+		
 
 			tClientHandlerTesterBeta = buildClientHandler (clients, "TesterBeta");
 			tClientHandlerTesterBeta.setOutputWriter (mPrintWriter);
+			
+			tHandleResult = tClientHandlerTesterAlpha.handleMessage(true, tMessageGood2);
+			assertTrue (tHandleResult);
+			
 			tHandleResult = tClientHandlerTesterBeta.handleMessage (true, tMessage1Bad);
 			assertEquals (false, tHandleResult);
 			
@@ -399,5 +420,62 @@ class ClientHandlerTests {
 			assertEquals (true, tHandleResult);
 			assertFalse (tClientHandlerTesterBeta.getClientIsAFK ());
 		}
+		
+		@Test
+		@DisplayName ("Handle Player is Ready Test")
+		void handlePlayerReadyTest () {
+			String tMessageGood = "Ready";
+			String tMessageBad = "ready";
+			ClientHandler tClientHandlerTesterAlpha;
+			ClientHandler tClientHandlerTesterBeta;
+			boolean tHandleResult;
+			
+			tClientHandlerTesterAlpha = buildClientHandler (clients, "TesterAlpha");
+			tClientHandlerTesterAlpha.setOutputWriter (mPrintWriter);
+			clients.add (tClientHandlerTesterAlpha);
+
+			tHandleResult = tClientHandlerTesterAlpha.handleMessage (true, tMessageGood);
+			assertEquals (true, tHandleResult);
+			assertTrue (tClientHandlerTesterAlpha.getClientIsReady ());
+			
+			tClientHandlerTesterBeta = buildClientHandler (clients, "TesterBeta");
+			tClientHandlerTesterBeta.setOutputWriter (mPrintWriter);
+			clients.add (tClientHandlerTesterBeta);
+
+			tHandleResult = tClientHandlerTesterBeta.handleMessage (true, tMessageBad);
+			assertEquals (true, tHandleResult);
+			assertFalse (tClientHandlerTesterBeta.getClientIsReady ());
+		}
+		
+		@Test
+		@DisplayName ("Handle Player is Not Ready Test")
+		void handlePlayerNotReadyTest () {
+			String tMessageGood = "Not Ready";
+			String tMessageBad = "Not ready";
+			ClientHandler tClientHandlerTesterAlpha;
+			ClientHandler tClientHandlerTesterBeta;
+			boolean tHandleResult;
+			
+			tClientHandlerTesterAlpha = buildClientHandler (clients, "TesterAlpha");
+			tClientHandlerTesterAlpha.setOutputWriter (mPrintWriter);
+			clients.add (tClientHandlerTesterAlpha);
+
+			tHandleResult = tClientHandlerTesterAlpha.handleMessage (true, tMessageGood);
+			assertEquals (true, tHandleResult);
+			assertFalse (tClientHandlerTesterAlpha.getClientIsReady ());
+			
+			tClientHandlerTesterBeta = buildClientHandler (clients, "TesterBeta");
+			tClientHandlerTesterBeta.setOutputWriter (mPrintWriter);
+			clients.add (tClientHandlerTesterBeta);
+			
+			tHandleResult = tClientHandlerTesterBeta.handleMessage (true, tMessageGood);
+			assertEquals (true, tHandleResult);
+			assertFalse (tClientHandlerTesterBeta.getClientIsReady ());
+
+			tHandleResult = tClientHandlerTesterBeta.handleMessage (true, tMessageBad);
+			assertEquals (true, tHandleResult);
+			assertFalse (tClientHandlerTesterBeta.getClientIsReady ());
+		}
+
 	}
 }
