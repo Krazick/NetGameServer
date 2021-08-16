@@ -404,7 +404,7 @@ public class ClientHandler implements Runnable {
 	}
 	
     private void log (String aMessage, Exception aException) {
-    	logger.error(aMessage + " [" + name + "]", aException);
+    	logger.error (aMessage + " [" + name + "]", aException);
     }
 
     public void setGEVersion (String aGEVersion) {
@@ -516,8 +516,23 @@ public class ClientHandler implements Runnable {
 		gameListModel = aGameListModel;
 	}
 	
+	private boolean clientListContains (String aName) {
+		String tClientName;
+		int tIndex;
+		boolean tContains = false;
+		
+		for (tIndex = 0; tIndex < clientListModel.size (); tIndex++) {
+			tClientName = clientListModel.get (tIndex);
+			if (tClientName.startsWith (aName)) {
+				tContains = true;
+			}	
+		}
+		
+		return tContains;
+	}
+	
 	private void addNewUser (String aName) {
-		if (! clientListModel.contains (aName)) {
+		if (! clientListContains (aName)) {
 			clientListModel.addElement (aName);
 		}
 	}
@@ -549,7 +564,8 @@ public class ClientHandler implements Runnable {
 		int tSpaceIndex = aMessage.indexOf (" ");
 		if (tSpaceIndex > 0) {
 			tName = aMessage.substring (tSpaceIndex + 1);
-			if (! (clientListModel.contains (tName) || clientListModel.contains (getAFKName (tName)))) {
+			if (! clientListContains (tName)) {
+//			if (! (clientListModel.contains (tName) || clientListModel.contains (getAFKName (tName)))) {
 				setName (tName);
 				tFullName = getFullName ();
 				addNewUser (tFullName);
