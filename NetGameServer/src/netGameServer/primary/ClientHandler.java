@@ -23,6 +23,7 @@ public class ClientHandler implements Runnable {
 	public static final String GAME_SELECTION = "GameSelection";
 	public static final int NO_GAME_INDEX = -1;
 	public static final String NO_CLIENT_NAME = null;
+	public static final String NO_GAME_NAME = null;
 	public static final ClientHandler NO_CLIENT_HANDLER = null;
 	public static final ArrayList<ClientHandler> NO_CLIENT_HANDLERS = null;
 	public static enum SEND_TO { Requestor, AllClients, AllButRequestor };
@@ -565,7 +566,6 @@ public class ClientHandler implements Runnable {
 		if (tSpaceIndex > 0) {
 			tName = aMessage.substring (tSpaceIndex + 1);
 			if (! clientListContains (tName)) {
-//			if (! (clientListModel.contains (tName) || clientListModel.contains (getAFKName (tName)))) {
 				setName (tName);
 				tFullName = getFullName ();
 				addNewUser (tFullName);
@@ -607,25 +607,31 @@ public class ClientHandler implements Runnable {
 		}
 	}
 	
-	private int getGameIndex (String aGameActivity) {
+	public int getGameIndex (String aGameActivity) {
 		int tGameIndex = NO_GAME_INDEX;
 		String tPrefix = getGameSelectPrefix ();
-		String tShort;
+		String tShort, tShortInt;
+		int tGameIndexLoc;
 		
 		if (aGameActivity.startsWith (tPrefix)) {
-			tShort = aGameActivity.substring (tPrefix.length ());
-			tShort = tShort.substring (0, tShort.indexOf ("\""));
-			tGameIndex = Integer.parseInt (tShort);
+			tGameIndexLoc = aGameActivity.indexOf (GAME_INDEX);
+			
+			if (tGameIndexLoc > 0) {
+				tShort = aGameActivity.substring (tGameIndexLoc);
+				tShort = tShort.substring (GAME_INDEX.length () + 2);
+				tShortInt = tShort.substring (0, tShort.indexOf ("\""));
+				tGameIndex = Integer.parseInt (tShortInt);
+			}
 		}
 		
 		return tGameIndex;
 	}
 	
-	private String getGameSelectPrefix () {
-		return GAME_ACTIVITY_PREFIX + "<" + GAME_SELECTION + " " + GAME_INDEX + "=\"";
+	public String getGameSelectPrefix () {
+		return GAME_ACTIVITY_PREFIX + "<" + GAME_SELECTION + " ";
 	}
 
-	private void addGameName (String aGameActivity) {
+	public void addGameName (String aGameActivity) {
 		int tGameIndex;
 		
 		tGameIndex = getGameIndex (aGameActivity);
@@ -638,7 +644,7 @@ public class ClientHandler implements Runnable {
 	public void addGameNameToList (int aGameIndex) {
 		String tGameName;
 		
-		tGameName = serverFrame.getGameName(aGameIndex);
+		tGameName = serverFrame.getGameName (aGameIndex);
 		addGameNameToList (tGameName);
 	}
 	
@@ -649,8 +655,29 @@ public class ClientHandler implements Runnable {
 		}
 	}
 	
+	public int getGameListCount () {
+		return gameListModel.getSize ();
+	}
+	
+	public String getGameName () {
+		return gameName;
+	}
+	
+	public String getGameName (int aGameIndex) {
+		String tFoundName = NO_GAME_NAME;
+		
+		if ((aGameIndex >= 0) && (aGameIndex < getGameListCount ())) {
+			tFoundName = gameListModel.get (aGameIndex);
+		}
+		
+		return tFoundName;
+	}
+	
 	private void broadcastGameActivity (String aGameActivity) {
-		if (aGameActivity.startsWith (getGameSelectPrefix ())) {
+		String tGameSelectPrefix;
+		
+		tGameSelectPrefix = getGameSelectPrefix ();
+		if (aGameActivity.startsWith (tGameSelectPrefix)) {
 			setClientIsReady (true);
 			addGameName (aGameActivity);
 		}
@@ -770,7 +797,7 @@ public class ClientHandler implements Runnable {
 		
 		logger.info ("Before Updating Client Handlers:");
 		printAllClientHandlerNames ();
-		aGameSupport.printInfo();
+//		aGameSupport.printInfo();
 		tClientCount = clients.size ();
 		for (tClientIndex = 0; tClientIndex < tClientCount; tClientIndex++) {
 			tClientHandler = clients.get (tClientIndex);
@@ -811,7 +838,7 @@ public class ClientHandler implements Runnable {
 		}
 		logger.info ("After Updating Client Handlers:");
 		printAllClientHandlerNames ();
-		aGameSupport.printInfo();
+//		aGameSupport.printInfo();
 		
 		return tSuccessfulUpdate;
 		// TODO --
