@@ -107,10 +107,12 @@ class ClientHandlerTests {
 			String aClientName) {
 		ClientHandler tClientHandler;
 		DefaultListModel<String> tClientListModel = new DefaultListModel<String> ();
+		DefaultListModel<String> tGameListModel = new DefaultListModel<String> ();
+		
 		Mockito.doReturn (logger).when (mServerFrame).getLogger ();
 
 		tClientHandler = new ClientHandler (mServerFrame, mClientSocket, aClients,
-				tClientListModel, mGameListModel, false);
+				tClientListModel, tGameListModel, false);
 		tClientHandler.setName (aClientName);
 		
 		return tClientHandler;
@@ -128,25 +130,120 @@ class ClientHandlerTests {
 		return tClientHandler;
 	}
 	
-	@Test
-	@DisplayName ("Test getting a GameID") 
-	void testGettingGameID () {
-		ClientHandler tClientHandlerTesterAlpha;
-		ClientHandler tClientHandlerTesterBeta;
+	@Nested
+	@DisplayName ("Test working with GameID and GameName")
+	class testWorkingWithGameIDandName {
+		@Test 
+		@DisplayName ("Test getting GameSelectPrefix")
+		void testGettingGameSelectPrefix () {
+			ClientHandler tClientHandlerTesterAlpha;
+			
+			tClientHandlerTesterAlpha = buildClientHandler (clients, "TesterAlpha");
+			assertEquals ("Game Activity <GA><GameSelection ", tClientHandlerTesterAlpha.getGameSelectPrefix ());
+			
+		}
 		
-		tClientHandlerTesterAlpha = buildClientHandler (clients, "TesterAlpha");
-		clients.add (tClientHandlerTesterAlpha);
-		tClientHandlerTesterBeta = buildClientHandler (clients, "TesterBeta");
-		clients.add (tClientHandlerTesterBeta);
-		assertEquals ("NOID", tClientHandlerTesterAlpha.getGameID ());
+		@Test
+		@DisplayName ("Test adding Game Name via String to List")
+		void testAddingGameNameStringToList () {
+			ClientHandler tClientHandlerTesterAlpha;
+			String tGameName = "TestGameNameAlpha";
+			
+			tClientHandlerTesterAlpha = buildClientHandler1 (clients, "TesterAlpha");
+			clients.add (tClientHandlerTesterAlpha);
+
+			Mockito.doReturn ("Mocked GameID Alpha").when (mGameSupport1).getGameID ();
+			tClientHandlerTesterAlpha.setGameSupport (mGameSupport1);
+			tClientHandlerTesterAlpha.addGameNameToList (tGameName);
+			assertEquals ("TestGameNameAlpha Mocked GameID Alpha", tClientHandlerTesterAlpha.getGameName ());
+			assertEquals (1, tClientHandlerTesterAlpha.getGameListCount ());
+			assertEquals ("TestGameNameAlpha Mocked GameID Alpha", tClientHandlerTesterAlpha.getGameName (0));
+			
+			tClientHandlerTesterAlpha.addGameNameToList (tGameName);
+			assertEquals ("TestGameNameAlpha Mocked GameID Alpha", tClientHandlerTesterAlpha.getGameName (0));
+			assertNull (tClientHandlerTesterAlpha.getGameName (1));
+			assertNull (tClientHandlerTesterAlpha.getGameName (-31));
+		}
 		
-		Mockito.doReturn ("Mocked GameID").when (mGameSupport1).getGameID ();
-		tClientHandlerTesterAlpha.setGameSupport (mGameSupport1);
-		assertEquals ("Mocked GameID", tClientHandlerTesterAlpha.getGameID ());
-		assertEquals ("NOID", tClientHandlerTesterBeta.getGameID ());
+		@Test
+		@DisplayName ("Test adding Game Name via Int to List")
+		void testAddingGameNameIntToList () {
+			ClientHandler tClientHandlerTesterAlpha;
+			
+			Mockito.doReturn ("Mocked GameID Alpha").when (mGameSupport1).getGameID ();
+			Mockito.doReturn ("Mocked GameName Alpha").when (mServerFrame).getGameName (Mockito.anyInt ());
+			tClientHandlerTesterAlpha = buildClientHandler1 (clients, "TesterAlpha");
+			clients.add (tClientHandlerTesterAlpha);
+
+			tClientHandlerTesterAlpha.setGameSupport (mGameSupport1);
+			tClientHandlerTesterAlpha.addGameNameToList (0);
+			assertEquals (1, tClientHandlerTesterAlpha.getGameListCount ());
+			assertEquals ("Mocked GameName Alpha Mocked GameID Alpha", tClientHandlerTesterAlpha.getGameName (0));
+			
+			tClientHandlerTesterAlpha.addGameNameToList (0);
+			assertEquals ("Mocked GameName Alpha Mocked GameID Alpha", tClientHandlerTesterAlpha.getGameName (0));
+			assertNull (tClientHandlerTesterAlpha.getGameName (1));
+			assertNull (tClientHandlerTesterAlpha.getGameName (-31));
+		}
 		
-		tClientHandlerTesterBeta.setGameSupport (mGameSupport1);
-		assertEquals ("Mocked GameID", tClientHandlerTesterBeta.getGameID ());
+		@Test
+		@DisplayName ("Test getting a GameID") 
+		void testGettingGameID () {
+			ClientHandler tClientHandlerTesterAlpha;
+			ClientHandler tClientHandlerTesterBeta;
+			
+			tClientHandlerTesterAlpha = buildClientHandler (clients, "TesterAlpha");
+			clients.add (tClientHandlerTesterAlpha);
+			tClientHandlerTesterBeta = buildClientHandler (clients, "TesterBeta");
+			clients.add (tClientHandlerTesterBeta);
+			assertEquals ("NOID", tClientHandlerTesterAlpha.getGameID ());
+			
+			Mockito.doReturn ("Mocked GameID").when (mGameSupport1).getGameID ();
+			tClientHandlerTesterAlpha.setGameSupport (mGameSupport1);
+			assertEquals ("Mocked GameID", tClientHandlerTesterAlpha.getGameID ());
+			assertEquals ("NOID", tClientHandlerTesterBeta.getGameID ());
+			
+			tClientHandlerTesterBeta.setGameSupport (mGameSupport1);
+			assertEquals ("Mocked GameID", tClientHandlerTesterBeta.getGameID ());
+		}
+		
+		@Test
+		@DisplayName ("Test getting GameIndex via GameActivity")
+		void testGettingGameIndexGameActivity () {
+			ClientHandler tClientHandlerTesterAlpha;
+			String tGameActivityGood = "Game Activity <GA><GameSelection gameID=\"2021-08-17-0936\" gameIndex=\"0\" z_broadcast=\"TesterAlpha has Selected [1830] Are you ready to Play?\"/></GA>";
+			String tGameActivityBad1 = "Game Activity <GA><GameSelection gameID=\"2021-08-17-0936\" z_broadcast=\"TesterAlpha has Selected [1830] Are you ready to Play?\"/></GA>";
+			String tGameActivityBad2 = "Game Activity <GA><PlayerOrder gameID=\"2021-08-17-0936\" gameIndex=\"0\" z_broadcast=\"TesterAlpha has Selected [1830] Are you ready to Play?\"/></GA>";
+
+			tClientHandlerTesterAlpha = buildClientHandler (clients, "TesterAlpha");
+			assertEquals (0, tClientHandlerTesterAlpha.getGameIndex (tGameActivityGood));
+			assertEquals (-1, tClientHandlerTesterAlpha.getGameIndex (tGameActivityBad2));
+			assertEquals (-1, tClientHandlerTesterAlpha.getGameIndex (tGameActivityBad1));
+
+		}
+		
+		@Test
+		@DisplayName ("Test getting GameName via GameActivity")
+		void testGettingGameNameGameActivity () {
+			ClientHandler tClientHandlerTesterAlpha;
+			String tGameActivityGood = "Game Activity <GA><GameSelection gameID=\"2021-08-17-0936\" gameIndex=\"0\" z_broadcast=\"TesterAlpha has Selected [1830] Are you ready to Play?\"/></GA>";
+			String tGameActivityBad1 = "Game Activity <GA><GameSelection gameID=\"2021-08-17-0936\" z_broadcast=\"TesterAlpha has Selected [1830] Are you ready to Play?\"/></GA>";
+			
+			Mockito.doReturn ("Mocked GameID Alpha").when (mGameSupport1).getGameID ();
+			Mockito.doReturn ("Mocked GameName Alpha").when (mServerFrame).getGameName (0);
+			Mockito.doReturn (mGameSupport1).when (mServerFrame).createNewGameSupport (Mockito.any ());
+			tClientHandlerTesterAlpha = buildClientHandler1 (clients, "TesterAlpha");
+			tClientHandlerTesterAlpha.addGameName (tGameActivityGood);
+			assertEquals (1, tClientHandlerTesterAlpha.getGameListCount ());
+			assertEquals ("Mocked GameName Alpha Mocked GameID Alpha", tClientHandlerTesterAlpha.getGameName (0));
+
+			tClientHandlerTesterAlpha.addGameName (tGameActivityGood);
+			assertEquals (1, tClientHandlerTesterAlpha.getGameListCount ());
+
+			tClientHandlerTesterAlpha.addGameName (tGameActivityBad1);
+			assertEquals (1, tClientHandlerTesterAlpha.getGameListCount ());
+
+		}
 	}
 	
 	@Nested
@@ -260,7 +357,6 @@ class ClientHandlerTests {
 			tFoundGameSupport = tClientHandlerTesterLambda.getGameSupport ();
 			assertEquals (clients, tFoundGameSupport.getClientHandlers ());
 		}
-
 	}
 
 	@Nested
@@ -359,14 +455,16 @@ class ClientHandlerTests {
 			clients.add (tClientHandlerTesterAlpha);
 
 			tHandleResult = tClientHandlerTesterAlpha.handleMessage (true, tMessageGood);
-			assertEquals (true, tHandleResult);
+			assertTrue (tHandleResult);
+			assertEquals ("0.7.X", tClientHandlerTesterAlpha.getGEVersion ());
 			
 			tClientHandlerTesterBeta = buildClientHandler (clients, "TesterBeta");
 			tClientHandlerTesterBeta.setOutputWriter (mPrintWriter);
 			clients.add (tClientHandlerTesterBeta);
 
 			tHandleResult = tClientHandlerTesterBeta.handleMessage (true, tMessageBad);
-			assertEquals (false, tHandleResult);
+			assertFalse (tHandleResult);
+			assertEquals ("", tClientHandlerTesterBeta.getGEVersion ());
 		}
 		
 		@Test
