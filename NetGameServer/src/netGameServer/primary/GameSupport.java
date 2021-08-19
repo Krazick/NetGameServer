@@ -110,6 +110,7 @@ public class GameSupport {
 		setLogger (aLogger);
 		setupAllAutoSaveFunctionality (aLogger);
 		setGameStatus (STATUS_PREPARED);
+		clients = new ArrayList <ClientHandler> ();
 	}
 	
 	public void setServerFrame (ServerFrame aServerFrame) {
@@ -369,6 +370,8 @@ public class GameSupport {
 	public String generateGSResponse (String aRequest, ClientHandler aClientHandler) {
 		int tNewActionNumber;
 		String tGSResponse = BAD_REQUEST;
+		String tGameName;
+		ClientHandler tFirstClientHandler;
 		
 		if (isRequestForHeartbeat (aRequest)) {
 			tGSResponse = generateGSResponseHearbeat (aClientHandler);
@@ -388,7 +391,12 @@ public class GameSupport {
 				aClientHandler.handleClientIsStarting ();
 				tGSResponse = aClientHandler.getName () + " Starts the Game";
 			} else if (isRequestForReady (aRequest)) {
+				tFirstClientHandler = clients.get (0);
+				tGameName = tFirstClientHandler.getGameName ();
+				aClientHandler.setGameName (tGameName);
+				aClientHandler.setGameSupport (this);
 				aClientHandler.handleClientIsReady ();
+				addClientHandler (aClientHandler);
 				tGSResponse = aClientHandler.getName () + " is Ready to play the Game";
 			} else if (isRequestForReconnect (aRequest)) {
 				updateClientHandlers (aRequest, aClientHandler);
@@ -918,6 +926,11 @@ public class GameSupport {
 	
 	public ArrayList<ClientHandler> getClientHandlers () {
 		return clients;
+	}
+	
+	public void addClientHandler (ClientHandler aClientHandler) {
+		clients.add (aClientHandler);
+		addClientName (aClientHandler.getName ());
 	}
 	
 	public void setClientHandlers (ArrayList<ClientHandler> aClients) {

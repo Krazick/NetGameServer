@@ -21,6 +21,7 @@ public class ClientHandler implements Runnable {
 	public final static String GAME_SUPPORT_SUFFFIX = "</GS>";
 	public static final String GAME_INDEX = "gameIndex";
 	public static final String GAME_SELECTION = "GameSelection";
+	public static final String PLAYER_ORDER = "PlayerOrder";
 	public static final int NO_GAME_INDEX = -1;
 	public static final String NO_CLIENT_NAME = null;
 	public static final String NO_GAME_NAME = null;
@@ -33,7 +34,7 @@ public class ClientHandler implements Runnable {
 	private Socket socket;
 	private BufferedReader in;
 	private PrintWriter out;
-	private String name;
+	private String name;	// Player Name
 	private String geVersion;
 	private String gameName;
 	private ServerFrame serverFrame;
@@ -221,6 +222,8 @@ public class ClientHandler implements Runnable {
 	}
 
 	public boolean handleMessage (boolean aContinue, String aMessage) {
+		boolean tHandled;
+		
 		if (aMessage == null) {
 			aContinue = false;
 			serverBroadcast (name + " has aborted", SEND_TO.AllButRequestor);
@@ -231,7 +234,13 @@ public class ClientHandler implements Runnable {
 		} else if (aMessage.startsWith ("say")) {
 			aContinue = playerBroadcast (aMessage);
 		} else if (startsAndEndsWith (aMessage, GAME_ACTIVITY_PREFIX, GAME_ACTIVITY_SUFFFIX)) {
-			gameSupport.handleGameActivityRequest (aMessage);
+			tHandled = handleGameSelection (aMessage);
+			if (! tHandled) {
+				tHandled = handlePlayerOrder (aMessage);
+			}
+			if (! tHandled) {
+				gameSupport.handleGameActivityRequest (aMessage);
+			}
 			broadcastGameActivity (aMessage);
 		} else if (startsAndEndsWith (aMessage, GAME_SUPPORT_PREFIX, GAME_SUPPORT_SUFFFIX)) {
 			handleGameSupport (aMessage);
@@ -321,6 +330,7 @@ public class ClientHandler implements Runnable {
 		return tFoundGameSupport;
 	}
 	
+
 	private void syncGameSupport (String aGameSupportText) {
 		String tGameID;
 		
@@ -347,6 +357,7 @@ public class ClientHandler implements Runnable {
 			logger.info ("Did not Find a loaded Game Support");
 		} else {
 			logger.info ("Found Game Support replacing the Place Holder");
+			serverFrame.syncClientHandlersForGame (aGameID);
 			setGameSupport (tFoundGameSupport);
 		}
 	}
@@ -627,6 +638,10 @@ public class ClientHandler implements Runnable {
 		return tGameIndex;
 	}
 	
+	public String getPlayerOrderPrefix () {
+		return GAME_ACTIVITY_PREFIX + "<" + PLAYER_ORDER + " ";
+	}
+	
 	public String getGameSelectPrefix () {
 		return GAME_ACTIVITY_PREFIX + "<" + GAME_SELECTION + " ";
 	}
@@ -649,10 +664,14 @@ public class ClientHandler implements Runnable {
 	}
 	
 	public void addGameNameToList (String aGameName) {
-		gameName = aGameName + " " + gameSupport.getGameID ();
+		setGameName (aGameName + " " + gameSupport.getGameID ());
 		if (! gameListModel.contains (gameName)) {
 			gameListModel.addElement (gameName);
 		}
+	}
+
+	public void setGameName (String aGameName) {
+		gameName = aGameName;
 	}
 	
 	public int getGameListCount () {
@@ -674,13 +693,6 @@ public class ClientHandler implements Runnable {
 	}
 	
 	private void broadcastGameActivity (String aGameActivity) {
-		String tGameSelectPrefix;
-		
-		tGameSelectPrefix = getGameSelectPrefix ();
-		if (aGameActivity.startsWith (tGameSelectPrefix)) {
-			setClientIsReady (true);
-			addGameName (aGameActivity);
-		}
 		for (ClientHandler tClientHandler : clients) {
 			if (name != null) {
 				if (! name.equals (tClientHandler.getName ())) {
@@ -688,6 +700,32 @@ public class ClientHandler implements Runnable {
 				}
 			}
 		}
+	}
+
+	public boolean handlePlayerOrder (String aGameActivity) {
+		String tPlayerOrderPrefix;
+		boolean tHandled = false;
+		
+		tPlayerOrderPrefix = getPlayerOrderPrefix ();
+		if (aGameActivity.startsWith (tPlayerOrderPrefix)) {
+			tHandled = true;
+		}
+		
+		return tHandled;
+	}
+
+	public boolean handleGameSelection (String aGameActivity) {
+		String tGameSelectPrefix;
+		boolean tHandled = false;
+		
+		tGameSelectPrefix = getGameSelectPrefix ();
+		if (aGameActivity.startsWith (tGameSelectPrefix)) {
+			setClientIsReady (true);
+			addGameName (aGameActivity);
+			tHandled = true;
+		}
+		
+		return tHandled;
 	}
 
 	private boolean playerBroadcast (String aMessage) {

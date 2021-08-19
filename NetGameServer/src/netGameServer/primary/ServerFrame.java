@@ -111,11 +111,11 @@ public class ServerFrame extends JFrame {
 		
 		tNewGameID = generateNewGameID ();
 		tNewGameSupport = new GameSupport (this, tNewGameID, logger);
+		tNewGameSupport.addClientHandler (aClientHandler);
 		activeGames.add (tNewGameSupport);
 		tFilePath = tNewGameSupport.constructAutoSaveFileName (getFullASDirectory (), tNewGameID);
 		tPlayerName = aClientHandler.getName ();
 		games.addNewSavedGame (tFilePath, tNewGameID, tPlayerName);
-//		games.addSavedGame (tFilePath);
 		
 		return tNewGameSupport;
 	}
@@ -404,5 +404,40 @@ public class ServerFrame extends JFrame {
 
 	public boolean isRunning () {
 		return true;
+	}
+	
+
+	public void syncClientHandlersForGame (String aGameID) {
+		String tFoundGameName;
+		
+		tFoundGameName = getGameName (aGameID);
+		if (tFoundGameName != ClientHandler.NO_GAME_NAME) {
+			setGameNamesForClientHandlers (aGameID, tFoundGameName);
+		}
+	}
+
+	public void setGameNamesForClientHandlers (String aGameID, String aGameName) {
+		for (ClientHandler tClientHandler : clients) {
+			if (tClientHandler.getGameID ().equals (aGameID)) {
+				tClientHandler.setGameName (aGameName);
+			}
+		}
+	}
+	
+	public String getGameName (String aGameID) {
+		String tGameName;
+		String tFoundGameName = ClientHandler.NO_GAME_NAME;
+		
+		for (ClientHandler tClientHandler : clients) {
+			if (tClientHandler.getGameID ().equals (aGameID)) {
+				
+				tGameName = tClientHandler.getGameName ();
+				if (tGameName != ClientHandler.NO_GAME_NAME) {
+					tFoundGameName = tGameName;
+				}
+			}
+		}
+		
+		return tFoundGameName;
 	}
 }
