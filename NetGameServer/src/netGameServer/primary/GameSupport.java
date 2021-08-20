@@ -50,7 +50,6 @@ public class GameSupport {
 	private final String PLAYER_READY = "<Ready>";
 	private final String GAME_START = "<Start>";
 	private final int NO_ACTION_NUMBER = -1;
-	public final String STATUS_PREPARED = "PREPARED";
 	private final String STATUS_COMPLETE = "Complete";
 	private final String STATUS_PENDING = "Pending";
 	private final String STATUS_RECEIVED = "Received";
@@ -109,7 +108,7 @@ public class GameSupport {
 		setGameID (aNewGameID);
 		setLogger (aLogger);
 		setupAllAutoSaveFunctionality (aLogger);
-		setGameStatus (STATUS_PREPARED);
+		setGameStatus (SavedGame.STATUS_PREPARED);
 		clients = new ArrayList <ClientHandler> ();
 	}
 	
@@ -216,13 +215,10 @@ public class GameSupport {
 	}
 	
 	private void writeClientsInXML () {
-//		String tPlayerName;
 		String tPlayerStatus;
 		
 		fileUtils.outputToFile ("<Players>");
 		for (String tPlayerName : clientNames) {
-//		 for (ClientHandler tClientHandler : clients) {
-//			tPlayerName = tClientHandler.getName ();
 			tPlayerStatus = getPlayerStatus (tPlayerName);
 			if (tPlayerName.length () > 0) {
 				tPlayerName = "<Player name=\"" + tPlayerName + "\" status=\"" + tPlayerStatus + "\"/>";
@@ -340,6 +336,7 @@ public class GameSupport {
 		if (tMatcher.find ()) {
 			tAction = tMatcher.group (1);
 			updateLastAction (tAction);
+			setGameStatus (SavedGame.STATUS_ACTIVE);
 			autoSave ();
 		} else {
 			System.err.println ("Handle Action not matched [" + aRequest+"]");
