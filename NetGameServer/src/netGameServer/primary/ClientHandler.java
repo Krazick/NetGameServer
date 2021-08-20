@@ -210,7 +210,6 @@ public class ClientHandler implements Runnable {
 			}
 		}
 		shutdown ();
-		clients.remove (this);
 	}
 
 	public boolean startsAndEndsWith (String aText, String aStartText, String aEndText) {
@@ -222,8 +221,6 @@ public class ClientHandler implements Runnable {
 	}
 
 	public boolean handleMessage (boolean aContinue, String aMessage) {
-		boolean tHandled;
-		
 		if (aMessage == null) {
 			aContinue = false;
 			serverBroadcast (name + " has aborted", SEND_TO.AllButRequestor);
@@ -234,22 +231,13 @@ public class ClientHandler implements Runnable {
 		} else if (aMessage.startsWith ("say")) {
 			aContinue = playerBroadcast (aMessage);
 		} else if (startsAndEndsWith (aMessage, GAME_ACTIVITY_PREFIX, GAME_ACTIVITY_SUFFFIX)) {
-			tHandled = handleGameSelection (aMessage);
-			if (! tHandled) {
-				tHandled = handlePlayerOrder (aMessage);
-			}
-			if (! tHandled) {
-				gameSupport.handleGameActivityRequest (aMessage);
-			}
-			broadcastGameActivity (aMessage);
+			handleGameActivity (aMessage);
 		} else if (startsAndEndsWith (aMessage, GAME_SUPPORT_PREFIX, GAME_SUPPORT_SUFFFIX)) {
 			handleGameSupport (aMessage);
 		} else if (aMessage.equals ("who")) {
 			reportWho ();
 		} else if (aMessage.equals ("stop")) {
-			aContinue = false;
-			out.println ("stopping");
-			serverBroadcast (name + " has left", SEND_TO.AllButRequestor);
+			aContinue = handlePlayerStop ();
 		} else if (aMessage.equals ("AFK")) {
 			serverBroadcast (name + " is AFK", SEND_TO.AllClients);
 			setClientIsAFK (true);
@@ -268,6 +256,29 @@ public class ClientHandler implements Runnable {
 		}
 		
 		return aContinue;
+	}
+
+	public boolean handlePlayerStop () {
+		boolean tContinue;
+		
+		tContinue = false;
+		out.println ("stopping");
+		serverBroadcast (name + " has left", SEND_TO.AllButRequestor);
+		
+		return tContinue;
+	}
+
+	public void handleGameActivity (String aMessage) {
+		boolean tHandled;
+		
+		tHandled = handleGameSelection (aMessage);
+		if (! tHandled) {
+			tHandled = handlePlayerOrder (aMessage);
+		}
+		if (! tHandled) {
+			gameSupport.handleGameActivityRequest (aMessage);
+		}
+		broadcastGameActivity (aMessage);
 	}
 
 	private void handleUnrecognizedDataReceived (String aMessage) {
@@ -790,6 +801,13 @@ public class ClientHandler implements Runnable {
 			}
 		}
 		serverFrame.removeClient (this);
+		clients.remove (this);
+		if (clients.size () == 0) {
+			if (gameSupport.getGameStatus ().equals (SavedGame.STATUS_ACTIVE)) {
+				gameSupport.setGameStatus (SavedGame.STATUS_INACTIVE);
+			}
+			gameSupport.autoSave ();
+		}
 	}
 
 	public void shutdownAll () {
