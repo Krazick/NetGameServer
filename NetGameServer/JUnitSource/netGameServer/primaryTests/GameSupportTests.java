@@ -277,6 +277,8 @@ class GameSupportTests {
 			String tGameID;
 			
 			Mockito.doReturn ("GSTester").when (mClientHandlerAlpha).getName ();
+			Mockito.doReturn ("GSGame Name").when (mClientHandlerAlpha).getGameName ();
+			gameSupportNoID.addClientHandler (mClientHandlerAlpha);
 			tGSResponse = gameSupportNoID.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("GSTester is Ready to play the Game", tGSResponse);
 			tGameID = gameSupportNoID.getGameID ();
@@ -734,6 +736,8 @@ class GameSupportTests {
 			String tGSResponse;
 			
 			Mockito.doReturn ("GSTester").when (mClientHandlerAlpha).getName ();
+			Mockito.doReturn ("GSGame Name").when (mClientHandlerAlpha).getGameName ();
+			gameSupport.addClientHandler (mClientHandlerAlpha);
 			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("GSTester is Ready to play the Game", tGSResponse);
 			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandlerAlpha);
