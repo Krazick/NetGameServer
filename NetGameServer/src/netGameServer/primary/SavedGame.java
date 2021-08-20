@@ -20,6 +20,10 @@ public class SavedGame {
 	private final static String PLAYER_WITH_NAME = "<Player name=\"(.*)\" status=\"(.*)\"\s*/>";
 	private final static Pattern PLAYER_WITH_NAME_PATTERN = Pattern.compile (PLAYER_WITH_NAME);
 	public final static SavedGame NO_GAME = null;
+	public final static String STATUS_PREPARED = "PREPARED";
+	public final static String STATUS_ACTIVE = "ACTIVE";
+	public final static String STATUS_INACTIVE = "INACTIVE";
+	public final static String STATUS_COMPLETED = "COMPLETED";
 	public final static String NO_GAME_ID = "NOID";
 	public final static String NO_NAME = "NO_NAME";
 	public final static String NO_STATUS = "NO_STATUS";
