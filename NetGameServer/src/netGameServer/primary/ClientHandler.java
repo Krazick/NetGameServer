@@ -801,18 +801,24 @@ public class ClientHandler implements Runnable {
 			}
 		}
 		serverFrame.removeClient (this);
-		clients.remove (this);
-		if (clients.size () == 0) {
-			if (gameSupport.getGameStatus ().equals (SavedGame.STATUS_ACTIVE)) {
-				gameSupport.setGameStatus (SavedGame.STATUS_INACTIVE);
+		if (clients.size () == 1) { // Last Client being Removed, so perform autosave
+			if (gameSupport != GameSupport.NO_GAME_SUPPORT) {
+				if (gameSupport.getGameStatus ().equals (SavedGame.STATUS_ACTIVE)) {
+					gameSupport.setGameStatus (SavedGame.STATUS_INACTIVE);
+				}
+				gameSupport.autoSave ();
 			}
-			gameSupport.autoSave ();
 		}
+		clients.remove (this);
 	}
 
 	public void shutdownAll () {
-		for (ClientHandler tClientHandler : clients) {
-			tClientHandler.shutdown ();
+		if (clients != NO_CLIENT_HANDLERS) {
+			if (clients.size () > 0) {
+				for (ClientHandler tClientHandler : clients) {
+					tClientHandler.shutdown ();
+				}
+			}
 		}
 	}
 
