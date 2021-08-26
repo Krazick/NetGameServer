@@ -20,8 +20,8 @@ public class GameSupport {
 	public static final ElementName EN_PLAYER = new ElementName ("Player");
 	public static final AttributeName AN_NAME = new AttributeName ("name");
 	public final String NOT_CONNECTED = "Not Connected";
-	private final String BAD_REQUEST = "<GSResponse><BadRequest></GSResponse>";
-	private final String BAD_GAME_ID = "<GSResponse><BadGameID></GSResponse>";
+	private final String BAD_REQUEST = "<GSResponse><BadRequest/></GSResponse>";
+	private final String BAD_GAME_ID = "<GSResponse><BadGameID/></GSResponse>";
 	private final static String ACTION_NUMBER = "actionNumber=\"(\\d+)\"";
 	private final static String REQUEST_ACTION = "<RequestAction "+ ACTION_NUMBER + ">";
 	private final static Pattern REQUEST_ACTION_PATTERN = Pattern.compile (REQUEST_ACTION);
@@ -35,6 +35,8 @@ public class GameSupport {
 	private final static Pattern GA_WITH_NO_GAME_ID_PATTERN = Pattern.compile (GA_WITH_ACTION);
 	private final static String REQUEST_HEARTBEAT = "<Heartbeat>";
 	private final static Pattern REQUEST_HEARTBEAT_PATTERN = Pattern.compile (REQUEST_HEARTBEAT);
+//	private final static String REQUEST_LOADAUTOSAVE = "<LoadAutoSave/>";
+//	private final static Pattern REQUEST_LOADAUTOSAVE_PATTERN = Pattern.compile (REQUEST_LOADAUTOSAVE);
 	private final String REQUEST_ACTION_NUMBER = "<ActionNumber requestNew=\"TRUE\">";
 	private final static String REQUEST_SAVED_GAMES_FOR = "<RequestSavedGames player=\"([A-Za-z][A-Za-z0-9]+)\"/?>";
 	private final static Pattern REQUEST_SAVED_GAMES_FOR_PATTERN = Pattern.compile (REQUEST_SAVED_GAMES_FOR);
