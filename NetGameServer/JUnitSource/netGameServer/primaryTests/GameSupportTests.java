@@ -641,7 +641,7 @@ class GameSupportTests {
 			assertEquals ("<GSResponse><ActionNotComplete></GSResponse>", tGSResponse);
 			
 			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest, mClientHandlerAlpha);
-			assertEquals ("<GSResponse><BadRequest></GSResponse>", tGSResponse);
+			assertEquals ("<GSResponse><BadRequest/></GSResponse>", tGSResponse);
 			
 			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse><ActionNotComplete></GSResponse>", tGSResponse);
@@ -741,7 +741,7 @@ class GameSupportTests {
 			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("GSTester is Ready to play the Game", tGSResponse);
 			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandlerAlpha);
-			assertEquals ("<GSResponse><BadRequest></GSResponse>", tGSResponse);
+			assertEquals ("<GSResponse><BadRequest/></GSResponse>", tGSResponse);
 		}
 		
 		@Test
@@ -756,7 +756,7 @@ class GameSupportTests {
 			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("GSTester Starts the Game", tGSResponse);
 			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandlerAlpha);
-			assertEquals ("<GSResponse><BadRequest></GSResponse>", tGSResponse);	
+			assertEquals ("<GSResponse><BadRequest/></GSResponse>", tGSResponse);	
 		}
 		
 		@Test
@@ -770,7 +770,7 @@ class GameSupportTests {
 			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse gameID=\"2020-07-31-2005\">", tGSResponse);
 			tGSResponse = gameSupport.handleGameSupportRequest (tBadRequest1, mClientHandlerAlpha);
-			assertEquals ("<GSResponse><BadGameID></GSResponse>", tGSResponse);
+			assertEquals ("<GSResponse><BadGameID/></GSResponse>", tGSResponse);
 			
 			tGSResponse = gameSupportNoID.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("<GSResponse gameID=\"2021-02-28-1833\">", tGSResponse);
