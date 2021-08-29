@@ -392,8 +392,12 @@ public class ClientHandler implements Runnable {
 		tGSResponse = gameSupport.handleGameSupportRequest (aGameSupportText, this);
 		tSendTo = gameSupport.whoGetsResponse (aGameSupportText);
 		tLastActionNumber = gameSupport.getLastActionNumber ();
-		logger.info ("----- Client " + name + " Last Action Number " + tLastActionNumber);
-		logger.info ("Generated Response is [" + tGSResponse + "]");
+		if (gameSupport.isRequestForHeartbeat (aGameSupportText)) {
+			// Setup Customer Logger for Heartbeat Logging to separate file.
+		} else {
+			logger.info ("----- Client " + name + " Last Action Number " + tLastActionNumber);
+			logger.info ("Generated Response is [" + tGSResponse + "]");
+		}
 		serverBroadcast (tGSResponse, tSendTo);
 		
 		return tHandledGameSupport;
