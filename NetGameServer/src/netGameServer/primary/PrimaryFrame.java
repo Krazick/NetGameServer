@@ -41,13 +41,13 @@ public class PrimaryFrame extends JFrame {
 	}
 	
 	private void setupLogger () {
-		String tXMLConfigFIle;
+		String tXMLConfigFile;
 	    String tJavaVersion = System.getProperty ("java.version");
 	    String tOSName = System.getProperty ("os.name");
 	    String tOSVersion = System.getProperty( "os.version");
 	    
-	    tXMLConfigFIle = "XML Data" + File.separator + "log4j2.xml";
-		System.setProperty ("log4j.configurationFile", tXMLConfigFIle);
+	    tXMLConfigFile = "XML Data" + File.separator + "log4j2.xml";
+		System.setProperty ("log4j.configurationFile", tXMLConfigFile);
 		logger = LogManager.getLogger (ServerFrame.class);
 		logger.info ("Network Game Server, Version " + getNGSVersion ());
 		logger.info ("Java Version " + tJavaVersion + 
