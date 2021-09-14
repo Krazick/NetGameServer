@@ -33,6 +33,8 @@ public class GameSupport {
 	private final static Pattern GS_WITH_NO_GAME_ID_PATTERN = Pattern.compile (GS_WITH_NO_GAME_ID);
 	private final static String GA_WITH_ACTION = "<GA>(<Action.*)</GA>";
 	private final static Pattern GA_WITH_NO_GAME_ID_PATTERN = Pattern.compile (GA_WITH_ACTION);
+	private final static String GA_REMOVE_ACTION = "<GA>(<RemoveAction number=\"(\\d+)\").*></GA>";
+	private final static Pattern GA_REMOVE_NO_GAME_ID_PATTERN = Pattern.compile (GA_REMOVE_ACTION);
 	private final static String REQUEST_HEARTBEAT = "<Heartbeat>";
 	private final static Pattern REQUEST_HEARTBEAT_PATTERN = Pattern.compile (REQUEST_HEARTBEAT);
 	private final String REQUEST_ACTION_NUMBER = "<ActionNumber requestNew=\"TRUE\">";
@@ -97,7 +99,7 @@ public class GameSupport {
 		} else {
 			fileUtils.printInfo ();
 		}
-		networkActions.printInfo ();
+//		networkActions.printInfo ();
 	}
 	
 	public GameSupport (ServerFrame aServerFrame, String aNewGameID, Logger aLogger) {
@@ -331,9 +333,17 @@ public class GameSupport {
 	
 	public void handleGameActivityRequest (String aRequest) {
 		String tAction;
+		String tNumberMatched;
+		int tActionNumber;
 		Matcher tMatcher = GA_WITH_NO_GAME_ID_PATTERN.matcher (aRequest);
+		Matcher tMatcherRemoval = GA_REMOVE_NO_GAME_ID_PATTERN.matcher (aRequest);
 
-		if (tMatcher.find ()) {
+		if (tMatcherRemoval.find ()) {
+			tNumberMatched = tMatcherRemoval.group (2);
+			tActionNumber = Integer.parseInt (tNumberMatched);
+			removeAction (tActionNumber);
+		} else 
+			if (tMatcher.find ()) {
 			tAction = tMatcher.group (1);
 			updateLastAction (tAction);
 			setGameStatus (SavedGame.STATUS_ACTIVE);
@@ -343,6 +353,11 @@ public class GameSupport {
 		}
 	}
 
+	public void removeAction (int aActionNumber) {
+		System.out.println ("Ready to Remove Action " + aActionNumber);
+		networkActions.remove (aActionNumber);
+	}
+	
 	public void updateLastAction (String aAction) {
 		NetworkAction tNetworkAction;
 		
@@ -796,7 +811,7 @@ public class GameSupport {
 		int tActionNumber;
 		Matcher tMatcher = REQUEST_ACTION_PATTERN.matcher (aRequest);
 		
-		printInfo ();
+//		printInfo ();
 		if (tMatcher.find ()) {
 			tNumberMatched = tMatcher.group (1);
 			tActionNumber = Integer.parseInt (tNumberMatched);
