@@ -65,6 +65,22 @@ public class NetworkActions {
 		return getNetworkActionAt (getCount () - 1);
 	}
 	
+	public void remove (int aActionNumber) {
+		int tIndex, tFoundIndex;
+		NetworkAction tNetworkAction;
+		
+		tFoundIndex = 0;
+		for (tIndex = (getCount () - 1); (tIndex > 0) && (tFoundIndex == 0); tIndex--) {
+			tNetworkAction = getNetworkActionAt (tIndex);
+			if (tNetworkAction.getNumber () == aActionNumber) {
+				tFoundIndex = tIndex;
+			}
+		}
+		if (tFoundIndex > 0) {
+			actions.remove (tFoundIndex);
+		}
+	}
+	
 	public String getStatusAt (int aIndex) {
 		NetworkAction tNetworkAction;
 		String tStatus = NetworkAction.NO_STATUS;
