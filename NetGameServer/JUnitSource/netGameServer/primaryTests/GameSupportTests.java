@@ -349,7 +349,6 @@ class GameSupportTests {
 		void isGameActivityRequestTest () {
 			int tCurrentActionNumber;
 			String tGAResponse;
-//			String tLastActionRequest;
 			String tGoodGameActivity = "<Action actor=\"Mark\" chainPrevious=\"false\" class=\"ge18xx.round.action.BuyStockAction\" name=\"Buy Stock Action\" number=\"101\" roundID=\"1\" roundType=\"Stock Round\" totalCash=\"12000\">" +
 					"<Effects><Effect cash=\"40\" class=\"ge18xx.round.action.effects.CashTransferEffect\" fromActor=\"Mark\" isAPrivate=\"false\" name=\"Cash Transfer\" toActor=\"Bank\"/>" +
 					"<Effect class=\"ge18xx.round.action.effects.TransferOwnershipEffect\" companyAbbrev=\"C&amp;SL\" fromActor=\"Start Packet\" isAPrivate=\"false\" name=\"Transfer Ownership\" percentage=\"100\" president=\"true\" toActor=\"Mark\"/>" +
@@ -358,7 +357,6 @@ class GameSupportTests {
 					"<Effect actor=\"Mark\" class=\"ge18xx.round.action.effects.StateChangeEffect\" isAPrivate=\"false\" name=\"State Change\" newState=\"Bought\" previousState=\"No Action\"/>" +
 					"</Effects></Action>";
 			String tGoodGARequest = "<GA>" + tGoodGameActivity + "</GA>";
-//			String tGoodGAResponse = "<GSResponse>" + tGoodGameActivity + "</GSResponse>";
 			NetworkAction tInjectedLastAction;
 			
 			Mockito.doNothing ().when (mGameSupport).autoSave ();
@@ -373,9 +371,6 @@ class GameSupportTests {
 			mGameSupport.setActionNumber (tCurrentActionNumber);
 			tGAResponse = mGameSupport.generateGSReponseRequestLast ();
 			assertEquals ("<GSResponse><LastAction actionNumber=\"101\" status=\"Complete\"></GSResponse>", tGAResponse);
-
-//			tLastActionRequest = mGameSupport.generateGSResponseRequestAction ("<RequestAction actionNumber=\"" + tCurrentActionNumber + "\">");
-//			assertEquals (tGoodGAResponse, tLastActionRequest);
 		}
 		
 		@Test
