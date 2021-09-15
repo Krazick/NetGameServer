@@ -62,17 +62,26 @@ public class NetworkActions {
 	}
 	
 	public NetworkAction getLastNetworkAction () {
-		return getNetworkActionAt (getCount () - 1);
+		NetworkAction tLastNetworkAction = NetworkAction.NO_ACTION;
+		int tLastIndex;
+		
+		if (! actions.isEmpty ()) {
+			tLastIndex = actions.size () - 1;
+			tLastNetworkAction = actions.get (tLastIndex);
+		}
+		
+		return tLastNetworkAction;
 	}
 	
 	public void remove (int aActionNumber) {
-		int tIndex, tFoundIndex;
+		int tIndex, tFoundIndex, tActionNumber;
 		NetworkAction tNetworkAction;
 		
 		tFoundIndex = 0;
 		for (tIndex = (getCount () - 1); (tIndex > 0) && (tFoundIndex == 0); tIndex--) {
 			tNetworkAction = getNetworkActionAt (tIndex);
-			if (tNetworkAction.getNumber () == aActionNumber) {
+			tActionNumber = tNetworkAction.getNumber ();
+			if (tActionNumber == aActionNumber) {
 				tFoundIndex = tIndex;
 			}
 		}
