@@ -354,8 +354,16 @@ public class GameSupport {
 	}
 
 	public void removeAction (int aActionNumber) {
-		System.out.println ("Ready to Remove Action " + aActionNumber);
+		int tLastActionNumber;
+		
+		System.out.println ("Ready to Remove Action " + aActionNumber + 
+				" Count Before " + networkActions.getCount ());
 		networkActions.remove (aActionNumber);
+		tLastActionNumber = networkActions.getLastNetworkActionNumber ();
+		setActionNumber (tLastActionNumber);
+		System.out.println ("Action Removed " + aActionNumber + 
+				" Count After " + networkActions.getCount () +
+				" Reset Action Number to " + tLastActionNumber);
 	}
 	
 	public void updateLastAction (String aAction) {
@@ -920,6 +928,7 @@ public class GameSupport {
 		
 		return tPlayerStatus;
 	}
+	
 	public ClientHandler getClientHandlerFor (String aClientName) {
 		ClientHandler tFoundClientHandler = ClientHandler.NO_CLIENT_HANDLER;
 		String tClientName;
