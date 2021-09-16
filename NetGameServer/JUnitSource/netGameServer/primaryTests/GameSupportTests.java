@@ -804,4 +804,89 @@ class GameSupportTests {
                 assertEquals (tExpectedResponse3, gameSupport.handleGameSupportRequest (tGoodRequest3, mClientHandlerAlpha));
         }		
 	}
+
+	@Nested
+	@DisplayName ("Integration Test with NetworkActions")
+	class integrationNetworkActionsTests {
+		@Test
+		@DisplayName ("Game Activity add Action")
+		void isGameActivityRequestTest () {
+//			int tCurrentActionNumber;
+//			String tGAResponse;
+			String tGoodGameActivity1 = "<Action actor=\"Mark\" chainPrevious=\"false\" class=\"ge18xx.round.action.BuyStockAction\" name=\"Buy Stock Action\" number=\"101\" roundID=\"1\" roundType=\"Stock Round\" totalCash=\"12000\">" +
+					"<Effects><Effect cash=\"40\" class=\"ge18xx.round.action.effects.CashTransferEffect\" fromActor=\"Mark\" isAPrivate=\"false\" name=\"Cash Transfer\" toActor=\"Bank\"/>" +
+					"</Action>";
+			String tGoodGameActivity2 = "<Action actor=\"Mark\" chainPrevious=\"false\" class=\"ge18xx.round.action.BidStockAction\" name=\"Bid Stock Action\" number=\"102\" roundID=\"1\" roundType=\"Stock Round\" totalCash=\"12000\">" +
+					"<Effects><Effect cash=\"40\" class=\"ge18xx.round.action.effects.CashTransferEffect\" fromActor=\"Mark\" isAPrivate=\"false\" name=\"Cash Transfer\" toActor=\"Bank\"/>" +
+					"</Action>";
+			String tGoodGameActivity3 = "<Action actor=\"Mark\" chainPrevious=\"false\" class=\"ge18xx.round.action.SellStockAction\" name=\"Sell Stock Action\" number=\"103\" roundID=\"1\" roundType=\"Stock Round\" totalCash=\"12000\">" +
+					"<Effects><Effect cash=\"40\" class=\"ge18xx.round.action.effects.CashTransferEffect\" fromActor=\"Mark\" isAPrivate=\"false\" name=\"Cash Transfer\" toActor=\"Bank\"/>" +
+					"</Action>";
+//			String tRemoveLastAction = "<RemoveAction number=\"103\">";
+//			String tGoodGARequest = "<GA>" + tGoodGameActivity1 + "</GA>";
+			NetworkAction tInjectedLastAction;
+			
+			gameSupport.setDoAutoSave (false);
+			
+			tInjectedLastAction = new NetworkAction (101, "Complete");
+			tInjectedLastAction.setActionXML (tGoodGameActivity1);
+			gameSupport.addNewNetworkAction (tInjectedLastAction);
+			assertEquals (101, gameSupport.getLastActionNumber ());
+
+			tInjectedLastAction = new NetworkAction (102, "Complete");
+			tInjectedLastAction.setActionXML (tGoodGameActivity2);
+			gameSupport.addNewNetworkAction (tInjectedLastAction);
+			assertEquals (102, gameSupport.getLastActionNumber ());
+			
+			tInjectedLastAction = new NetworkAction (103, "Complete");
+			tInjectedLastAction.setActionXML (tGoodGameActivity3);
+			gameSupport.addNewNetworkAction (tInjectedLastAction);
+			assertEquals (103, gameSupport.getLastActionNumber ());
+		}
+		
+		@Test
+		@DisplayName ("Game Activity add Action via GA Request")
+		void isGameActivityRequest2Test () {
+			int tCurrentActionNumber;
+			String tGoodGameActivity1 = "<Action actor=\"Mark\" chainPrevious=\"false\" class=\"ge18xx.round.action.BuyStockAction\" name=\"Buy Stock Action\" number=\"101\" roundID=\"1\" roundType=\"Stock Round\" totalCash=\"12000\">" +
+					"<Effects><Effect cash=\"40\" class=\"ge18xx.round.action.effects.CashTransferEffect\" fromActor=\"Mark\" isAPrivate=\"false\" name=\"Cash Transfer\" toActor=\"Bank\"/>" +
+					"</Action>";
+			String tGoodGameActivity2 = "<Action actor=\"Mark\" chainPrevious=\"false\" class=\"ge18xx.round.action.BidStockAction\" name=\"Bid Stock Action\" number=\"102\" roundID=\"1\" roundType=\"Stock Round\" totalCash=\"12000\">" +
+					"<Effects><Effect cash=\"40\" class=\"ge18xx.round.action.effects.CashTransferEffect\" fromActor=\"Mark\" isAPrivate=\"false\" name=\"Cash Transfer\" toActor=\"Bank\"/>" +
+					"</Action>";
+			String tGoodGameActivity3 = "<Action actor=\"Mark\" chainPrevious=\"false\" class=\"ge18xx.round.action.SellStockAction\" name=\"Sell Stock Action\" number=\"103\" roundID=\"1\" roundType=\"Stock Round\" totalCash=\"12000\">" +
+					"<Effects><Effect cash=\"40\" class=\"ge18xx.round.action.effects.CashTransferEffect\" fromActor=\"Mark\" isAPrivate=\"false\" name=\"Cash Transfer\" toActor=\"Bank\"/>" +
+					"</Action>";
+//			String tRemoveLastAction1 = "<RemoveAction number=\"103\">";
+			String tRemoveLastAction2 = "<RemoveAction number=\"102\">";
+			String tGoodGARequest;
+			
+			gameSupport.setDoAutoSave (false);
+			
+			//handleGameActivityRequest
+			tGoodGARequest = "<GA>" + tGoodGameActivity1 + "</GA>";
+			tCurrentActionNumber = gameSupport.generateNewActionNumber ();
+			gameSupport.handleGameActivityRequest (tGoodGARequest);
+			assertEquals (101, gameSupport.getLastActionNumber ());
+
+			tGoodGARequest = "<GA>" + tGoodGameActivity2 + "</GA>";
+			tCurrentActionNumber = gameSupport.generateNewActionNumber ();
+			gameSupport.handleGameActivityRequest (tGoodGARequest);
+			assertEquals (102, gameSupport.getLastActionNumber ());
+			
+			tGoodGARequest = "<GA>" + tGoodGameActivity3 + "</GA>";
+			tCurrentActionNumber = gameSupport.generateNewActionNumber ();
+			gameSupport.handleGameActivityRequest (tGoodGARequest);
+			assertEquals (103, gameSupport.getLastActionNumber ());
+			
+			gameSupport.removeAction (tCurrentActionNumber);
+			assertEquals (102, gameSupport.getLastActionNumber ());
+			
+			tGoodGARequest = "<GA>" + tRemoveLastAction2 + "</GA>";
+			gameSupport.handleGameActivityRequest (tGoodGARequest);
+			assertEquals (101, gameSupport.getLastActionNumber ());
+			
+		}
+
+	}
 }

@@ -72,6 +72,11 @@ public class GameSupport {
 	File autoSaveFile = FileUtils.NO_FILE;
 	FileUtils fileUtils = FileUtils.NO_FILE_UTILS;
 	boolean goodFileWriter = false;
+	boolean doAutoSave = true;
+	
+	public void setDoAutoSave (boolean aDoAutoSave) {
+		doAutoSave = aDoAutoSave;
+	}
 	
 	public void printInfo () {
 		System.out.println ("Game Support Info");
@@ -199,20 +204,22 @@ public class GameSupport {
 	public void autoSave () {
 		SavedGame tSavedGame;
 		
-		if (! fileUtils.fileWriterIsSetup () || ! fileUtils.fileIsSetup ()) {
-			setupAutoSaveFile (gameID);
-			goodFileWriter = fileUtils.setupFileWriter ();
-		}
-		if (goodFileWriter) {
-			fileUtils.startXMLFileOutput ();
-			fileUtils.outputToFile ("<NetworkSaveGame gameID=\"" + getGameID () + "\" status=\"" + 
-					getGameStatus () + "\" lastActionNumber=\"" + getLastActionNumber () +"\">");
-			writeClientsInXML ();
-			networkActions.writeAllActions (fileUtils);
-			fileUtils.outputToFile ("</NetworkSaveGame>");
-			fileUtils.closeFile ();
-			tSavedGame = serverFrame.getSavedGameFor (gameID);
-			tSavedGame.setLastActionNumber (actionNumber);
+		if (doAutoSave) {
+			if (! fileUtils.fileWriterIsSetup () || ! fileUtils.fileIsSetup ()) {
+				setupAutoSaveFile (gameID);
+				goodFileWriter = fileUtils.setupFileWriter ();
+			}
+			if (goodFileWriter) {
+				fileUtils.startXMLFileOutput ();
+				fileUtils.outputToFile ("<NetworkSaveGame gameID=\"" + getGameID () + "\" status=\"" + 
+						getGameStatus () + "\" lastActionNumber=\"" + getLastActionNumber () +"\">");
+				writeClientsInXML ();
+				networkActions.writeAllActions (fileUtils);
+				fileUtils.outputToFile ("</NetworkSaveGame>");
+				fileUtils.closeFile ();
+				tSavedGame = serverFrame.getSavedGameFor (gameID);
+				tSavedGame.setLastActionNumber (actionNumber);
+			}
 		}
 	}
 	
