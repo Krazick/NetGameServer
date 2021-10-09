@@ -1,6 +1,5 @@
 package netGameServer.primaryTests;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.InputStream;
@@ -25,6 +24,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import netGameServer.primary.ClientHandler;
 import netGameServer.primary.GameSupport;
 import netGameServer.primary.ServerFrame;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName ("Client Handler Tests")
 @ExtendWith (MockitoExtension.class)
@@ -140,7 +144,6 @@ class ClientHandlerTests {
 			
 			tClientHandlerTesterAlpha = buildClientHandler (clients, "TesterAlpha");
 			assertEquals ("Game Activity <GA><GameSelection ", tClientHandlerTesterAlpha.getGameSelectPrefix ());
-			
 		}
 		
 		@Test

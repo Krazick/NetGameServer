@@ -1,6 +1,5 @@
 package netGameServer.primaryTests;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,7 +7,6 @@ import java.util.ArrayList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,6 +21,12 @@ import netGameServer.primary.ClientHandler;
 import netGameServer.primary.GameSupport;
 import netGameServer.primary.NetworkAction;
 import netGameServer.primary.ServerFrame;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName ("Game Support Tests")
 @ExtendWith (MockitoExtension.class)
