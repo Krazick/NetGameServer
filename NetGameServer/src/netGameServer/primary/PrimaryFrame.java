@@ -112,6 +112,7 @@ public class PrimaryFrame extends JFrame {
 			tGameNames.add ("1853");
 			tGameNames.add ("1856");
 			tGameNames.add ("1870");
+			tGameNames.add ("1830+");
 		} else if (aType.equals (NAME_CARDS)) {
 			tGameNames.add ("Hearts");
 			tGameNames.add ("Spades");
