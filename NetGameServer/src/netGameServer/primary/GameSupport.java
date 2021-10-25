@@ -45,7 +45,7 @@ public class GameSupport {
 	private final String REQUEST_LAST_ACTION_PENDING = "<ActionNumber requestPending=\"TRUE\">";
 	private final String REQUEST_GAME_ID = "<GameIDRequest>";
 	private final static String REQUEST_GAME_LOAD_SETUP = 
-				"<LoadGameSetup gameID=\"" + GAME_ID + "\" " + ACTION_NUMBER + " gameName=\"([A-Z0-9]+)\">";
+				"<LoadGameSetup gameID=\"" + GAME_ID + "\" " + ACTION_NUMBER + " gameName=\"([A-Z0-9\\+]+)\">";
 	private final static Pattern REQUEST_WITH_GAME_LOAD_SETUP_PATTERN = Pattern.compile (REQUEST_GAME_LOAD_SETUP);
 	private final static String PLAYER_RECONNECT = "<Reconnect name=\"(.*)\">";
 	private final static Pattern REQUEST_RECONNECT_WITH_NAME_PATTERN = Pattern.compile (PLAYER_RECONNECT);
