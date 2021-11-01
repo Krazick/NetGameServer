@@ -123,6 +123,7 @@ public class PrimaryFrame extends JFrame {
 
 	private void setupActions () {
 		btnQuit.addActionListener (new ActionListener () {
+			@Override
 			public void actionPerformed (ActionEvent e) {
 				if (serverThread18XX != null) {
 					serverThread18XX.quitThread ();
@@ -134,12 +135,14 @@ public class PrimaryFrame extends JFrame {
 			}
 		});
 		btnManage18XX.addActionListener (new ActionListener () {
+			@Override
 			public void actionPerformed (ActionEvent e) {
 				serverThread18XX = manageAction (btnManage18XX, serverThread18XX, PORT_18XX, NAME_18XX);
 			}
 		});
 
 		btnManageCards.addActionListener (new ActionListener () {
+			@Override
 			public void actionPerformed (ActionEvent e) {
 				serverThreadCards = manageAction (btnManageCards, serverThreadCards, PORT_CARDS, NAME_CARDS);
 			}

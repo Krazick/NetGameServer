@@ -28,7 +28,8 @@ public class GameServer {
         //creating and showing this application's GUI.
 		
         SwingUtilities.invokeLater (new Runnable () {
-        	public void run () {
+        	@Override
+			public void run () {
         		//Turn off metal's use of bold fonts
         		UIManager.put ("swing.boldMetal", Boolean.FALSE);
                  

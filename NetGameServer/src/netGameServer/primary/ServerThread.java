@@ -32,6 +32,7 @@ public class ServerThread extends Thread {
 		return logger;
 	}
 	
+	@Override
 	public void run () {
 		if (serverFrame == null) {
 			try {

@@ -167,6 +167,7 @@ public class XMLNode {
 		}
 	}
 	
+	@Override
 	public String toString () {
 		return convertNodeToString (node);
 	}

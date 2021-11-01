@@ -245,10 +245,12 @@ public class ServerFrame extends JFrame {
 		return serverPort;
 	}
 	
+	@Override
 	public void setName (String aName) {
 		name = aName;
 	}
 	
+	@Override
 	public String getName () {
 		return name;
 	}
@@ -272,6 +274,7 @@ public class ServerFrame extends JFrame {
 	
 	private void setupActions () {
 		btnQuit.addActionListener (new ActionListener () {
+			@Override
 			public void actionPerformed (ActionEvent e) {
 				quitFrame ();
 			}
