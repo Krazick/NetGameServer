@@ -187,7 +187,7 @@ public class ClientHandler implements Runnable {
 						tNullReadCount++;
 						Thread.sleep (3000);
 					} else {
-						tMessageClean = tMessage.replaceAll (">\s+<","><");
+						tMessageClean = tMessage.replaceAll (">[ \t\n\f\r]+<","><");
 						tContinue = handleMessage (tContinue, tMessageClean);
 					}
 				} catch (SocketException tException) {

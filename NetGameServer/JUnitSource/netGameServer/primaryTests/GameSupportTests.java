@@ -1,6 +1,5 @@
 package netGameServer.primaryTests;
 
-
 import java.io.File;
 import java.util.ArrayList;
 
@@ -118,8 +117,8 @@ class GameSupportTests {
         String tAllGames_with_Jeff = "";
         String tAllGames_with_Player2 = tGame_12 + tGame_421 + tGame_42 + tGame_251;
         String tExpectedResponse1 = "<GSResponse><SavedGames name=\"" + tPlayer1 + "\">" + tAllGames_with_Player1 + "</SavedGames></GSResponse>";
-        String tExpectedResponse3 = "<GSResponse><SavedGames name=\""+ tPlayer3 + "\"></SavedGames></GSResponse>";
         String tExpectedResponse2 = "<GSResponse><SavedGames name=\"" + tPlayer2 + "\">" + tAllGames_with_Player2 + "</SavedGames></GSResponse>";
+        String tExpectedResponse3 = "<GSResponse><SavedGames name=\"" + tPlayer3 + "\"></SavedGames></GSResponse>";
         String tExpectedResponse = "";
 
         if (tPlayer1.equals (aPlayerName)) {

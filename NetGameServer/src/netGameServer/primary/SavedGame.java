@@ -17,7 +17,7 @@ public class SavedGame {
 	private final static String GAME_ID = "(\\d\\d\\d\\d-\\d\\d-\\d\\d-\\d\\d\\d\\d)";
 	private final static String NSG_WITH_GAME_ID = "<NetworkSaveGame gameID=\"" + GAME_ID + "\" status=\"(.*)\" lastActionNumber=\"(\\d+)\">";
 	private final static Pattern NSG_WITH_GAME_ID_PATTERN = Pattern.compile (NSG_WITH_GAME_ID);
-	private final static String PLAYER_WITH_NAME = "<Player name=\"(.*)\" status=\"(.*)\"\s*/>";
+	private final static String PLAYER_WITH_NAME = "<Player name=\"(.*)\" status=\"(.*)\"[ \t\n\f\r]*/>"; 
 	private final static Pattern PLAYER_WITH_NAME_PATTERN = Pattern.compile (PLAYER_WITH_NAME);
 	public final static SavedGame NO_GAME = null;
 	public final static String STATUS_PREPARED = "PREPARED";
