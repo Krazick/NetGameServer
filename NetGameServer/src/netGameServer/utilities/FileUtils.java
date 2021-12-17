@@ -58,11 +58,13 @@ public class FileUtils {
 		
 		fileWriter = NO_FILE_WRITER;
 		
-		try {
-			fileWriter = new FileWriter (file, false); // Overwrite the file if it exists
-			tGoodFileWriter = true;
-		} catch (IOException tException) {
-			logger.error ("FileUtils problem creating FileWriter", tException);
+		if (file != null) {
+			try {
+				fileWriter = new FileWriter (file, false); // Overwrite the file if it exists
+				tGoodFileWriter = true;
+			} catch (IOException tException) {
+				logger.error ("FileUtils problem creating FileWriter", tException);
+			}
 		}
 		
 		return tGoodFileWriter;
