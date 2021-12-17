@@ -341,11 +341,10 @@ public class ClientHandler implements Runnable {
 		return tFoundGameSupport;
 	}
 	
-
 	private void syncGameSupport (String aGameSupportText) {
 		String tGameID;
 		
-		if (gameSupport == null) {
+		if (gameSupport == GameSupport.NO_GAME_SUPPORT) {
 			setNewGameSupport (logger);
 			tGameID = gameSupport.getGameIdFromRequest (aGameSupportText);
 			logger.info ("Game ID Found " + tGameID);
@@ -360,17 +359,21 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
-	public void updateGameSupport (String aGameID) {
+	public boolean updateGameSupport (String aGameID) {
 		GameSupport tFoundGameSupport;
+		boolean tUpdated = false;
 		
 		tFoundGameSupport = getMatchingGameSupport (aGameID);
 		if (tFoundGameSupport == GameSupport.NO_GAME_SUPPORT) {
-			logger.info ("Did not Find a loaded Game Support");
+			logger.info ("Did not Find a loaded Game Support with id " + aGameID);
 		} else {
-			logger.info ("Found Game Support replacing the Place Holder");
+			logger.info ("Found Game Support with ID " + aGameID + " replacing the Place Holder");
 			serverFrame.syncClientHandlersForGame (aGameID);
 			setGameSupport (tFoundGameSupport);
+			tUpdated = true;
 		}
+		
+		return tUpdated;
 	}
 	
 	public boolean handleGameSupport (String aGameSupportText) {
@@ -380,11 +383,15 @@ public class ClientHandler implements Runnable {
 		String tGameID;
 		int tLastActionNumber;
 		
-		if (gameSupport == null) {
+		if (gameSupport == GameSupport.NO_GAME_SUPPORT) {
 			setNewGameSupport (logger);
 			tGameID = gameSupport.getGameIdFromRequest (aGameSupportText);
-			logger.info ("Game ID Found " + tGameID);
-			updateGameSupport (tGameID);
+			if (tGameID.equals (GameSupport.NO_GAME_ID)) {
+				logger.info ("No Game ID Found in Request");
+			} else {
+				logger.info ("Game ID Found " + tGameID);
+				updateGameSupport (tGameID);
+			}
 		} else {
 			syncGameSupport (aGameSupportText);
 		}

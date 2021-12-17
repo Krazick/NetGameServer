@@ -309,15 +309,15 @@ public class GameSupport {
 		if (isRequestWithGameID (aRequest)) {
 			tBaseRequest = getBaseRequest (aRequest);
 			if (isRequestForReady (tBaseRequest)) {
-				tGameID = this.getGameID (aRequest);
+				tGameID = getGameID (aRequest);
 			} else if (isRequestForReconnect (tBaseRequest)) {
-				tGameID = this.getGameID (aRequest);
+				tGameID = getGameID (aRequest);
 			}
 		}
 		if (isRequestForAnyGame (aRequest)) {
 			tBaseRequest = getBaseRequestNoGameID (aRequest);
-			if (this.isRequestForGameLoadSetup (tBaseRequest)) {
-				tGameID = this.getGameIDFromLoadRequest (tBaseRequest);
+			if (isRequestForGameLoadSetup (tBaseRequest)) {
+				tGameID = getGameIDFromLoadRequest (tBaseRequest);
 			}
 		}
 		
@@ -379,8 +379,8 @@ public class GameSupport {
 		tNetworkAction = getLastNetworkAction ();
 		if (tNetworkAction != NetworkAction.NO_ACTION) {
 			tNetworkAction.setActionXML (aAction);
-			printInfo ();
 			tNetworkAction.setStatus (STATUS_COMPLETE);
+			setActionNumber (tNetworkAction.getNumber ());
 		} else {
 			System.err.println("Found No Last Action");
 		}
@@ -830,6 +830,7 @@ public class GameSupport {
 		if (tMatcher.find ()) {
 			tNumberMatched = tMatcher.group (1);
 			tActionNumber = Integer.parseInt (tNumberMatched);
+			System.out.println ("Handling Request Action Number " + tActionNumber + " current Last Action Number " + actionNumber);
 			if ((tActionNumber > MIN_ACTION_NUMBER) && (tActionNumber <= actionNumber)) {
 				tActionFound = getThisAction (tActionNumber);
 				tGSResponse = wrapWithGSResponse (tActionFound);
@@ -878,20 +879,28 @@ public class GameSupport {
 		
 		if (tMatcher.find ()) {
 			tGameID = tMatcher.group (1);
-			tActionNumberText = tMatcher.group (2);
-			tGameName = tMatcher.group (3);
-			setGameID (tGameID);
-			tActionNumber = Integer.parseInt (tActionNumberText);
-			setActionNumber (tActionNumber);
-			setupAutoSaveFile (tGameID);
-			loadAutoSave ();
-			aClientHandler.addGameNameToList (tGameName);
+			// If the GameID found in the request does not match the Game ID in the Client Handler
+			if (! tGameID.equals (aClientHandler.getGameID ())) {
+				// Then update the Game Support for this GameID - Expected for first person to join a saved Game
+				if (! aClientHandler.updateGameSupport (tGameID)) {
+					logger.info ("The Client Handler updated to Game ID " + tGameID);
+					tActionNumberText = tMatcher.group (2);
+					tGameName = tMatcher.group (3);
+					setGameID (tGameID);
+					tActionNumber = Integer.parseInt (tActionNumberText);
+					setActionNumber (tActionNumber);
+					setupAutoSaveFile (tGameID);
+					loadAutoSave ();
+					aClientHandler.addGameNameToList (tGameName);
+				}
+			}
 			tGSResponse = wrapWithGSResponse ("<GOOD>");
 		}
 		
 		return tGSResponse;
 	}
 
+	
 	public String handleGSResponseRequestSavedGamesFor (String aRequest) {
 		String tGSResponse = BAD_REQUEST;
 		Matcher tMatcher = REQUEST_SAVED_GAMES_FOR_PATTERN.matcher (aRequest);
