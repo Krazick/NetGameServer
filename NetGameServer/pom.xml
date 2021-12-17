@@ -3,7 +3,11 @@
   <groupId>NetGameServer</groupId>
   <artifactId>NetGameServer</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <build>
+  <name>NetGameServer</name>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+ <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
       <plugin>
@@ -32,12 +36,12 @@
 	<dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-api</artifactId>
-        <version>2.14.1</version>
+        <version>2.15.0</version>
     </dependency>
     <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-core</artifactId>
-        <version>2.14.1</version>
+        <version>2.15.0</version>
     </dependency>
     <dependency>
         <groupId>org.apache.commons</groupId>
