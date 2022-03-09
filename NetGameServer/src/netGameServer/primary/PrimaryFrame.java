@@ -45,13 +45,16 @@ public class PrimaryFrame extends JFrame {
 	    String tJavaVersion = System.getProperty ("java.version");
 	    String tOSName = System.getProperty ("os.name");
 	    String tOSVersion = System.getProperty( "os.version");
-	    
+	    String tLog4JVersion;
+
 	    tXMLConfigFile = "XML Data" + File.separator + "log4j2.xml";
 		System.setProperty ("log4j.configurationFile", tXMLConfigFile);
 		logger = LogManager.getLogger (ServerFrame.class);
 		logger.info ("Network Game Server, Version " + getNGSVersion ());
 		logger.info ("Java Version " + tJavaVersion + 
 					" OS Name " + tOSName + " OS Version " + tOSVersion);
+		tLog4JVersion = org.apache.logging.log4j.LogManager.class.getPackage ().getImplementationVersion ();
+		logger.info ("Log4J2 LogManager Version " + tLog4JVersion);
 	}
 
 	private String getNGSVersion () {
