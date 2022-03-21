@@ -30,7 +30,7 @@ public class NoSpaceString {
 		boolean tEquals;
 		
 		if (hasValue ()) {
-			if (aString == null) {
+			if (aString == NO_STRING) {
 				tEquals = false;
 			} else {
 				tEquals = string.equals (aString);
