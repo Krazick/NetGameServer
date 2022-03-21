@@ -9,6 +9,7 @@
 	<Properties>
         <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %p %m%n</Property>
         <Property name="LOG_DIRECTORY">logs${sys:file.separator}</Property>
+        <Property name="APP_NAME">$${userlookup:appName}</Property>
         <Property name="USER_NAME">$${userlookup:userName}</Property>
 	</Properties>
 	
@@ -28,7 +29,7 @@
             <DefaultRolloverStrategy max="180"/>
         </RollingFile>
         
-        <RollingFile name="HearbeatLogFile" fileName="${LOG_DIRECTORY}heartbeat.log" 
+        <RollingFile name="HeartbeatLogFile" fileName="${LOG_DIRECTORY}heartbeat.log" 
 					filePattern="${LOG_DIRECTORY}heartbeat-%d{yyyy-MM-dd}-%i.log">
 	  		<LevelRangeFilter minLevel="HEARTBEAT" maxLevel="HEARTBEAT" onMatch="ACCEPT" onMismatch="DENY"/>
 			<PatternLayout pattern="${LOG_PATTERN}"/>
@@ -42,7 +43,7 @@
     <Loggers>
     
 		<Logger name="com.ge18xx.heartbeat" additivity="false" level="HEARTBEAT">
-            <AppenderRef ref="HearbeatLogFile" level="HEARTBEAT"/>
+            <AppenderRef ref="HeartbeatLogFile" level="HEARTBEAT"/>
         </Logger>
     
         <Root level="all">
