@@ -347,7 +347,7 @@ public class ServerFrame extends JFrame {
 							.addPreferredGap(ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
 							.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
 								.addGroup(groupLayout.createSequentialGroup()
-									.addComponent(gamesList, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE)
+									.addComponent(gamesList, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
 									.addGap(33))
 								.addGroup(groupLayout.createSequentialGroup()
 									.addComponent(lblGames, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
@@ -397,7 +397,7 @@ public class ServerFrame extends JFrame {
 		);
 		getContentPane ().setLayout (groupLayout);
 
-		setSize (600, 300);
+		setSize (800, 300);
 		setVisible (true);
 	}
 	

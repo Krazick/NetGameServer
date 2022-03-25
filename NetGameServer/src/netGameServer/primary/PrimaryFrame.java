@@ -178,7 +178,7 @@ public class PrimaryFrame extends JFrame {
 			setStartText (btnManage18XX, NAME_18XX);
 		} else if (serverPort == PORT_CARDS) {
 			serverThreadCards = null;
-			setStartText (btnManageCards, NAME_18XX);
+			setStartText (btnManageCards, NAME_CARDS);
 		}
 	}
 	
