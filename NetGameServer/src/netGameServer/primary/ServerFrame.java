@@ -351,7 +351,7 @@ public class ServerFrame extends JFrame {
 									.addGap(33))
 								.addGroup(groupLayout.createSequentialGroup()
 									.addComponent(lblGames, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
-									.addGap(62)))
+									.addGap(250)))
 							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 								.addGroup(groupLayout.createSequentialGroup()
 									.addComponent(lblConnections)
@@ -391,9 +391,9 @@ public class ServerFrame extends JFrame {
 							.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
 								.addComponent(lblConnections)
 								.addComponent(connectionCount, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-							.addGap(104)
+							.addGap(70)
 							.addComponent(btnQuit)
-							.addGap(27))))
+							.addGap(40))))
 		);
 		getContentPane ().setLayout (groupLayout);
 
