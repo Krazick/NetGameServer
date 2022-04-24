@@ -249,8 +249,6 @@ public class ClientHandler implements Runnable {
 		} else if (aMessage.equals ("Not Ready")) {
 			setClientIsReady (false);
 			serverBroadcast (name + " is Not Ready to play the Game", SEND_TO.AllButRequestor);
-		} else if (aMessage.equals ("Start")) {
-//			handleClientIsStarting ();
 		} else {
 			handleUnrecognizedDataReceived (aMessage);
 		}

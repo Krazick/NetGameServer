@@ -397,8 +397,6 @@ public class GameSupport {
 	public String generateGSResponse (String aRequest, ClientHandler aClientHandler) {
 		int tNewActionNumber;
 		String tGSResponse = BAD_REQUEST;
-		String tGameName;
-		ClientHandler tFirstClientHandler;
 		
 		if (isRequestForHeartbeat (aRequest)) {
 			tGSResponse = generateGSResponseHearbeat (aClientHandler);
@@ -418,13 +416,7 @@ public class GameSupport {
 				aClientHandler.handleClientIsStarting ();
 				tGSResponse = aClientHandler.getName () + " Starts the Game";
 			} else if (isRequestForReady (aRequest)) {
-				tFirstClientHandler = clients.get (0);
-				tGameName = tFirstClientHandler.getGameName ();
-				aClientHandler.setGameName (tGameName);
-				aClientHandler.setGameSupport (this);
-				aClientHandler.handleClientIsReady ();
-				addClientHandler (aClientHandler);
-				tGSResponse = aClientHandler.getName () + " is Ready to play the Game";
+				tGSResponse = handleClientIsReady(aClientHandler);
 			} else if (isRequestForReconnect (aRequest)) {
 				updateClientHandlers (aRequest, aClientHandler);
 				tGSResponse = generateGSResponseReconnect (aClientHandler);
@@ -434,6 +426,25 @@ public class GameSupport {
 				tGSResponse = handleGSResponseRequestSavedGamesFor (aRequest);
 			}
 		}
+		
+		return tGSResponse;
+	}
+
+	private String handleClientIsReady (ClientHandler aClientHandler) {
+		String tGameName;
+		String tGSResponse;
+		ClientHandler tFirstClientHandler;
+		String tPlayerName;
+		
+		tFirstClientHandler = clients.get (0);
+		tGameName = tFirstClientHandler.getGameName ();
+		aClientHandler.setGameName (tGameName);
+		aClientHandler.setGameSupport (this);
+		aClientHandler.handleClientIsReady ();
+		addClientHandler (aClientHandler);
+		tPlayerName = aClientHandler.getName ();
+		serverFrame.addPlayerToSavedGame (gameID, tPlayerName);
+		tGSResponse = aClientHandler.getName () + " is Ready to play the Game";
 		
 		return tGSResponse;
 	}

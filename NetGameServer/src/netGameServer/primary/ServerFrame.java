@@ -51,7 +51,7 @@ public class ServerFrame extends JFrame {
 	private ServerThread serverThread;
 	private ServerSocket serverSocket;
 	private Logger logger;
-	private SavedGames games;
+	private SavedGames savedGames;
 
 	public ServerFrame (String aName, int aServerPort, ArrayList<String> aGameNames, ServerThread aServerThread) 
 			throws HeadlessException, IOException {
@@ -69,14 +69,14 @@ public class ServerFrame extends JFrame {
 		activeGames = new LinkedList<GameSupport> ();
 		setupAutoSaveDirectory ();
 		tAutoSavesDirectory = getFullASDirectory ();
-		games = new SavedGames (tAutoSavesDirectory);
+		savedGames = new SavedGames (tAutoSavesDirectory);
 
 		serverSocket = null;
 		serverThread.setIsRunning (false);
 	}
 	
 	public SavedGames getSavedGames () {
-		return games;
+		return savedGames;
 	}
 
 	public Logger getLogger () {
@@ -90,7 +90,7 @@ public class ServerFrame extends JFrame {
 	public SavedGame getSavedGameFor (String aGameID) {
 		SavedGame tSavedGame;
 		
-		tSavedGame = games.getSavedGameFor (aGameID);
+		tSavedGame = savedGames.getSavedGameFor (aGameID);
 		
 		return tSavedGame;
 	}
@@ -98,7 +98,7 @@ public class ServerFrame extends JFrame {
 	public String getSavedGamesFor (String aPlayerName) {
 		String tSavedGamesFor;
 		
-		tSavedGamesFor = games.getSavedGamesFor (aPlayerName);
+		tSavedGamesFor = savedGames.getSavedGamesFor (aPlayerName);
 		
 		return tSavedGamesFor;
 	}
@@ -115,9 +115,13 @@ public class ServerFrame extends JFrame {
 		activeGames.add (tNewGameSupport);
 		tFilePath = tNewGameSupport.constructAutoSaveFileName (getFullASDirectory (), tNewGameID);
 		tPlayerName = aClientHandler.getName ();
-		games.addNewSavedGame (tFilePath, tNewGameID, tPlayerName);
+		savedGames.addNewSavedGame (tFilePath, tNewGameID, tPlayerName);
 		
 		return tNewGameSupport;
+	}
+	
+	public void addPlayerToSavedGame (String aNewGameID, String aPlayerName) {
+		savedGames.addPlayerToSavedGame (aNewGameID, aPlayerName);
 	}
 	
 	// -----------------  Auto Save Functions ---------------

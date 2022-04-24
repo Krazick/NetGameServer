@@ -40,6 +40,13 @@ public class SavedGames {
 		}
 	}
 	
+	public void addPlayerToSavedGame (String aGameID, String aPlayerName) {
+		SavedGame tSavedGame;
+		
+		tSavedGame = getSavedGameFor (aGameID);
+		tSavedGame.addPlayer (aPlayerName);
+	}
+	
 	public SavedGame getSavedGameFor (String aGameID) {
 		SavedGame tFoundSavedGame = SavedGame.NO_GAME;
 		
