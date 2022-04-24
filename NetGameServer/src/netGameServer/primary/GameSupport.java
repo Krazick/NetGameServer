@@ -837,7 +837,6 @@ public class GameSupport {
 		int tActionNumber;
 		Matcher tMatcher = REQUEST_ACTION_PATTERN.matcher (aRequest);
 		
-//		printInfo ();
 		if (tMatcher.find ()) {
 			tNumberMatched = tMatcher.group (1);
 			tActionNumber = Integer.parseInt (tNumberMatched);

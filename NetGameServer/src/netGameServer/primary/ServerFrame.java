@@ -176,6 +176,7 @@ public class ServerFrame extends JFrame {
 	
 	public void operateFrame () {
 		Socket tClientSocket;
+		ClientHandler tClientHandler;
 		
 		try {
 			serverSocket = new ServerSocket (serverPort);
@@ -185,7 +186,7 @@ public class ServerFrame extends JFrame {
 				
 				logger.info ("Thread Loop Start");
 				tClientSocket = acceptServerSocket ("Operate Frame first time");
-				ClientHandler tClientHandler = new ClientHandler (this, tClientSocket, clients, 
+				tClientHandler = new ClientHandler (this, tClientSocket, clients, 
 								clientListModel, gameListModel);
 				
 				if (clients.size () < MAX_THREADS) {

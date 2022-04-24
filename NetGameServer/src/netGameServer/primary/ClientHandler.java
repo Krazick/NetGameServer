@@ -22,6 +22,29 @@ public class ClientHandler implements Runnable {
 	public static final String GAME_INDEX = "gameIndex";
 	public static final String GAME_SELECTION = "GameSelection";
 	public static final String PLAYER_ORDER = "PlayerOrder";
+	public enum PlayerStatus { 
+		NotConnected ("NOT CONNECTED"), Connected ("CONNECTED"), 
+		Ready ("READY"), Active ("ACTIVE"), AFK ("AFK");
+		private String enumString;
+		
+		PlayerStatus (String aEnumString) { enumString = aEnumString; }
+		
+		@Override
+		public String toString () { return enumString; }
+		
+		public static PlayerStatus fromString (String aPlayerStatus) {
+			PlayerStatus tFoundPlayerStatus = PlayerStatus.NotConnected;
+			
+			for (PlayerStatus tPlayerStatus : PlayerStatus.values ()) {
+				if (tPlayerStatus.toString ().equalsIgnoreCase (aPlayerStatus)) {
+					tFoundPlayerStatus = tPlayerStatus;
+				}
+			}
+			
+			return tFoundPlayerStatus;
+		}
+	};
+
 	public static final int NO_GAME_INDEX = -1;
 	public static final String NO_CLIENT_NAME = null;
 	public static final String NO_GAME_NAME = null;
@@ -38,6 +61,7 @@ public class ClientHandler implements Runnable {
 	private String geVersion;
 	private String gameName;
 	private ServerFrame serverFrame;
+	private PlayerStatus playerStatus;
 	private boolean afk;
 	private boolean ready;
 	private boolean inBufferGood = false;
@@ -58,6 +82,7 @@ public class ClientHandler implements Runnable {
 			DefaultListModel<String> aClientListModel,
 			DefaultListModel<String> aGameListModel, boolean aSetupInOut) {
 		serverFrame = aServerFrame;
+		name = "";
 		try {
 			setSocket (aClientSocket);
 		} catch (IOException tException) {
@@ -67,6 +92,7 @@ public class ClientHandler implements Runnable {
 		setClientList (aClientListModel);
 		setGameList (aGameListModel);
 		setLogger (serverFrame.getLogger ());
+		setPlayerStatus (PlayerStatus.Connected);
 		setGEVersion ("");
 		if (aSetupInOut) {
 			SetupSocketInOut ();
@@ -284,7 +310,8 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void handleClientIsStarting () {
-		setClientIsReady (true);
+//		setClientIsReady (true);
+		setPlayerStatus (PlayerStatus.Active);
 	}
 
 	public void handleClientIsReady () {
@@ -419,7 +446,9 @@ public class ClientHandler implements Runnable {
 	private boolean handleNewPlayer (boolean aContinue, String aMessage) {
 		String tResponse;
 		
-		if (! setNameFromMessage (aMessage) ) {
+		if (setNameFromMessage (aMessage) ) {
+			setPlayerStatus (PlayerStatus.Connected);
+		} else {
 			// If the name provided is already in the list, Reject this Client, Send 'stopping'
 			// and do not continue the processing;
 			aContinue = false;
@@ -450,19 +479,6 @@ public class ClientHandler implements Runnable {
 	public String getName () {
 		return name;
 	}
-	
-	public String getPlayerStatus () {
-		String tPlayerStatus;
-		
-		tPlayerStatus = "NotConnected";
-		if (isClientReady ()) {
-			tPlayerStatus = "READY";
-		} else if (isClientAFK ()) {
-			tPlayerStatus = "AFK";
-		}
-		
-		return tPlayerStatus;
-	}
 
 	public String getAFKName (String aName) {
 		return aName + " [AFK]";
@@ -483,15 +499,12 @@ public class ClientHandler implements Runnable {
 	public String getFullName () {
 		String tFullName;
 		
-		tFullName = name;
-		if (isClientAFK ()) {
-			tFullName = getAFKName (tFullName);
+		if (playerStatus == null) {
+			tFullName = "Name UNDEFINED";
+		} else {
+			tFullName = name + " [" + playerStatus.toString () + "]";
+			tFullName += " " + geVersion;
 		}
-		if (isClientReady ()) {
-			tFullName = getReadyName (tFullName);
-		}
-		
-		tFullName += " " + geVersion;
 		
 		return tFullName;
 	}
@@ -501,11 +514,58 @@ public class ClientHandler implements Runnable {
 		
 		tCurrentName = getFullName ();
 		ready = aIsReady;
+		setPlayerStatus (PlayerStatus.Ready);
 		tNewName = getFullName ();
 		
 		swapUser (tCurrentName, tNewName);
 	}
 
+	public void setPlayerStatus (PlayerStatus aNewPlayerStatus) {
+		String tFullName, tNewFullName;
+		int tFoundIndex;
+		
+		tFullName = getFullName ();
+		tFoundIndex = tFindIndexFor (tFullName);
+		playerStatus = aNewPlayerStatus;
+		if (tFoundIndex >= 0) {
+			tNewFullName = getFullName ();
+			clientListModel.set (tFoundIndex, tNewFullName);
+		}
+	}
+	
+	private int tFindIndexFor (String aFullName) {
+		int tIndex, tFoundIndex, tClientCount;
+		String tFullName;
+		
+		tFoundIndex = -1;
+		tClientCount = clientListModel.size ();
+		if (tClientCount > 0) {
+			for (tIndex = 0; tIndex < tClientCount; tIndex++) {
+				tFullName = clientListModel.get (tIndex);
+				if (tFullName.equals (aFullName)) {
+					tFoundIndex = tIndex;
+				}
+			}
+		}
+		
+		return tFoundIndex;
+	}
+	
+	public String getPlayerStatus () {
+		String tPlayerStatus;
+		
+		tPlayerStatus = "NotConnected";
+		if (isClientReady ()) {
+			tPlayerStatus = "READY";
+		} else if (isClientAFK ()) {
+			tPlayerStatus = "AFK";
+		}
+		
+		tPlayerStatus = playerStatus.toString ();
+		
+		return tPlayerStatus;
+	}
+	
 	private void swapUser (String aCurrentName, String aNewName) {
 		removeUser (aCurrentName);
 		addNewUser (aNewName);
