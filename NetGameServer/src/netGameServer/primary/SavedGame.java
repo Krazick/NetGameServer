@@ -13,25 +13,25 @@ public class SavedGame {
 	String gameStatus;
 	int lastActionNumber;
 	ArrayList<String> players;
-	public ArrayList<String> NO_PLAYERS = null;
 	private final static String GAME_ID = "(\\d\\d\\d\\d-\\d\\d-\\d\\d-\\d\\d\\d\\d)";
-	private final static String NSG_WITH_GAME_ID = "<NetworkSaveGame gameID=\"" + GAME_ID + "\" status=\"(.*)\" lastActionNumber=\"(\\d+)\">";
+	private final static String NSG_WITH_GAME_ID = "<NetworkSaveGame gameID=\"" + GAME_ID + "\" status=\"(.*)\" lastActionNumber=\"(\\d+)\"/?>";
 	private final static Pattern NSG_WITH_GAME_ID_PATTERN = Pattern.compile (NSG_WITH_GAME_ID);
-	private final static String PLAYER_WITH_NAME = "<Player name=\"(.*)\" status=\"(.*)\"[ \t\n\f\r]*/>"; 
+	private final static String PLAYER_WITH_NAME = "<Player name=\"(.*)\" status=\"(.*)\"/?>"; 
 	private final static Pattern PLAYER_WITH_NAME_PATTERN = Pattern.compile (PLAYER_WITH_NAME);
 	public final static SavedGame NO_GAME = null;
+	public final static ArrayList<String> NO_PLAYERS = null;
 	public final static String STATUS_PREPARED = "PREPARED";
 	public final static String STATUS_ACTIVE = "ACTIVE";
 	public final static String STATUS_INACTIVE = "INACTIVE";
 	public final static String STATUS_COMPLETED = "COMPLETED";
+	public final static String NO_STATUS = "NO_STATUS";
 	public final static String NO_GAME_ID = "NOID";
 	public final static String NO_NAME = "NO_NAME";
-	public final static String NO_STATUS = "NO_STATUS";
 	public final static String TEST_FILE = "JunitTestFile";
 	public final static int BAD_ACTION_NUMBER = -1;
 	
 	public SavedGame (String aFileName) throws FileNotFoundException {
-		players = new ArrayList<String> ();
+		setupPlayers();
 		if (aFileName != null) {
 			readFile (aFileName);
 		} else {
@@ -40,13 +40,17 @@ public class SavedGame {
 	}
 
 	public SavedGame (String aFilePath, String aGameID, String aPlayerName) {
-		players = new ArrayList<String> ();
+		setupPlayers();
 		setGameID (aGameID);
 		addPlayer (aPlayerName);
 		setGameStatus (NO_STATUS);
 		setLastActionNumber (0);
 	}
 	
+	private void setupPlayers() {
+		players = new ArrayList<String> ();
+	}
+
 	private void readFile (String aFileName) {
 		FileReader tFile;
 		BufferedReader tReader;
@@ -84,8 +88,10 @@ public class SavedGame {
 		}
 	}
 	
-	public void addPlayer (String tPlayerName) {
-		players.add (tPlayerName);		
+	public void addPlayer (String aPlayerName) {
+		if (! hasPlayer (aPlayerName)) {
+			players.add (aPlayerName);
+		}
 	}
 	
 	public void setGameID (String aGameID) {
@@ -192,6 +198,10 @@ public class SavedGame {
 		return tHasPlayer;
 	}
 
+	public void removeFirstPlayer () {
+		players.remove (0);
+	}
+	
 	public String getSavedGameXML () {
 		String tSavedGameXML = "";
 		String tPlayers;
