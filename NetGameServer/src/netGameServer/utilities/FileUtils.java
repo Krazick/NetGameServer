@@ -10,7 +10,6 @@ public class FileUtils {
 	public static final File NO_FILE = null;
 	public static final FileUtils NO_FILE_UTILS = null;
 	public static final FileWriter NO_FILE_WRITER = null;
-//	public static final XMLDocument NO_VALID_XML_DOCUMENT = null;
 	private Logger logger;
 	private FileWriter fileWriter;
 	private File file;
@@ -100,7 +99,7 @@ public class FileUtils {
 				fileWriter.close ();
 				fileWriter = NO_FILE_WRITER;
 			} catch (IOException tException) {
-				logger.error("FileUtils problem Closing FileWriter", tException);
+				logger.error ("FileUtils problem Closing FileWriter", tException);
 			}
 		}
 	}
