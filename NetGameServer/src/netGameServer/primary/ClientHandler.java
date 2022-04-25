@@ -309,8 +309,14 @@ public class ClientHandler implements Runnable {
 		logger.error ("+++++ UNRECOGNIZED DATA RECEUVED [" + aMessage + "]");
 	}
 
-	public void handleClientIsStarting () {
-//		setClientIsReady (true);
+	public void startAllClientsInGame () {
+		for (ClientHandler aClientHandler : clients) {
+			aClientHandler.startClient ();
+		}
+	}
+	
+	public void startClient () {
+		
 		setPlayerStatus (PlayerStatus.Active);
 	}
 

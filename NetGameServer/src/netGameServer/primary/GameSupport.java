@@ -413,7 +413,7 @@ public class GameSupport {
 			} else if (isRequestForGameID (aRequest)) {
 				tGSResponse = generateGSResponseGameID (aClientHandler);
 			} else if (isRequestForStart (aRequest)) {
-				aClientHandler.handleClientIsStarting ();
+				aClientHandler.startAllClientsInGame ();
 				tGSResponse = aClientHandler.getName () + " Starts the Game";
 			} else if (isRequestForReady (aRequest)) {
 				tGSResponse = handleClientIsReady(aClientHandler);
