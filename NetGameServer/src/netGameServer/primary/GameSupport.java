@@ -246,8 +246,7 @@ public class GameSupport {
 				logger.error ("AutoSave File not set yet");
 			} else {
 				tXMLAutoSaveDocument = fileUtils.loadXMLFile (autoSaveFile);
-				if (tXMLAutoSaveDocument != FileUtils.NO_VALID_XML_DOCUMENT) {
-					System.out.println ("Ready to parse Loaded AutoSaved NetGame Network Actions");
+				if (tXMLAutoSaveDocument != XMLDocument.NO_XML_DOCUMENT) {
 					loadXMLAutoSave (tXMLAutoSaveDocument);
 				} else {
 					logger.error("Loading of AutoSave File failed to get Valid XML Document");
