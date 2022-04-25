@@ -10,7 +10,7 @@ public class FileUtils {
 	public static final File NO_FILE = null;
 	public static final FileUtils NO_FILE_UTILS = null;
 	public static final FileWriter NO_FILE_WRITER = null;
-	public static final XMLDocument NO_VALID_XML_DOCUMENT = null;
+//	public static final XMLDocument NO_VALID_XML_DOCUMENT = null;
 	private Logger logger;
 	private FileWriter fileWriter;
 	private File file;
@@ -58,7 +58,7 @@ public class FileUtils {
 		
 		fileWriter = NO_FILE_WRITER;
 		
-		if (file != null) {
+		if (file != NO_FILE) {
 			try {
 				fileWriter = new FileWriter (file, false); // Overwrite the file if it exists
 				tGoodFileWriter = true;
@@ -117,9 +117,9 @@ public class FileUtils {
 	}
 	
 	public XMLDocument loadXMLFile (File aSaveGame) {
-		XMLDocument tXMLDocument = NO_VALID_XML_DOCUMENT;
+		XMLDocument tXMLDocument = XMLDocument.NO_XML_DOCUMENT;
 		
-		if (aSaveGame != null) {
+		if (aSaveGame != NO_FILE) {
 			try {
 				tXMLDocument = new XMLDocument (aSaveGame);
 				if (! tXMLDocument.ValidDocument ()) {
@@ -135,5 +135,4 @@ public class FileUtils {
 		
 		return tXMLDocument;
 	}
-
 }
