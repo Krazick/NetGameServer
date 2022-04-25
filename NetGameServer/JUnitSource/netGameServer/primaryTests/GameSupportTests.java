@@ -749,7 +749,6 @@ class GameSupportTests {
 			String tBadRequest1 = "<GS gameID=\"2020-07-31-2005\"><NotStarting></GS>";
 			String tGSResponse;
 			
-			Mockito.doNothing ().when (mClientHandlerAlpha).startClient ();
 			Mockito.doReturn ("GSTester").when (mClientHandlerAlpha).getName ();
 			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
 			assertEquals ("GSTester Starts the Game", tGSResponse);
