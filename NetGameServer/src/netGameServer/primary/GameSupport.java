@@ -51,6 +51,7 @@ public class GameSupport {
 	private final static Pattern REQUEST_RECONNECT_WITH_NAME_PATTERN = Pattern.compile (PLAYER_RECONNECT);
 	private final String PLAYER_READY = "<Ready>";
 	private final String GAME_START = "<Start>";
+	private final String PLAYER_ACTIVE = "<Active>";
 	private final int NO_ACTION_NUMBER = -1;
 	private final String STATUS_COMPLETE = "Complete";
 	private final String STATUS_PENDING = "Pending";
@@ -554,34 +555,46 @@ public class GameSupport {
 		return tRequestIsValid;		
 	}
 	
-	public boolean isRequestForGameID (String aRequest) {
+	private boolean isValidRequestFor (String aRequest, String aMatch) {
 		boolean tRequestIsValid = false;
 		
-		if (REQUEST_GAME_ID.equals (aRequest)) {
+		if (aMatch.equals (aRequest)) {
 			tRequestIsValid = true;
 		}
 		
-		return tRequestIsValid;		
+		return tRequestIsValid;
+	}
+	
+	public boolean isRequestForGameID (String aRequest) {
+		return isValidRequestFor (aRequest, REQUEST_GAME_ID);
 	}
 	
 	public boolean isRequestForStart (String aRequest) {
-		boolean tRequestIsValid = false;
-		
-		if (GAME_START.equals (aRequest)) {
-			tRequestIsValid = true;
-		}
-		
-		return tRequestIsValid;
+		return isValidRequestFor (aRequest, GAME_START);
 	}
 	
 	public boolean isRequestForReady (String aRequest) {
-		boolean tRequestIsValid = false;
-		
-		if (PLAYER_READY.equals (aRequest)) {
-			tRequestIsValid = true;
-		}
-		
-		return tRequestIsValid;
+		return isValidRequestFor (aRequest, PLAYER_READY);
+	}
+	
+	public boolean isRequestForActive (String aRequest) {
+		return isValidRequestFor (aRequest, PLAYER_ACTIVE);
+	}
+	
+	public boolean isRequestForActionNumber (String aRequest) {
+		return isValidRequestFor (aRequest, REQUEST_ACTION_NUMBER);
+	}
+	
+	public boolean isRequestForLastAction (String aRequest) {
+		return isValidRequestFor (aRequest, REQUEST_LAST_ACTION);
+	}
+	
+	public boolean isRequestForLastActionIsComplete (String aRequest) {
+		return isValidRequestFor (aRequest, REQUEST_LAST_ACTION_COMPLETE);
+	}
+	
+	public boolean isRequestForLastActionIsPending (String aRequest) {
+		return isValidRequestFor (aRequest, REQUEST_LAST_ACTION_PENDING);
 	}
 	
 	public boolean isRequestForReconnect (String aRequest) {
@@ -589,46 +602,6 @@ public class GameSupport {
 		Matcher tMatcher = REQUEST_RECONNECT_WITH_NAME_PATTERN.matcher (aRequest);
 		
 		if (tMatcher.matches ()) {
-			tRequestIsValid = true;
-		}
-		
-		return tRequestIsValid;
-	}
-	
-	public boolean isRequestForActionNumber (String aRequest) {
-		boolean tRequestIsValid = false;
-		
-		if (REQUEST_ACTION_NUMBER.equals (aRequest)) {
-			tRequestIsValid = true;
-		}
-		
-		return tRequestIsValid;
-	}
-	
-	public boolean isRequestForLastAction (String aRequest) {
-		boolean tRequestIsValid = false;
-		
-		if (REQUEST_LAST_ACTION.equals (aRequest)) {
-			tRequestIsValid = true;
-		}
-		
-		return tRequestIsValid;
-	}
-	
-	public boolean isRequestForLastActionIsComplete (String aRequest) {
-		boolean tRequestIsValid = false;
-		
-		if (REQUEST_LAST_ACTION_COMPLETE.equals (aRequest)) {
-			tRequestIsValid = true;
-		}
-		
-		return tRequestIsValid;
-	}
-	
-	public boolean isRequestForLastActionIsPending (String aRequest) {
-		boolean tRequestIsValid = false;
-		
-		if (REQUEST_LAST_ACTION_PENDING.equals (aRequest)) {
 			tRequestIsValid = true;
 		}
 		
