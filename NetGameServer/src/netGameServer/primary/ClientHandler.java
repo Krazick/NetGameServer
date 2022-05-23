@@ -250,16 +250,25 @@ public class ClientHandler implements Runnable {
 		if (aMessage == null) {
 			aContinue = false;
 			serverBroadcast (name + " has aborted", SEND_TO.AllButRequestor);
-		} else if (aMessage.startsWith ("name")) {
+		} else if (startsAndEndsWith (aMessage, GAME_ACTIVITY_PREFIX, GAME_ACTIVITY_SUFFFIX)) {
+			handleGameActivity (aMessage);
+		} else if (startsAndEndsWith (aMessage, GAME_SUPPORT_PREFIX, GAME_SUPPORT_SUFFFIX)) {
+			handleGameSupport (aMessage);
+		} else {
+			aContinue = handleServerCommands (aContinue, aMessage);
+		}
+		
+		return aContinue;
+	}
+
+	private boolean handleServerCommands (boolean aContinue, String aMessage) {
+		
+		if (aMessage.startsWith ("name")) {
 			aContinue = handleNewPlayer (aContinue, aMessage);
 		} else if (aMessage.startsWith ("GEVersion")) {
 			aContinue = handleGEVersion (aContinue, aMessage);
 		} else if (aMessage.startsWith ("say")) {
 			aContinue = playerBroadcast (aMessage);
-		} else if (startsAndEndsWith (aMessage, GAME_ACTIVITY_PREFIX, GAME_ACTIVITY_SUFFFIX)) {
-			handleGameActivity (aMessage);
-		} else if (startsAndEndsWith (aMessage, GAME_SUPPORT_PREFIX, GAME_SUPPORT_SUFFFIX)) {
-			handleGameSupport (aMessage);
 		} else if (aMessage.equals ("who")) {
 			reportWho ();
 		} else if (aMessage.equals ("stop")) {
@@ -270,6 +279,8 @@ public class ClientHandler implements Runnable {
 		} else if (aMessage.equals ("Not AFK")) {
 			serverBroadcast (name + " is Not AFK", SEND_TO.AllClients);
 			setClientIsAFK (false);
+		} else if (aMessage.equals ("Active")) {
+			startClient ();
 		} else if (aMessage.equals ("Ready")) {
 			handleClientIsReady ();
 		} else if (aMessage.equals ("Not Ready")) {
@@ -281,7 +292,7 @@ public class ClientHandler implements Runnable {
 		
 		return aContinue;
 	}
-
+	
 	public boolean handlePlayerStop () {
 		boolean tContinue;
 		
@@ -316,7 +327,6 @@ public class ClientHandler implements Runnable {
 	}
 	
 	public void startClient () {
-		
 		setPlayerStatus (PlayerStatus.Active);
 	}
 
@@ -565,6 +575,8 @@ public class ClientHandler implements Runnable {
 			tPlayerStatus = "READY";
 		} else if (isClientAFK ()) {
 			tPlayerStatus = "AFK";
+		} else if (this.isClientActive ()) {
+			tPlayerStatus = "Active";
 		}
 		
 		tPlayerStatus = playerStatus.toString ();
@@ -604,6 +616,9 @@ public class ClientHandler implements Runnable {
 	
 	public boolean isClientAFK () {
 		return afk;
+	}
+	public boolean isClientActive () {
+		return playerStatus == PlayerStatus.Active;
 	}
 
 	public void setClientList (DefaultListModel<String> aClientListModel) {
