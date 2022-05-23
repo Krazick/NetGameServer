@@ -348,17 +348,46 @@ class ClientHandlerTests {
 			GameSupport tFoundGameSupport;
 			GameSupport tGameSupport;
 			
+			
+			tGameSupport = new GameSupport (mServerFrame, "Client Handler 1", logger);
+			tGameSupport.addClientHandler (ClientHandler.NO_CLIENT_HANDLER);
+			assertEquals (0, tGameSupport.getPlayerCount ());
+			assertEquals (0, tGameSupport.getCountClientHandlers ());
+
 			tClientHandlerTesterAlpha = buildClientHandler (clients, "TesterAlpha");
 			clients.add (tClientHandlerTesterAlpha);
 			tClientHandlerTesterBeta = buildClientHandler (clients, "TesterBeta");
 			clients.add (tClientHandlerTesterBeta);
 			tClientHandlerTesterLambda = buildClientHandler ("TesterLambda");
-			tGameSupport = new GameSupport (mServerFrame, "Client Handler 1", logger);
+			
 			tClientHandlerTesterLambda.setGameSupport (tGameSupport);
 			
 			tClientHandlerTesterLambda.setGSClientHandlers (clients);
 			tFoundGameSupport = tClientHandlerTesterLambda.getGameSupport ();
 			assertEquals (clients, tFoundGameSupport.getClientHandlers ());
+		}
+		
+		@Test
+		@DisplayName ("Verify can't add same ClientHandler twice into GameSupport")
+		void testAddingClientHandlerTwiceInGameSupport () {
+			ClientHandler tClientHandlerTesterAlpha;
+			ClientHandler tClientHandlerTesterBeta;
+			GameSupport tGameSupport;
+			
+			tClientHandlerTesterAlpha = buildClientHandler (clients, "TesterAlpha");
+			clients.add (tClientHandlerTesterAlpha);
+			tClientHandlerTesterBeta = buildClientHandler (clients, "TesterBeta");
+			clients.add (tClientHandlerTesterBeta);
+			tGameSupport = new GameSupport (mServerFrame, "Client Handler 1", logger);
+			tGameSupport.addClientHandler (tClientHandlerTesterAlpha);
+			assertEquals (1, tGameSupport.getPlayerCount ());
+			assertEquals (1, tGameSupport.getCountClientHandlers ());
+			tGameSupport.addClientHandler (tClientHandlerTesterBeta);
+			assertEquals (2, tGameSupport.getPlayerCount ());
+			assertEquals (2, tGameSupport.getCountClientHandlers ());
+			tGameSupport.addClientHandler (tClientHandlerTesterAlpha);
+			assertEquals (2, tGameSupport.getPlayerCount ());
+			assertEquals (2, tGameSupport.getCountClientHandlers ());
 		}
 	}
 

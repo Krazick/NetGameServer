@@ -146,7 +146,10 @@ class GameSupportTests {
     		String tPlayerName1 = "GSTesterAlpha";
     		String tPlayerName2 = "GSTesterBeta";
    		
-    		gameSupport.addClientName (tPlayerName1);
+    		gameSupport.addClientName (ClientHandler.NO_CLIENT_NAME);
+       		assertEquals (0, gameSupport.getPlayerCount ());
+       		
+       		gameSupport.addClientName (tPlayerName1);
     		assertEquals (1, gameSupport.getPlayerCount ());
     		
     		gameSupport.addClientName (tPlayerName1);
@@ -286,6 +289,22 @@ class GameSupportTests {
 			assertEquals ("GSTester is Ready to play the Game", tGSResponse);
 			tGameID = gameSupportNoID.getGameID ();
 			assertEquals ("2021-02-26-1001", tGameID);
+		}
+		
+		@Test
+		@DisplayName ("Player Active is Requested with GameID")
+		void playerActiveIsRequestedTest () {
+			String tGoodRequest = "<GS gameID=\"2020-07-31-2005\"><Active></GS>";
+			String tGSResponse;
+			String tGameID;
+			
+			Mockito.doReturn ("GSTester").when (mClientHandlerAlpha).getName ();
+			Mockito.doReturn ("GSGame Name").when (mClientHandlerAlpha).getGameName ();
+			gameSupport.addClientHandler (mClientHandlerAlpha);
+			tGSResponse = gameSupport.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);
+			assertEquals ("GSTester is Active in the Game", tGSResponse);
+			tGameID = gameSupport.getGameID ();
+			assertEquals ("2020-07-31-2005", tGameID);
 		}
 		
 		@Test
