@@ -111,12 +111,12 @@ public class GameSupport {
 		setServerFrame (aServerFrame);
 		networkActions = new NetworkActions ();
 		clientNames = new LinkedList<String> ();
+		clients = new LinkedList<ClientHandler> ();
 		setActionNumber (MIN_ACTION_NUMBER);
 		setGameID (aNewGameID);
 		setLogger (aLogger);
 		setupAllAutoSaveFunctionality (aLogger);
 		setGameStatus (SavedGame.STATUS_PREPARED);
-		clients = new LinkedList<ClientHandler> ();
 	}
 
 	public void setServerFrame (ServerFrame aServerFrame) {
@@ -965,8 +965,27 @@ public class GameSupport {
 	}
 
 	public void addClientHandler (ClientHandler aClientHandler) {
-		clients.add (aClientHandler);
-		addClientName (aClientHandler.getName ());
+		String tClientName;
+		String tNewClientName;
+		boolean tAddClientHandler;
+		
+		tNewClientName = aClientHandler.getName ();
+		tAddClientHandler = false;
+		if (clients != ClientHandler.NO_CLIENT_HANDLERS) {
+			for (ClientHandler tClientHandler : clients) {
+				tClientName = tClientHandler.getName ();
+				if (! tNewClientName.equals (tClientName)) {
+					tAddClientHandler = true;
+					
+				}
+				addClientName (tClientName);
+			}
+		}
+		if (tAddClientHandler) {
+			clients.add (aClientHandler);
+		}
+//		clients.add (aClientHandler);
+//		addClientName (aClientHandler.getName ());
 	}
 
 	public void setClientHandlers (LinkedList<ClientHandler> aClients) {
