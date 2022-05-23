@@ -2,7 +2,7 @@ package netGameServer.primary;
 
 import java.awt.HeadlessException;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 import org.apache.logging.log4j.Logger;
 
@@ -12,10 +12,10 @@ public class ServerThread extends Thread {
 	String name;
 	int serverPort;
 	boolean isRunning;
-	ArrayList<String> gameNames;
+	LinkedList<String> gameNames;
 	Logger logger;
 	
-	public ServerThread (String aName, int aServerPort, PrimaryFrame aPrimaryFrame, ArrayList<String> aGameNames) {
+	public ServerThread (String aName, int aServerPort, PrimaryFrame aPrimaryFrame, LinkedList<String> aGameNames) {
 		super ();
 		name = aName;
 		serverPort = aServerPort;
@@ -50,11 +50,11 @@ public class ServerThread extends Thread {
 		}
 	}
 	
-	private void setGameNames (ArrayList<String> aGameNames) {
+	private void setGameNames (LinkedList<String> aGameNames) {
 		gameNames = aGameNames;
 	}
 	
-	public ArrayList<String> getGameNames () {
+	public LinkedList<String> getGameNames () {
 		return gameNames;
 	}
 	

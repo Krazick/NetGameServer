@@ -5,7 +5,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -65,7 +65,7 @@ public class PrimaryFrame extends JFrame {
 		return logger;
 	}
 	
-	public ServerThread newServerThread (String aName, int aPort, ArrayList<String> aGameNames) {
+	public ServerThread newServerThread (String aName, int aPort, LinkedList<String> aGameNames) {
 		ServerThread tServerThread;
 		
 		tServerThread = new ServerThread (aName, aPort, this, aGameNames);
@@ -105,10 +105,10 @@ public class PrimaryFrame extends JFrame {
 		return this;
 	}
 
-	public ArrayList<String> loadGameNames (String aType) {
-		ArrayList<String> tGameNames;
+	public LinkedList<String> loadGameNames (String aType) {
+		LinkedList<String> tGameNames;
 		
-		tGameNames = new ArrayList<String> ();
+		tGameNames = new LinkedList<String> ();
 		if (aType.equals (NAME_18XX)) {
 			tGameNames.add ("1830");
 			tGameNames.add ("1835");
@@ -153,7 +153,7 @@ public class PrimaryFrame extends JFrame {
 	}
 
 	public ServerThread manageAction (JButton aServerButton, ServerThread aServerThread, int aPort, String aThreadName) {
-		ArrayList<String> tGameNames;
+		LinkedList<String> tGameNames;
 		ServerThread tServerThread;
 		
 		if (aServerThread != null) {

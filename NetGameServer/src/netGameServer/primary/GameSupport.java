@@ -1,7 +1,6 @@
 package netGameServer.primary;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,7 +61,7 @@ public class GameSupport {
 	public static String NO_FILE_NAME = "";
 
 	NetworkActions networkActions;
-	private ArrayList<ClientHandler> clients;
+	private LinkedList<ClientHandler> clients;
 	private LinkedList<String> clientNames;
 	ServerFrame serverFrame;
 	String gameStatus;
@@ -117,7 +116,7 @@ public class GameSupport {
 		setLogger (aLogger);
 		setupAllAutoSaveFunctionality (aLogger);
 		setGameStatus (SavedGame.STATUS_PREPARED);
-		clients = new ArrayList<ClientHandler> ();
+		clients = new LinkedList<ClientHandler> ();
 	}
 
 	public void setServerFrame (ServerFrame aServerFrame) {
@@ -299,7 +298,8 @@ public class GameSupport {
 		} else {
 			tGSResponse = BAD_GAME_ID;
 		}
-
+		printInfo ();
+		
 		return tGSResponse;
 	}
 
@@ -960,7 +960,7 @@ public class GameSupport {
 		return tFoundClientHandler;
 	}
 
-	public ArrayList<ClientHandler> getClientHandlers () {
+	public LinkedList<ClientHandler> getClientHandlers () {
 		return clients;
 	}
 
@@ -969,7 +969,7 @@ public class GameSupport {
 		addClientName (aClientHandler.getName ());
 	}
 
-	public void setClientHandlers (ArrayList<ClientHandler> aClients) {
+	public void setClientHandlers (LinkedList<ClientHandler> aClients) {
 		String tClientName;
 
 		clients = aClients;

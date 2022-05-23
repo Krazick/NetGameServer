@@ -8,7 +8,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -35,7 +34,7 @@ import netGameServer.utilities.FileUtils;
 public class ServerFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private final int MAX_THREADS = 12;
-	private ArrayList<ClientHandler> clients = new ArrayList <> ();
+	private LinkedList<ClientHandler> clients = new LinkedList <> ();
 	private ExecutorService pool = Executors.newFixedThreadPool (MAX_THREADS);
 	boolean continueThread = true;
 	private JButton btnQuit;
@@ -44,7 +43,7 @@ public class ServerFrame extends JFrame {
 	private DefaultListModel<String> clientListModel = new DefaultListModel<String> ();
 	private DefaultListModel<String> gameListModel = new DefaultListModel<String> ();
 	private JTextField connectionCount;
-	private ArrayList<String> gameNames;
+	private LinkedList<String> gameNames;
 	private List<GameSupport> activeGames;
 	private String name;
 	private int serverPort;
@@ -53,7 +52,7 @@ public class ServerFrame extends JFrame {
 	private Logger logger;
 	private SavedGames savedGames;
 
-	public ServerFrame (String aName, int aServerPort, ArrayList<String> aGameNames, ServerThread aServerThread) 
+	public ServerFrame (String aName, int aServerPort, LinkedList<String> aGameNames, ServerThread aServerThread) 
 			throws HeadlessException, IOException {
 		super ("");
 		

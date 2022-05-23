@@ -1,7 +1,7 @@
 package netGameServer.primaryTests;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -189,10 +189,10 @@ class GameSupportTests {
        	@Test
     	@DisplayName ("Setting ClientHandlers 2 in Game Support")
     	void setClientHandlerTest2 () {
-    		ArrayList<ClientHandler> tClientHandlers;
+       		LinkedList<ClientHandler> tClientHandlers;
     		ClientHandler tFoundClientHandler;
     		
-        	tClientHandlers = new ArrayList<ClientHandler> ();
+        	tClientHandlers = new LinkedList<ClientHandler> ();
         	
 			Mockito.doReturn ("GSTesterAlpha").when (mClientHandlerAlpha).getName ();
 			tClientHandlers.add (mClientHandlerAlpha);

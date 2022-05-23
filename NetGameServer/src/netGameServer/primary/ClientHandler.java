@@ -8,7 +8,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
+//import java.util.ArrayList;
+import java.util.LinkedList;
 
 import javax.swing.DefaultListModel;
 
@@ -49,9 +50,9 @@ public class ClientHandler implements Runnable {
 	public static final String NO_CLIENT_NAME = null;
 	public static final String NO_GAME_NAME = null;
 	public static final ClientHandler NO_CLIENT_HANDLER = null;
-	public static final ArrayList<ClientHandler> NO_CLIENT_HANDLERS = null;
+	public static final LinkedList<ClientHandler> NO_CLIENT_HANDLERS = null;
 	public static enum SEND_TO { Requestor, AllClients, AllButRequestor };
-	private static ArrayList<ClientHandler> clients;
+	private LinkedList<ClientHandler> clients;
 	private DefaultListModel<String> clientListModel;
 	private DefaultListModel<String> gameListModel;
 	private Socket socket;
@@ -70,7 +71,7 @@ public class ClientHandler implements Runnable {
 	Logger logger;
 
 	public ClientHandler (ServerFrame aServerFrame, Socket aClientSocket, 
-			ArrayList<ClientHandler> aClients, 
+			LinkedList<ClientHandler> aClients, 
 			DefaultListModel<String> aClientListModel,
 			DefaultListModel<String> aGameListModel) {
 		
@@ -78,7 +79,7 @@ public class ClientHandler implements Runnable {
 	}
 	
 	public ClientHandler (ServerFrame aServerFrame, Socket aClientSocket, 
-			ArrayList<ClientHandler> aClients, 
+			LinkedList<ClientHandler> aClients, 
 			DefaultListModel<String> aClientListModel,
 			DefaultListModel<String> aGameListModel, boolean aSetupInOut) {
 		serverFrame = aServerFrame;
@@ -99,7 +100,7 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
-	public void setClientHandlers (ArrayList<ClientHandler> aClients) {
+	public void setClientHandlers (LinkedList<ClientHandler> aClients) {
 		clients = aClients;
 	}
 	
@@ -352,13 +353,13 @@ public class ClientHandler implements Runnable {
 		gameSupport = aGameSupport;
 	}
 	
-	public void setGSClientHandlers (ArrayList<ClientHandler> aClientHandlers) {
+	public void setGSClientHandlers (LinkedList<ClientHandler> aClientHandlers) {
 		gameSupport.setClientHandlers (aClientHandlers);
 	}
 	
 	public void setNewGameSupport (Logger aLogger) {
 		GameSupport tNewGameSupport;
-		ArrayList<ClientHandler> tClientHandlers;
+		LinkedList<ClientHandler> tClientHandlers;
 		
 		tClientHandlers = clients;
 		tNewGameSupport = new GameSupport (serverFrame, GameSupport.NO_GAME_ID, aLogger);

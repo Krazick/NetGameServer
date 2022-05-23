@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 import javax.swing.DefaultListModel;
 
@@ -52,12 +52,12 @@ class ClientHandlerTests {
     @Mock
     PrintWriter mPrintWriter;
     
-    ArrayList<ClientHandler> clients;
+    LinkedList<ClientHandler> clients;
 	Logger logger;
    
 	@BeforeEach
 	void setUp () throws Exception {
-		clients = new ArrayList <ClientHandler> ();
+		clients = new LinkedList <ClientHandler> ();
 		setupLogger ();
 	}
 	
@@ -94,7 +94,7 @@ class ClientHandlerTests {
 		tClientHandlerTesterBeta.printAllClientHandlerNames ();
 	}
 	
-	private ClientHandler buildClientHandler (ArrayList <ClientHandler> aClients,
+	private ClientHandler buildClientHandler (LinkedList <ClientHandler> aClients,
 			String aClientName) {
 		ClientHandler tClientHandler;
 		
@@ -107,7 +107,7 @@ class ClientHandlerTests {
 		return tClientHandler;
 	}
 	
-	private ClientHandler buildClientHandler1 (ArrayList <ClientHandler> aClients,
+	private ClientHandler buildClientHandler1 (LinkedList <ClientHandler> aClients,
 			String aClientName) {
 		ClientHandler tClientHandler;
 		DefaultListModel<String> tClientListModel = new DefaultListModel<String> ();
