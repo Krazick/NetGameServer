@@ -945,9 +945,10 @@ public class GameSupport {
 	}
 
 	public ClientHandler getClientHandlerFor (String aClientName) {
-		ClientHandler tFoundClientHandler = ClientHandler.NO_CLIENT_HANDLER;
+		ClientHandler tFoundClientHandler;
 		String tClientName;
 
+		tFoundClientHandler = ClientHandler.NO_CLIENT_HANDLER;
 		if (clients != ClientHandler.NO_CLIENT_HANDLERS) {
 			for (ClientHandler tClientHandler : clients) {
 				tClientName = tClientHandler.getName ();
@@ -964,28 +965,31 @@ public class GameSupport {
 		return clients;
 	}
 
+	public int getCountClientHandlers () {
+		return clients.size ();
+	}
+	
 	public void addClientHandler (ClientHandler aClientHandler) {
 		String tClientName;
 		String tNewClientName;
 		boolean tAddClientHandler;
 		
-		tNewClientName = aClientHandler.getName ();
-		tAddClientHandler = false;
-		if (clients != ClientHandler.NO_CLIENT_HANDLERS) {
+		if (aClientHandler != ClientHandler.NO_CLIENT_HANDLER) {
+			tNewClientName = aClientHandler.getName ();
+			tAddClientHandler = true;
 			for (ClientHandler tClientHandler : clients) {
 				tClientName = tClientHandler.getName ();
-				if (! tNewClientName.equals (tClientName)) {
-					tAddClientHandler = true;
-					
+				// If Client is in the List, DO NOT Add --- don't want duplicates
+				if (tNewClientName.equals (tClientName)) {
+					tAddClientHandler = false;
 				}
-				addClientName (tClientName);
+			}
+			// If the Client was not found, add it
+			if (tAddClientHandler) {
+				clients.add (aClientHandler);
+				addClientName (tNewClientName);
 			}
 		}
-		if (tAddClientHandler) {
-			clients.add (aClientHandler);
-		}
-//		clients.add (aClientHandler);
-//		addClientName (aClientHandler.getName ());
 	}
 
 	public void setClientHandlers (LinkedList<ClientHandler> aClients) {
