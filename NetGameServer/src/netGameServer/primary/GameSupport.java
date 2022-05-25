@@ -298,7 +298,7 @@ public class GameSupport {
 		} else {
 			tGSResponse = BAD_GAME_ID;
 		}
-		printInfo ();
+//		printInfo ();
 		
 		return tGSResponse;
 	}
