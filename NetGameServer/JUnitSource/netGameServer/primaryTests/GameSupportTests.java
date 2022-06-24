@@ -341,7 +341,7 @@ class GameSupportTests {
 		@DisplayName ("Get GameID From Ready or Load Request")
 		void getGameIDfromReadyORLoadRequestTest () {
 			String tGoodRequest1 = "<GS gameID=\"2021-03-01-1001\"><Ready></GS>";
-			String tGoodRequest2 = "<GS><LoadGameSetup gameID=\"2021-03-01-1121\" actionNumber=\"234\" gameName=\"1830\"></GS>";
+			String tGoodRequest2 = "<GS><LoadGameSetup actionNumber=\"234\" gameID=\"2021-03-01-1121\" gameName=\"1830\"/></GS>";
 			String tGameID;
 			
 			tGameID = gameSupportNoID.getGameIdFromRequest (tGoodRequest1);
@@ -494,7 +494,7 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("Load Game Setup")
 		void isValidLoadSetupRequestTest () {
-			String tGoodRequest = "<LoadGameSetup gameID=\"2021-03-01-1121\" actionNumber=\"234\" gameName=\"1830\">";
+			String tGoodRequest = "<LoadGameSetup actionNumber=\"234\" gameID=\"2021-03-01-1121\" gameName=\"1830\"/>";
 			String tBadRequest = "<LastActionNumber requestNew=\"TRUE\">";
 			
 			assertTrue (gameSupport.isRequestForGameLoadSetup (tGoodRequest));
@@ -547,7 +547,7 @@ class GameSupportTests {
 		@DisplayName ("Game ID Retrieve from LoadGame") 
 		void generateGameIDResponseFromLoadTest () {
 			String tGSResponse;
-			String tGoodRequest = "<LoadGameSetup gameID=\"2021-07-31-2005\" actionNumber=\"234\" gameName=\"1830\">";
+			String tGoodRequest = "<LoadGameSetup actionNumber=\"234\" gameID=\"2021-07-31-2005\" gameName=\"1830\"/>";
 			String tBadRequest = "<LastActionNumber requestNew=\"TRUE\">";
 			
 			tGSResponse = gameSupport.getGameIDFromLoadRequest (tGoodRequest);
@@ -611,7 +611,7 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("Load Game Setup")
 		void generateLoadSetupRequestTest () {
-			String tGoodRequest = "<LoadGameSetup gameID=\"2021-03-01-1121\" actionNumber=\"234\" gameName=\"1830\">";
+			String tGoodRequest = "<LoadGameSetup actionNumber=\"234\" gameID=\"2021-03-01-1121\" gameName=\"1830\"/>";
 			
 			assertEquals ("<GSResponse><GOOD></GSResponse>", gameSupport.handleGSResponseGameLoadSetup (tGoodRequest, mClientHandlerAlpha));
 		}
@@ -795,7 +795,7 @@ class GameSupportTests {
 		@Test
 		@DisplayName ("Load Game Setup Final")
 		void generateLoadSetupRequestTest () {
-			String tGoodRequest = "<GS><LoadGameSetup gameID=\"2021-07-31-2005\" actionNumber=\"171\" gameName=\"1830\"></GS>";
+			String tGoodRequest = "<GS><LoadGameSetup actionNumber=\"171\" gameID=\"2021-07-31-2005\" gameName=\"1830\"/></GS>";
 			String tGSResponse;
 			
 			tGSResponse = gameSupportNoID.handleGameSupportRequest (tGoodRequest, mClientHandlerAlpha);

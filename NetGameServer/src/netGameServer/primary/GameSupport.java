@@ -43,8 +43,7 @@ public class GameSupport {
 	private final String REQUEST_LAST_ACTION_COMPLETE = "<LastAction isComplete=\"TRUE\">";
 	private final String REQUEST_LAST_ACTION_PENDING = "<ActionNumber requestPending=\"TRUE\">";
 	private final String REQUEST_GAME_ID = "<GameIDRequest>";
-	private final static String REQUEST_GAME_LOAD_SETUP = "<LoadGameSetup gameID=\"" + GAME_ID + "\" " + ACTION_NUMBER
-			+ " gameName=\"([A-Z0-9\\+]+)\">";
+	private final static String REQUEST_GAME_LOAD_SETUP = "<LoadGameSetup " + ACTION_NUMBER + " gameID=\"" + GAME_ID + "\" gameName=\"([A-Z0-9\\+]+)\"/>";
 	private final static Pattern REQUEST_WITH_GAME_LOAD_SETUP_PATTERN = Pattern.compile (REQUEST_GAME_LOAD_SETUP);
 	private final static String PLAYER_RECONNECT = "<Reconnect name=\"(.*)\">";
 	private final static Pattern REQUEST_RECONNECT_WITH_NAME_PATTERN = Pattern.compile (PLAYER_RECONNECT);
@@ -646,7 +645,7 @@ public class GameSupport {
 		if (tMatcher.matches ()) {
 			tRequestIsValid = true;
 		}
-
+		
 		return tRequestIsValid;
 	}
 
@@ -863,7 +862,7 @@ public class GameSupport {
 		String tGameID = NO_GAME_ID;
 
 		if (tMatcher.find ()) {
-			tGameID = tMatcher.group (1);
+			tGameID = tMatcher.group (2);
 		}
 
 		return tGameID;
@@ -876,7 +875,7 @@ public class GameSupport {
 		int tActionNumber;
 
 		if (tMatcher.find ()) {
-			tGameID = tMatcher.group (1);
+			tGameID = tMatcher.group (2);
 			// If the GameID found in the request does not match the Game ID in the Client
 			// Handler
 			if (!tGameID.equals (aClientHandler.getGameID ())) {
@@ -884,7 +883,7 @@ public class GameSupport {
 				// join a saved Game
 				if (!aClientHandler.updateGameSupport (tGameID)) {
 					logger.info ("The Client Handler updated to Game ID " + tGameID);
-					tActionNumberText = tMatcher.group (2);
+					tActionNumberText = tMatcher.group (1);
 					tGameName = tMatcher.group (3);
 					setGameID (tGameID);
 					tActionNumber = Integer.parseInt (tActionNumberText);
