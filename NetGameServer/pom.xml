@@ -22,16 +22,26 @@
   </build>
   <dependencies>
     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>3.4.6</version>
-      <scope>test</scope>
+    	<groupId>org.mockito</groupId>
+    	<artifactId>mockito-core</artifactId>
+    	<version>4.8.1</version>
+    	<scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-junit-jupiter</artifactId>
-      <version>3.4.6</version>
-      <scope>test</scope>
+    	<groupId>org.mockito</groupId>
+    	<artifactId>mockito-junit-jupiter</artifactId>
+    	<version>4.8.1</version>
+    	<scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>net.bytebuddy</groupId>
+    	<artifactId>byte-buddy</artifactId>
+    	<version>1.12.18</version>
+    </dependency>
+    <dependency>
+    	<groupId>net.bytebuddy</groupId>
+    	<artifactId>byte-buddy-agent</artifactId>
+    	<version>1.12.18</version>
     </dependency>
 	<dependency>
         <groupId>org.apache.logging.log4j</groupId>
