@@ -1,11 +1,14 @@
 package netGameServer.primary;
 
 import java.awt.HeadlessException;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
@@ -17,15 +20,20 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JList;
+import javax.swing.JPanel;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+
 import javax.swing.JTextField;
-import javax.swing.LayoutStyle.ComponentPlacement;
 
 import org.apache.logging.log4j.Logger;
 
@@ -37,7 +45,19 @@ public class ServerFrame extends JFrame {
 	private LinkedList<ClientHandler> clients = new LinkedList <> ();
 	private ExecutorService pool = Executors.newFixedThreadPool (MAX_THREADS);
 	boolean continueThread = true;
-	private JButton btnQuit;
+	private JLabel frameTitle;
+	private JLabel labelPlayers;
+	private JLabel labelGames;
+	private JLabel labelPort;
+	private JLabel labelConnections;
+	private JLabel labelMaxThreads;
+	private JLabel labelServerIP;
+	private JPanel northJPanel;
+	private JPanel westJPanel;
+	private JPanel centerJPanel;
+	private JPanel eastJPanel;
+	
+	private JButton quitButton;
 	private JList<String> clientList;
 	private JList<String> gamesList;
 	private DefaultListModel<String> clientListModel = new DefaultListModel<String> ();
@@ -63,7 +83,9 @@ public class ServerFrame extends JFrame {
 		setServerThread (aServerThread);
 		setLogger (serverThread.getLogger ());
 		gameNames = aGameNames;
-		setupJFrame (name + " Server Monitor Frame");
+		setupJPanels ();
+		setupJFrameComponents (name + " Server Monitor Frame");
+		setupJFrame ();
 		setupActions ();
 		activeGames = new LinkedList<GameSupport> ();
 		setupAutoSaveDirectory ();
@@ -194,7 +216,7 @@ public class ServerFrame extends JFrame {
 				} else {
 					tClientHandler.reportFull ();
 				}
-				connectionCount.setText ("" + clients.size ());
+				updateLabelConnections (clients.size ());
 				logger.info  ("Thread Loop End");
 			}
 		} catch (SocketException tException) {
@@ -265,7 +287,7 @@ public class ServerFrame extends JFrame {
 	
 	public void removeClient (ClientHandler aClientHandler) {
 		clients.remove (aClientHandler);
-		connectionCount.setText ("" + clients.size ());
+		updateLabelConnections (clients.size ());
 	}
 	
 	public void repaintGamesList () {
@@ -277,7 +299,7 @@ public class ServerFrame extends JFrame {
 	}
 	
 	private void setupActions () {
-		btnQuit.addActionListener (new ActionListener () {
+		quitButton.addActionListener (new ActionListener () {
 			@Override
 			public void actionPerformed (ActionEvent e) {
 				quitFrame ();
@@ -296,8 +318,11 @@ public class ServerFrame extends JFrame {
 			tClientHandler.shutdownAll ();
 		}
 		serverThread.frameQuitting ();
-		
-		closeServerSocket ("Trying to Quit Server Frame");
+		if (serverSocket!= null) {
+			closeServerSocket ("Trying to Quit Server Frame");
+		} else {
+			System.out.println ("Quitting Server Frame, no Server Socket Set");
+		}
 	}
 
 	public void closeServerSocket (String aCaller) {
@@ -309,104 +334,108 @@ public class ServerFrame extends JFrame {
 		}
 	}
 	
-	private void setupJFrame (String aTitle) {
-
-		JLabel lblTitle = new JLabel (aTitle);
-		lblTitle.setHorizontalAlignment (SwingConstants.CENTER);
+	private void setupJPanels () {
+		northJPanel = new JPanel ();
+		westJPanel = new JPanel ();
+		centerJPanel = new JPanel ();
+		eastJPanel = new JPanel ();
 		
-		btnQuit = new JButton ("Quit");
-		btnQuit.setAlignmentX (Component.CENTER_ALIGNMENT);
+		add (northJPanel, BorderLayout.NORTH);
+		add (westJPanel, BorderLayout.WEST);
+		westJPanel.setLayout (new BoxLayout (westJPanel, BoxLayout.Y_AXIS));
+		add (centerJPanel, BorderLayout.CENTER);
+		centerJPanel.setLayout (new BoxLayout (centerJPanel, BoxLayout.Y_AXIS));
+		add (eastJPanel, BorderLayout.EAST);
+		eastJPanel.setLayout (new BoxLayout (eastJPanel, BoxLayout.Y_AXIS));
+	}
+	
+	private void setupJFrameComponents (String aTitle) {
+		String tMyIPAddress;
 		
-		JLabel lblPlayers = new JLabel ("Clients");
+		frameTitle = new JLabel (aTitle);
+		frameTitle.setHorizontalAlignment (SwingConstants.CENTER);
+		northJPanel.add (frameTitle);
+		
+		quitButton = new JButton ("Quit");
+		quitButton.setAlignmentX (Component.CENTER_ALIGNMENT);
+		
+		labelPlayers = new JLabel ("Clients");
 		clientList = new JList<String> (clientListModel = new DefaultListModel<String> ());
-		lblPlayers.setLabelFor (clientList);
-
+		clientList.setMinimumSize (new Dimension (300, 100));
+		clientList.setPreferredSize (new Dimension (300, 200));
+		clientList.setMaximumSize (new Dimension (300, 250));
+		clientList.setBackground (Color.PINK);
 		
-		JLabel lblGames = new JLabel ("Games");
+		labelPlayers.setLabelFor (clientList);
+		
+		labelGames = new JLabel ("Games");
 		gamesList = new JList<String> (gameListModel = new DefaultListModel<String> ());
-		lblGames.setLabelFor (gamesList);
+		gamesList.setMinimumSize (new Dimension (300, 100));
+		gamesList.setPreferredSize (new Dimension (300, 200));
+		gamesList.setMaximumSize (new Dimension (300, 250));
+		gamesList.setBackground (Color.GREEN);
+		labelGames.setLabelFor (gamesList);		
 		
-		JLabel lblPort = new JLabel ("Port: " + serverPort);
+		tMyIPAddress = whatIsMyIPAddress ();
+		labelServerIP = new JLabel ("Server IP: " + tMyIPAddress);
+		labelPort = new JLabel ("Port: " + serverPort);
 		
-		connectionCount = new JTextField ();
-		connectionCount.setAlignmentX (Component.RIGHT_ALIGNMENT);
-		connectionCount.setText ("0");
-		connectionCount.setColumns (10);
+		labelConnections = new JLabel ("Connections: 0");
+		labelConnections.setLabelFor (connectionCount);
 		
-		JLabel lblConnections = new JLabel ("Connections");
-		lblConnections.setLabelFor (connectionCount);
-		
-		JLabel lblMaxThreads = new JLabel("Max Threads: " + MAX_THREADS);
-		
-		GroupLayout groupLayout = new GroupLayout (getContentPane ());
-		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(groupLayout.createSequentialGroup()
-					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup()
-							.addGap(63)
-							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-								.addComponent(lblPlayers)
-								.addComponent(clientList, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE))
-							.addPreferredGap(ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
-							.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-								.addGroup(groupLayout.createSequentialGroup()
-									.addComponent(gamesList, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
-									.addGap(33))
-								.addGroup(groupLayout.createSequentialGroup()
-									.addComponent(lblGames, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
-									.addGap(250)))
-							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-								.addGroup(groupLayout.createSequentialGroup()
-									.addComponent(lblConnections)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(connectionCount, GroupLayout.PREFERRED_SIZE, 43, GroupLayout.PREFERRED_SIZE))
-								.addComponent(btnQuit, Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, 127, GroupLayout.PREFERRED_SIZE)
-								.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
-									.addComponent(lblPort)
-									.addGap(114))
-								.addComponent(lblMaxThreads)))
-						.addGroup(groupLayout.createSequentialGroup()
-							.addContainerGap()
-							.addComponent(lblTitle, GroupLayout.PREFERRED_SIZE, 551, GroupLayout.PREFERRED_SIZE)))
-					.addContainerGap())
-		);
-		groupLayout.setVerticalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(groupLayout.createSequentialGroup()
-					.addGap(16)
-					.addComponent(lblTitle)
-					.addGap(12)
-					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblPlayers)
-						.addComponent(lblPort)
-						.addComponent(lblGames))
-					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-						.addGroup(groupLayout.createSequentialGroup()
-							.addGap(18)
-							.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-								.addComponent(clientList, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE)
-								.addComponent(gamesList, GroupLayout.PREFERRED_SIZE, 174, GroupLayout.PREFERRED_SIZE))
-							.addContainerGap(26, Short.MAX_VALUE))
-						.addGroup(groupLayout.createSequentialGroup()
-							.addGap(8)
-							.addComponent(lblMaxThreads)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblConnections)
-								.addComponent(connectionCount, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-							.addGap(70)
-							.addComponent(btnQuit)
-							.addGap(40))))
-		);
-		getContentPane ().setLayout (groupLayout);
+		labelMaxThreads = new JLabel("Max Threads: " + MAX_THREADS);
+	}
+	
+	private void updateLabelConnections (int aCount) {
+		labelConnections.setText ("Connections: " + aCount);
+	}
+	
+	private void setupJFrame () {
+		westJPanel.add (labelPlayers);
+		westJPanel.add (clientList);
 
-		setSize (800, 300);
+		centerJPanel.add (labelGames);
+		centerJPanel.add (gamesList);
+
+		eastJPanel.add (labelServerIP);
+		eastJPanel.add (Box.createVerticalStrut (10));
+		eastJPanel.add (labelPort);
+		eastJPanel.add (Box.createVerticalStrut (10));
+		eastJPanel.add (labelMaxThreads);
+		eastJPanel.add (Box.createVerticalStrut (10));
+		eastJPanel.add (labelConnections);
+		eastJPanel.add (Box.createVerticalStrut (10));
+		eastJPanel.add (quitButton);
+		
+		setSize (800, 330);
 		setVisible (true);
 	}
 	
+	private String whatIsMyIPAddress () {
+		URL url_name;
+		BufferedReader sc;
+		String publicIPAddress;
+		
+		// Find Public IP address
+		publicIPAddress = "";
+		try
+		{
+			url_name = new URL ("https://api.ipify.org/");
+			sc = new BufferedReader(new InputStreamReader (url_name.openStream()));
+
+			// Reads system Public IPAddress
+			publicIPAddress = sc.readLine ().trim ();
+		}
+		catch (Exception e)
+		{
+			publicIPAddress = "Cannot Execute Properly";
+		}
+		
+		return publicIPAddress;
+	}
+	
     public void log (String aMessage, Exception aException) {
-    	logger.error (aMessage, aException);
+    		logger.error (aMessage, aException);
     }
 
 	public boolean isRunning () {
