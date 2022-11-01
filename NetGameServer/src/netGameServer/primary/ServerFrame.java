@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -33,8 +34,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 
-import javax.swing.JTextField;
-
 import org.apache.logging.log4j.Logger;
 
 import netGameServer.utilities.FileUtils;
@@ -48,10 +47,11 @@ public class ServerFrame extends JFrame {
 	private JLabel frameTitle;
 	private JLabel labelPlayers;
 	private JLabel labelGames;
-	private JLabel labelPort;
-	private JLabel labelConnections;
-	private JLabel labelMaxThreads;
-	private JLabel labelServerIP;
+	private JLabel portLabel;
+	private JLabel connectionsLabel;
+	private JLabel maxThreadLabel;
+	private JLabel serverIPLabel;
+	private JLabel gameActionsLabel;
 	private JPanel northJPanel;
 	private JPanel westJPanel;
 	private JPanel centerJPanel;
@@ -60,9 +60,10 @@ public class ServerFrame extends JFrame {
 	private JButton quitButton;
 	private JList<String> clientList;
 	private JList<String> gamesList;
+	private JList<String> gameActionList;
 	private DefaultListModel<String> clientListModel = new DefaultListModel<String> ();
 	private DefaultListModel<String> gameListModel = new DefaultListModel<String> ();
-	private JTextField connectionCount;
+	private DefaultListModel<String> gameActionListModel = new DefaultListModel<String> ();
 	private LinkedList<String> gameNames;
 	private List<GameSupport> activeGames;
 	private String name;
@@ -340,11 +341,14 @@ public class ServerFrame extends JFrame {
 		centerJPanel = new JPanel ();
 		eastJPanel = new JPanel ();
 		
+		westJPanel.setBorder (new EmptyBorder (5, 10, 0, 10));
 		add (northJPanel, BorderLayout.NORTH);
 		add (westJPanel, BorderLayout.WEST);
 		westJPanel.setLayout (new BoxLayout (westJPanel, BoxLayout.Y_AXIS));
 		add (centerJPanel, BorderLayout.CENTER);
+		centerJPanel.setBorder (new EmptyBorder (5, 0, 0, 10));
 		centerJPanel.setLayout (new BoxLayout (centerJPanel, BoxLayout.Y_AXIS));
+		eastJPanel.setBorder (new EmptyBorder (5, 0, 0, 10));
 		add (eastJPanel, BorderLayout.EAST);
 		eastJPanel.setLayout (new BoxLayout (eastJPanel, BoxLayout.Y_AXIS));
 	}
@@ -356,10 +360,8 @@ public class ServerFrame extends JFrame {
 		frameTitle.setHorizontalAlignment (SwingConstants.CENTER);
 		northJPanel.add (frameTitle);
 		
-		quitButton = new JButton ("Quit");
-		quitButton.setAlignmentX (Component.CENTER_ALIGNMENT);
-		
 		labelPlayers = new JLabel ("Clients");
+		labelPlayers.setAlignmentX (Component.CENTER_ALIGNMENT);
 		clientList = new JList<String> (clientListModel = new DefaultListModel<String> ());
 		clientList.setMinimumSize (new Dimension (300, 100));
 		clientList.setPreferredSize (new Dimension (300, 200));
@@ -369,6 +371,7 @@ public class ServerFrame extends JFrame {
 		labelPlayers.setLabelFor (clientList);
 		
 		labelGames = new JLabel ("Games");
+		labelGames.setAlignmentX (Component.CENTER_ALIGNMENT);
 		gamesList = new JList<String> (gameListModel = new DefaultListModel<String> ());
 		gamesList.setMinimumSize (new Dimension (300, 100));
 		gamesList.setPreferredSize (new Dimension (300, 200));
@@ -377,17 +380,33 @@ public class ServerFrame extends JFrame {
 		labelGames.setLabelFor (gamesList);		
 		
 		tMyIPAddress = whatIsMyIPAddress ();
-		labelServerIP = new JLabel ("Server IP: " + tMyIPAddress);
-		labelPort = new JLabel ("Port: " + serverPort);
+		serverIPLabel = new JLabel ("Server IP: " + tMyIPAddress);
+		serverIPLabel.setAlignmentX (Component.LEFT_ALIGNMENT);
+		portLabel = new JLabel ("Port: " + serverPort);
+		portLabel.setAlignmentX (Component.LEFT_ALIGNMENT);
 		
-		labelConnections = new JLabel ("Connections: 0");
-		labelConnections.setLabelFor (connectionCount);
+		maxThreadLabel = new JLabel("Max Threads: " + MAX_THREADS);
+		maxThreadLabel.setAlignmentX (Component.LEFT_ALIGNMENT);
 		
-		labelMaxThreads = new JLabel("Max Threads: " + MAX_THREADS);
+		connectionsLabel = new JLabel ("Connections: 0");
+		connectionsLabel.setAlignmentX (Component.LEFT_ALIGNMENT);
+		
+		gameActionsLabel = new JLabel ("Recent Game Actions");
+		gameActionsLabel.setAlignmentX (Component.LEFT_ALIGNMENT);
+		
+		gameActionList = new JList<String> (gameActionListModel = new DefaultListModel<String> ());
+		gameActionList.setMinimumSize (new Dimension (150, 500));
+		gameActionList.setPreferredSize (new Dimension (150, 100));
+		gameActionList.setMaximumSize (new Dimension (150, 100));
+		gameActionList.setBackground (Color.CYAN);
+		gameActionList.setAlignmentX (Component.LEFT_ALIGNMENT);
+
+		quitButton = new JButton ("Quit");
+		quitButton.setAlignmentX (Component.LEFT_ALIGNMENT);
 	}
 	
 	private void updateLabelConnections (int aCount) {
-		labelConnections.setText ("Connections: " + aCount);
+		connectionsLabel.setText ("Connections: " + aCount);
 	}
 	
 	private void setupJFrame () {
@@ -397,13 +416,17 @@ public class ServerFrame extends JFrame {
 		centerJPanel.add (labelGames);
 		centerJPanel.add (gamesList);
 
-		eastJPanel.add (labelServerIP);
+		eastJPanel.add (serverIPLabel);
 		eastJPanel.add (Box.createVerticalStrut (10));
-		eastJPanel.add (labelPort);
+		eastJPanel.add (portLabel);
 		eastJPanel.add (Box.createVerticalStrut (10));
-		eastJPanel.add (labelMaxThreads);
+		eastJPanel.add (maxThreadLabel);
 		eastJPanel.add (Box.createVerticalStrut (10));
-		eastJPanel.add (labelConnections);
+		eastJPanel.add (connectionsLabel);
+		eastJPanel.add (Box.createVerticalStrut (10));
+		eastJPanel.add (gameActionsLabel);
+		eastJPanel.add (Box.createVerticalStrut (10));
+		eastJPanel.add (gameActionList);
 		eastJPanel.add (Box.createVerticalStrut (10));
 		eastJPanel.add (quitButton);
 		
