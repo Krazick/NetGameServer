@@ -374,12 +374,15 @@ public class GameSupport {
 
 	public void updateLastAction (String aAction) {
 		NetworkAction tNetworkAction;
-
+		String tGameAction;
+		
 		tNetworkAction = getLastNetworkAction ();
 		if (tNetworkAction != NetworkAction.NO_ACTION) {
 			tNetworkAction.setActionXML (aAction);
 			tNetworkAction.setStatus (STATUS_COMPLETE);
 			setActionNumber (tNetworkAction.getNumber ());
+			tGameAction = tNetworkAction.getCompactAction ();
+			serverFrame.addGameAction (tGameAction);
 		} else {
 			System.err.println ("Found No Last Action");
 		}
@@ -893,6 +896,7 @@ public class GameSupport {
 					setupAutoSaveFile (tGameID);
 					loadAutoSave ();
 					aClientHandler.addGameNameToList (tGameName);
+					aClientHandler.addActiveGameSupport (this);
 				}
 			}
 			tGSResponse = wrapWithGSResponse ("<GOOD>");
@@ -921,6 +925,10 @@ public class GameSupport {
 		return tGSResponse;
 	}
 
+	public void addGameActionsToFrame () {
+		networkActions.addGameActionsToFrame (serverFrame);
+	}
+	
 	public int getLastActionNumber () {
 		return networkActions.getLastNetworkActionNumber ();
 	}
