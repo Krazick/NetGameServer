@@ -49,6 +49,15 @@ public class NetworkActions {
 		return tNetworkAction;
 	}
 	
+	public void addGameActionsToFrame (ServerFrame aServerFrame) {
+		String tGameAction;
+		
+		for (NetworkAction tNetworkAction : actions) {
+			tGameAction = tNetworkAction.getCompactAction ();
+			aServerFrame.addGameAction (tGameAction);
+		}
+	}
+	
 	public int getLastNetworkActionNumber () {
 		int tActionNumber = NetworkAction.MIN_ACTION_NUMBER;
 		NetworkAction tLastNetworkAction;
