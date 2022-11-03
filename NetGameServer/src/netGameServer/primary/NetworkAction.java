@@ -19,11 +19,10 @@ public class NetworkAction {
 	public static final String ACTION_COMPLETE = "Complete";
 	public static final String ACTION_PENDING = "Pending";
 	public static final String ACTION_RECEIVED = "Received";
-	private final static String REQUEST_ACTOR = "<Action.* actor=\"([A-Za-z0-9 ]+)\" ";
+	private final static String REQUEST_ACTOR = "<Action.* actor=\"([A-Za-z0-9&amp; ]+)\" ";
 	private final static Pattern REQUEST_ACTOR_PATTERN = Pattern.compile (REQUEST_ACTOR);
 	private final static String REQUEST_NAME = "<Action.*? name=\"([A-Za-z0-9 ]+)\"";
 	private final static Pattern REQUEST_NAME_PATTERN = Pattern.compile (REQUEST_NAME);
-	// name="Pass Action" 
 	int actionNumber;
 	String actionXML;
 	String status;
@@ -102,7 +101,7 @@ public class NetworkAction {
 	public String getCompactAction () {
 		String tCompactAction;
 		
-		tCompactAction = getNumber () + " " + getActorName () + " " + getActionName ();
+		tCompactAction = getNumber () + " " + getActorName () + " [" + getActionName () + "]";
 		
 		return tCompactAction;
 	}
