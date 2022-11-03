@@ -772,6 +772,10 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
+	public void addActiveGameSupport (GameSupport aGameSupport) {
+		serverFrame.addActiveGameSupport (aGameSupport);
+	}
+	
 	public void setGameName (String aGameName) {
 		gameName = aGameName;
 	}
