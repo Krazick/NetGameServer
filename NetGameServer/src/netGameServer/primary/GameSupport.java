@@ -368,6 +368,7 @@ public class GameSupport {
 		networkActions.remove (aActionNumber);
 		tLastActionNumber = networkActions.getLastNetworkActionNumber ();
 		setActionNumber (tLastActionNumber);
+		serverFrame.removeGameAction ();
 		System.out.println ("Action Removed " + aActionNumber + " Count After " + networkActions.getCount ()
 				+ " Reset Action Number to " + tLastActionNumber);
 	}

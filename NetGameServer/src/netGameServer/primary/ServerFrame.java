@@ -47,7 +47,6 @@ public class ServerFrame extends JFrame {
 	private LinkedList<ClientHandler> clients = new LinkedList <> ();
 	private ExecutorService pool = Executors.newFixedThreadPool (MAX_THREADS);
 	private String NO_SELECTED_GAME = "NO SELECTED GAME";
-//	private String NO_ACTIONS_IN_LIST = "NO ACTIONS IN LIST";
 	boolean continueThread = true;
 	private JLabel frameTitle;
 	private JLabel playersLabel;
@@ -436,6 +435,10 @@ public class ServerFrame extends JFrame {
 	
 	public void addGameAction (String aGameAction) {
 		gameActionListModel.add (0, aGameAction);
+	}
+	
+	public void removeGameAction () {
+		gameActionListModel.remove (0);
 	}
 	
 	public void handleGameSelection (int aSelectedGameIndex) {
