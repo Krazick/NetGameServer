@@ -20,6 +20,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.JButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -28,9 +30,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 
@@ -43,10 +46,12 @@ public class ServerFrame extends JFrame {
 	private final int MAX_THREADS = 12;
 	private LinkedList<ClientHandler> clients = new LinkedList <> ();
 	private ExecutorService pool = Executors.newFixedThreadPool (MAX_THREADS);
+	private String NO_SELECTED_GAME = "NO SELECTED GAME";
+//	private String NO_ACTIONS_IN_LIST = "NO ACTIONS IN LIST";
 	boolean continueThread = true;
 	private JLabel frameTitle;
-	private JLabel labelPlayers;
-	private JLabel labelGames;
+	private JLabel playersLabel;
+	private JLabel gamesLabel;
 	private JLabel portLabel;
 	private JLabel connectionsLabel;
 	private JLabel maxThreadLabel;
@@ -60,7 +65,12 @@ public class ServerFrame extends JFrame {
 	private JButton quitButton;
 	private JList<String> clientList;
 	private JList<String> gamesList;
+	private ListSelectionModel gamesListSelectionModel;
+	private SharedListSelectionHandler gameListSelectionHandler;
 	private JList<String> gameActionList;
+	private JScrollPane clientListPane;
+	private JScrollPane gamesListPane;
+	private JScrollPane gameActionListPane;
 	private DefaultListModel<String> clientListModel = new DefaultListModel<String> ();
 	private DefaultListModel<String> gameListModel = new DefaultListModel<String> ();
 	private DefaultListModel<String> gameActionListModel = new DefaultListModel<String> ();
@@ -72,6 +82,7 @@ public class ServerFrame extends JFrame {
 	private ServerSocket serverSocket;
 	private Logger logger;
 	private SavedGames savedGames;
+    String selectedGame;
 
 	public ServerFrame (String aName, int aServerPort, LinkedList<String> aGameNames, ServerThread aServerThread) 
 			throws HeadlessException, IOException {
@@ -134,12 +145,18 @@ public class ServerFrame extends JFrame {
 		tNewGameID = generateNewGameID ();
 		tNewGameSupport = new GameSupport (this, tNewGameID, logger);
 		tNewGameSupport.addClientHandler (aClientHandler);
-		activeGames.add (tNewGameSupport);
+		addActiveGameSupport (tNewGameSupport);
 		tFilePath = tNewGameSupport.constructAutoSaveFileName (getFullASDirectory (), tNewGameID);
 		tPlayerName = aClientHandler.getName ();
 		savedGames.addNewSavedGame (tFilePath, tNewGameID, tPlayerName);
 		
 		return tNewGameSupport;
+	}
+	
+	public void addActiveGameSupport (GameSupport aGameSupport) {
+		if (! activeGames.contains (aGameSupport)) {
+			activeGames.add (aGameSupport);
+		}
 	}
 	
 	public void addPlayerToSavedGame (String aNewGameID, String aPlayerName) {
@@ -360,24 +377,16 @@ public class ServerFrame extends JFrame {
 		frameTitle.setHorizontalAlignment (SwingConstants.CENTER);
 		northJPanel.add (frameTitle);
 		
-		labelPlayers = new JLabel ("Clients");
-		labelPlayers.setAlignmentX (Component.CENTER_ALIGNMENT);
+		playersLabel = new JLabel ("Clients");
+		playersLabel.setAlignmentX (Component.CENTER_ALIGNMENT);
 		clientList = new JList<String> (clientListModel = new DefaultListModel<String> ());
-		clientList.setMinimumSize (new Dimension (300, 100));
-		clientList.setPreferredSize (new Dimension (300, 200));
-		clientList.setMaximumSize (new Dimension (300, 250));
-		clientList.setBackground (Color.PINK);
+		clientListPane = new JScrollPane (clientList);
+		clientListPane.setMinimumSize (new Dimension (300, 100));
+		clientListPane.setPreferredSize (new Dimension (300, 200));
+		clientListPane.setMaximumSize (new Dimension (300, 250));
+		playersLabel.setLabelFor (clientList);
 		
-		labelPlayers.setLabelFor (clientList);
-		
-		labelGames = new JLabel ("Games");
-		labelGames.setAlignmentX (Component.CENTER_ALIGNMENT);
-		gamesList = new JList<String> (gameListModel = new DefaultListModel<String> ());
-		gamesList.setMinimumSize (new Dimension (300, 100));
-		gamesList.setPreferredSize (new Dimension (300, 200));
-		gamesList.setMaximumSize (new Dimension (300, 250));
-		gamesList.setBackground (Color.GREEN);
-		labelGames.setLabelFor (gamesList);		
+		setupGamesList ();		
 		
 		tMyIPAddress = whatIsMyIPAddress ();
 		serverIPLabel = new JLabel ("Server IP: " + tMyIPAddress);
@@ -395,26 +404,95 @@ public class ServerFrame extends JFrame {
 		gameActionsLabel.setAlignmentX (Component.LEFT_ALIGNMENT);
 		
 		gameActionList = new JList<String> (gameActionListModel = new DefaultListModel<String> ());
-		gameActionList.setMinimumSize (new Dimension (150, 500));
-		gameActionList.setPreferredSize (new Dimension (150, 100));
-		gameActionList.setMaximumSize (new Dimension (150, 100));
-		gameActionList.setBackground (Color.CYAN);
-		gameActionList.setAlignmentX (Component.LEFT_ALIGNMENT);
+		gameActionListPane = new JScrollPane (gameActionList);
+		gameActionListPane.setMinimumSize (new Dimension (260, 500));
+		gameActionListPane.setPreferredSize (new Dimension (260, 100));
+		gameActionListPane.setMaximumSize (new Dimension (260, 100));
+		gameActionListPane.setAlignmentX (Component.LEFT_ALIGNMENT);
+		addGameAction (NO_SELECTED_GAME);
 
 		quitButton = new JButton ("Quit");
 		quitButton.setAlignmentX (Component.LEFT_ALIGNMENT);
 	}
+
+	private void setupGamesList () {
+		gameListSelectionHandler = new SharedListSelectionHandler (this);
+		gamesLabel = new JLabel ("Active Games");
+		gamesLabel.setAlignmentX (Component.CENTER_ALIGNMENT);
+		gamesList = new JList<String> (gameListModel = new DefaultListModel<String> ());
+		gamesListPane = new JScrollPane (gamesList);
+		gamesListPane.setMinimumSize (new Dimension (180, 100));
+		gamesListPane.setPreferredSize (new Dimension (180, 200));
+		gamesListPane.setMaximumSize (new Dimension (180, 250));
+		gamesListSelectionModel = gamesList.getSelectionModel ();
+		gamesListSelectionModel.setSelectionMode (ListSelectionModel.SINGLE_SELECTION);
+		gamesListSelectionModel.addListSelectionListener (gameListSelectionHandler);
+		gamesLabel.setLabelFor (gamesList);
+	}
+	
+	public void clearGameActionList () {
+		gameActionListModel.clear ();
+	}
+	
+	public void addGameAction (String aGameAction) {
+		gameActionListModel.add (0, aGameAction);
+	}
+	
+	public void handleGameSelection (int aSelectedGameIndex) {
+		String tSelectedGameID;
+		GameSupport tSelectedGameSupport;
+		int tLastActionNumber;
+		
+		tSelectedGameID = gamesList.getModel ().getElementAt (aSelectedGameIndex);
+		tSelectedGameSupport = activeGames.get (aSelectedGameIndex);
+		tLastActionNumber = tSelectedGameSupport.getLastActionNumber ();
+		clearGameActionList ();
+		tSelectedGameSupport.addGameActionsToFrame ();
+        System.out.println ("List Selection Model -- Value Changed to GameID " + tSelectedGameID + 
+        						" Last Action # " + tLastActionNumber);
+	}
+	
+	class SharedListSelectionHandler implements ListSelectionListener {
+		ServerFrame serverFrame;
+		
+		SharedListSelectionHandler (ServerFrame aServerFrame) {
+			serverFrame = aServerFrame;
+		}
+		
+		@Override
+		public void valueChanged (ListSelectionEvent aLSEvent) { 
+            ListSelectionModel tLSM = (ListSelectionModel) aLSEvent.getSource ();
+            int tMinIndex;
+            int tMaxIndex;
+            int tSelectedID;
+
+            tSelectedID = -1;
+             if (! tLSM.isSelectionEmpty ()) {
+                 // Find out which indexes are selected.
+                tMinIndex = tLSM.getMinSelectionIndex ();
+                tMaxIndex = tLSM.getMaxSelectionIndex ();
+                for (int i = tMinIndex; i <= tMaxIndex; i++) {
+                    if (tLSM.isSelectedIndex (i)) {
+                    		tSelectedID = i;
+                    }
+                }
+            }
+           serverFrame.handleGameSelection (tSelectedID);
+         }
+    }
 	
 	private void updateLabelConnections (int aCount) {
 		connectionsLabel.setText ("Connections: " + aCount);
 	}
 	
 	private void setupJFrame () {
-		westJPanel.add (labelPlayers);
-		westJPanel.add (clientList);
+		westJPanel.add (playersLabel);		
+		westJPanel.add (Box.createVerticalStrut (5));
+		westJPanel.add (clientListPane);
 
-		centerJPanel.add (labelGames);
-		centerJPanel.add (gamesList);
+		centerJPanel.add (gamesLabel);
+		centerJPanel.add (Box.createVerticalStrut (5));
+		centerJPanel.add (gamesListPane);
 
 		eastJPanel.add (serverIPLabel);
 		eastJPanel.add (Box.createVerticalStrut (10));
@@ -426,11 +504,11 @@ public class ServerFrame extends JFrame {
 		eastJPanel.add (Box.createVerticalStrut (10));
 		eastJPanel.add (gameActionsLabel);
 		eastJPanel.add (Box.createVerticalStrut (10));
-		eastJPanel.add (gameActionList);
+		eastJPanel.add (gameActionListPane);
 		eastJPanel.add (Box.createVerticalStrut (10));
 		eastJPanel.add (quitButton);
 		
-		setSize (800, 330);
+		setSize (800, 340);
 		setVisible (true);
 	}
 	
