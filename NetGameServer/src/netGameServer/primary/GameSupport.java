@@ -364,13 +364,10 @@ public class GameSupport {
 	public void removeAction (int aActionNumber) {
 		int tLastActionNumber;
 
-		System.out.println ("Ready to Remove Action " + aActionNumber + " Count Before " + networkActions.getCount ());
 		networkActions.remove (aActionNumber);
 		tLastActionNumber = networkActions.getLastNetworkActionNumber ();
 		setActionNumber (tLastActionNumber);
-		serverFrame.removeGameAction ();
-		System.out.println ("Action Removed " + aActionNumber + " Count After " + networkActions.getCount ()
-				+ " Reset Action Number to " + tLastActionNumber);
+		serverFrame.removeLastGameAction ();
 	}
 
 	public void updateLastAction (String aAction) {
@@ -499,6 +496,10 @@ public class GameSupport {
 		return gameID;
 	}
 
+	public int getActionCount () {
+		return networkActions.getCount ();
+	}
+	
 	public String getGameID (String aRequest) {
 		Matcher tMatcher = GS_WITH_GAME_ID_PATTERN.matcher (aRequest);
 		String tFoundGameID = NO_GAME_ID;
