@@ -1,5 +1,8 @@
 package netGameServer.primary;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import netGameServer.utilities.AttributeName;
 import netGameServer.utilities.ElementName;
 import netGameServer.utilities.FileUtils;
@@ -16,6 +19,11 @@ public class NetworkAction {
 	public static final String ACTION_COMPLETE = "Complete";
 	public static final String ACTION_PENDING = "Pending";
 	public static final String ACTION_RECEIVED = "Received";
+	private final static String REQUEST_ACTOR = "<Action.* actor=\"([A-Za-z0-9 ]+)\" ";
+	private final static Pattern REQUEST_ACTOR_PATTERN = Pattern.compile (REQUEST_ACTOR);
+	private final static String REQUEST_NAME = "<Action.*? name=\"([A-Za-z0-9 ]+)\"";
+	private final static Pattern REQUEST_NAME_PATTERN = Pattern.compile (REQUEST_NAME);
+	// name="Pass Action" 
 	int actionNumber;
 	String actionXML;
 	String status;
@@ -63,5 +71,39 @@ public class NetworkAction {
 	
 	public void writeAction (FileUtils aFileUtils) {
 		aFileUtils.outputToFile (actionXML);
+	}
+	
+	public String getActorName () {
+		String tActorName;
+		Matcher tMatcher = REQUEST_ACTOR_PATTERN.matcher (actionXML);
+
+		tActorName = "NO_ACTOR";
+		
+		if (tMatcher.find ()) {
+			tActorName = tMatcher.group (1);
+		}
+		
+		return tActorName;
+	}
+	
+	public String getActionName () {
+		String tActionName;
+		Matcher tMatcher = REQUEST_NAME_PATTERN.matcher (actionXML);
+
+		tActionName = "NO_ACTION";
+		
+		if (tMatcher.find ()) {
+			tActionName = tMatcher.group (1);
+		}
+		
+		return tActionName;
+	}
+	
+	public String getCompactAction () {
+		String tCompactAction;
+		
+		tCompactAction = getNumber () + " " + getActorName () + " " + getActionName ();
+		
+		return tCompactAction;
 	}
 }
