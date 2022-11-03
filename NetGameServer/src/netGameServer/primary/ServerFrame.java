@@ -81,7 +81,8 @@ public class ServerFrame extends JFrame {
 	private ServerSocket serverSocket;
 	private Logger logger;
 	private SavedGames savedGames;
-    String selectedGame;
+	private GameSupport selectedGameSupport;
+//    String selectedGame;
 
 	public ServerFrame (String aName, int aServerPort, LinkedList<String> aGameNames, ServerThread aServerThread) 
 			throws HeadlessException, IOException {
@@ -102,7 +103,8 @@ public class ServerFrame extends JFrame {
 		setupAutoSaveDirectory ();
 		tAutoSavesDirectory = getFullASDirectory ();
 		savedGames = new SavedGames (tAutoSavesDirectory);
-
+		selectedGameSupport = GameSupport.NO_GAME_SUPPORT;
+		
 		serverSocket = null;
 		serverThread.setIsRunning (false);
 	}
@@ -399,7 +401,7 @@ public class ServerFrame extends JFrame {
 		connectionsLabel = new JLabel ("Connections: 0");
 		connectionsLabel.setAlignmentX (Component.LEFT_ALIGNMENT);
 		
-		gameActionsLabel = new JLabel ("Recent Game Actions");
+		gameActionsLabel = new JLabel ("Game Actions");
 		gameActionsLabel.setAlignmentX (Component.LEFT_ALIGNMENT);
 		
 		gameActionList = new JList<String> (gameActionListModel = new DefaultListModel<String> ());
@@ -414,6 +416,19 @@ public class ServerFrame extends JFrame {
 		quitButton.setAlignmentX (Component.LEFT_ALIGNMENT);
 	}
 
+	private void setGameActionsLabel () {
+		int tActionCount;
+		String tGameID;
+		
+		if (selectedGameSupport == GameSupport.NO_GAME_SUPPORT) {
+			gameActionsLabel = new JLabel ("Game Actions");
+		} else {
+			tGameID = selectedGameSupport.getGameID ();
+			tActionCount = selectedGameSupport.getActionCount ();
+			gameActionsLabel.setText ("(" + tGameID + ") Game Actions [" + tActionCount + "]");
+		}
+	}
+	
 	private void setupGamesList () {
 		gameListSelectionHandler = new SharedListSelectionHandler (this);
 		gamesLabel = new JLabel ("Active Games");
@@ -435,24 +450,19 @@ public class ServerFrame extends JFrame {
 	
 	public void addGameAction (String aGameAction) {
 		gameActionListModel.add (0, aGameAction);
+		setGameActionsLabel ();
 	}
 	
-	public void removeGameAction () {
+	public void removeLastGameAction () {
 		gameActionListModel.remove (0);
+		setGameActionsLabel ();
 	}
 	
 	public void handleGameSelection (int aSelectedGameIndex) {
-		String tSelectedGameID;
-		GameSupport tSelectedGameSupport;
-		int tLastActionNumber;
-		
-		tSelectedGameID = gamesList.getModel ().getElementAt (aSelectedGameIndex);
-		tSelectedGameSupport = activeGames.get (aSelectedGameIndex);
-		tLastActionNumber = tSelectedGameSupport.getLastActionNumber ();
+		selectedGameSupport = activeGames.get (aSelectedGameIndex);
 		clearGameActionList ();
-		tSelectedGameSupport.addGameActionsToFrame ();
-        System.out.println ("List Selection Model -- Value Changed to GameID " + tSelectedGameID + 
-        						" Last Action # " + tLastActionNumber);
+		selectedGameSupport.addGameActionsToFrame ();
+		setGameActionsLabel ();
 	}
 	
 	class SharedListSelectionHandler implements ListSelectionListener {
