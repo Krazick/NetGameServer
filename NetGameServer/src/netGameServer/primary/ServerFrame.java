@@ -359,16 +359,16 @@ public class ServerFrame extends JFrame {
 		centerJPanel = new JPanel ();
 		eastJPanel = new JPanel ();
 		
+		westJPanel.setLayout (new BoxLayout (westJPanel, BoxLayout.Y_AXIS));
 		westJPanel.setBorder (new EmptyBorder (5, 10, 0, 10));
+		centerJPanel.setLayout (new BoxLayout (centerJPanel, BoxLayout.Y_AXIS));
+		centerJPanel.setBorder (new EmptyBorder (5, 0, 0, 10));
+		eastJPanel.setLayout (new BoxLayout (eastJPanel, BoxLayout.Y_AXIS));
+		eastJPanel.setBorder (new EmptyBorder (5, 0, 0, 10));
 		add (northJPanel, BorderLayout.NORTH);
 		add (westJPanel, BorderLayout.WEST);
-		westJPanel.setLayout (new BoxLayout (westJPanel, BoxLayout.Y_AXIS));
 		add (centerJPanel, BorderLayout.CENTER);
-		centerJPanel.setBorder (new EmptyBorder (5, 0, 0, 10));
-		centerJPanel.setLayout (new BoxLayout (centerJPanel, BoxLayout.Y_AXIS));
-		eastJPanel.setBorder (new EmptyBorder (5, 0, 0, 10));
 		add (eastJPanel, BorderLayout.EAST);
-		eastJPanel.setLayout (new BoxLayout (eastJPanel, BoxLayout.Y_AXIS));
 	}
 	
 	private void setupJFrameComponents (String aTitle) {

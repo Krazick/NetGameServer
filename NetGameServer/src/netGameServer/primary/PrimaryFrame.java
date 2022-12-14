@@ -1,16 +1,17 @@
 package netGameServer.primary;
 
 import java.awt.Component;
-import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.LinkedList;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
+import javax.swing.JPanel;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,7 +22,8 @@ public class PrimaryFrame extends JFrame {
 	private final static int PORT_CARDS = 52000;
 	private final static String NAME_18XX = "18XX";
 	private final static String NAME_CARDS = "Cards";
-	private String version = "0.5";
+	private String version = "0.6";
+	JPanel primaryPanel;
 	JButton btnQuit;
 	JButton btnManage18XX;
 	JButton btnManageCards;
@@ -32,11 +34,10 @@ public class PrimaryFrame extends JFrame {
 	public PrimaryFrame () {
 		super ("Server Manager");
 		setupLogger ();
-		setLayout (new GridLayout (4, 1));
-		setupFrame ("Server Manager");
+		primaryPanel = setupPrimaryPanel ();
+		add (primaryPanel);
 		setupActions ();
-		setSize (300, 300);
-		pack ();
+		setSize (200, 140);
 		setVisible (true);
 	}
 	
@@ -75,20 +76,42 @@ public class PrimaryFrame extends JFrame {
 		return tServerThread;
 	}
 	
-	public void setupFrame (String aTitle) {
-		JLabel lblTitle = new JLabel (aTitle);
-		lblTitle.setHorizontalAlignment (SwingConstants.CENTER);
+	public JPanel setupPrimaryPanel () {
+		JPanel tPrimaryPanel;
 		
+		tPrimaryPanel = new JPanel ();
+		tPrimaryPanel.setLayout (new BoxLayout (tPrimaryPanel, BoxLayout.PAGE_AXIS));
+
 		btnQuit = new JButton ("Quit");
 		btnQuit.setAlignmentX (Component.CENTER_ALIGNMENT);
 		
 		btnManage18XX = setupManageButton (NAME_18XX);
 		btnManageCards = setupManageButton (NAME_CARDS);
 		
-		add (lblTitle);
-		add (btnManage18XX);
-		add (btnManageCards);
-		add (btnQuit);
+		tPrimaryPanel.add (Box.createVerticalStrut (10));
+		tPrimaryPanel.add (btnManage18XX);
+		tPrimaryPanel.add (Box.createVerticalStrut (10));
+		tPrimaryPanel.add (btnManageCards);
+		tPrimaryPanel.add (Box.createVerticalStrut (10));
+		tPrimaryPanel.add (btnQuit);
+		tPrimaryPanel.add (Box.createVerticalStrut (10));
+		
+		return tPrimaryPanel;
+	}
+	
+	public Point getOffsetFrame () {
+		Point tFramePoint, tNewPoint;
+		double tX, tY;
+		int tNewX, tNewY;
+
+		tFramePoint = getLocation ();
+		tX = tFramePoint.getX ();
+		tY = tFramePoint.getY ();
+		tNewX = (int) tX + 100;
+		tNewY = (int) tY + 100;
+		tNewPoint = new Point (tNewX, tNewY);
+
+		return tNewPoint;
 	}
 	
 	private JButton setupManageButton (String aButtonName) {

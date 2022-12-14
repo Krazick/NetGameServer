@@ -1,8 +1,11 @@
 package netGameServer.primary;
 
 import java.awt.HeadlessException;
+import java.awt.Point;
 import java.io.IOException;
 import java.util.LinkedList;
+
+import javax.swing.JFrame;
 
 import org.apache.logging.log4j.Logger;
 
@@ -32,12 +35,19 @@ public class ServerThread extends Thread {
 		return logger;
 	}
 	
+	public void setThisFrameLocation (JFrame tFrameToOffset) {
+		Point tNewPoint = primaryFrame.getOffsetFrame ();
+
+		tFrameToOffset.setLocation (tNewPoint);
+	}
+
 	@Override
 	public void run () {
 		if (serverFrame == null) {
 			try {
 				logger.info ("Server Thread trying to Run");
 				serverFrame = new ServerFrame (name, serverPort, gameNames, this);
+				setThisFrameLocation (serverFrame);
 				serverFrame.operateFrame ();
 				logger.info ("Server Up and Operating Frame");
 			} catch (HeadlessException tException1) {
