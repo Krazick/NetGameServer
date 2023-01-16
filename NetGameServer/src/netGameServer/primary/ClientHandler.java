@@ -147,6 +147,10 @@ public class ClientHandler implements Runnable {
 		return tOutBufferGood;
 	}
 
+	/** Set the OutputWriter to the local field 
+	 * 
+	 * @param aOutputWriter the Output Writer to store
+	 */
 	public void setOutputWriter (PrintWriter aOutputWriter) {
 		logger.info ("Setting Output Stream");
 		out = aOutputWriter;
