@@ -23,10 +23,10 @@ public class XMLElement {
 	}
 	
 	public void setAttribute (AttributeName aAttributeName, int aValue) {
-		setAttribute (aAttributeName, new Integer (aValue).toString ());
+		setAttribute (aAttributeName, Integer.valueOf (aValue).toString ());
 	}
 	
 	public void setAttribute (AttributeName aAttributeName, boolean aValue) {
-		setAttribute (aAttributeName, new Boolean (aValue).toString ());
+		setAttribute (aAttributeName, Boolean.valueOf (aValue).toString ());
 	}
 }
