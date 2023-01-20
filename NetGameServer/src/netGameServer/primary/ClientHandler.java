@@ -677,6 +677,7 @@ public class ClientHandler implements Runnable {
 			tGEVersion = aMessage.substring (tSpaceIndex + 1);
 			tCurrentName = getFullName ();
 			setGEVersion (tGEVersion);
+			logger.info (tCurrentName + " " + tGEVersion);
 			tNewName = getFullName ();
 			swapUser (tCurrentName, tNewName);
 			tAccepted = true;
