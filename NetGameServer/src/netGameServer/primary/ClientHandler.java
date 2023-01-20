@@ -272,6 +272,8 @@ public class ClientHandler implements Runnable {
 			aContinue = handleNewPlayer (aContinue, aMessage);
 		} else if (aMessage.startsWith ("GEVersion")) {
 			aContinue = handleGEVersion (aContinue, aMessage);
+		} else if (aMessage.startsWith ("EnvironmentVersionInfo")) {
+			aContinue = handleEnvironmentVersionInfo (aContinue, aMessage);
 		} else if (aMessage.startsWith ("say")) {
 			aContinue = playerBroadcast (aMessage);
 		} else if (aMessage.equals ("who")) {
@@ -458,6 +460,14 @@ public class ClientHandler implements Runnable {
 
 	private boolean handleGEVersion (boolean aContinue, String aMessage) {
 		if (! setGEVersionFromMessage (aMessage) ) {
+			aContinue = false;		
+		}
+		
+		return aContinue;
+	}
+	
+	private boolean handleEnvironmentVersionInfo (boolean aContinue, String aMessage) {
+		if (! setEnvironmentVersionInfoFromMessage (aMessage) ) {
 			aContinue = false;		
 		}
 		
@@ -658,9 +668,11 @@ public class ClientHandler implements Runnable {
 	private boolean setGEVersionFromMessage (String aMessage) {
 		boolean tAccepted = false;
 		String tGEVersion;
-		int tSpaceIndex = aMessage.indexOf (" ");
-		String tCurrentName, tNewName;
+		int tSpaceIndex;
+		String tCurrentName;
+		String tNewName;
 		
+		tSpaceIndex = aMessage.indexOf (" ");
 		if (tSpaceIndex > 0) {
 			tGEVersion = aMessage.substring (tSpaceIndex + 1);
 			tCurrentName = getFullName ();
@@ -670,6 +682,23 @@ public class ClientHandler implements Runnable {
 			tAccepted = true;
 		} else {
 			logger.error (">> No Space in GEVersion Command [" + aMessage + "] <<");
+		}
+		
+		return tAccepted;
+	}
+
+	private boolean setEnvironmentVersionInfoFromMessage (String aMessage) {
+		boolean tAccepted = false;
+		String tEnvironmentVersionInfo;
+		int tSpaceIndex;
+		
+		tSpaceIndex = aMessage.indexOf (" ");
+		if (tSpaceIndex > 0) {
+			tEnvironmentVersionInfo = aMessage.substring (tSpaceIndex + 1);
+			logger.info (tEnvironmentVersionInfo);
+			tAccepted = true;
+		} else {
+			logger.error (">> No Space in Environment Version Info Command [" + aMessage + "] <<");
 		}
 		
 		return tAccepted;
