@@ -267,7 +267,6 @@ public class ClientHandler implements Runnable {
 	}
 
 	private boolean handleServerCommands (boolean aContinue, String aMessage) {
-		System.out.println ("Message recieved [" + aMessage + "]");
 		if (aMessage.startsWith ("name")) {
 			aContinue = handleNewPlayer (aContinue, aMessage);
 		} else if (aMessage.startsWith ("GEVersion")) {
