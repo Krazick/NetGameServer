@@ -12,6 +12,8 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+//
+//import ge18xx.utilities.AttributeName;
 
 import java.io.StringWriter;
 
@@ -24,6 +26,7 @@ import javax.xml.transform.stream.StreamResult;
 
 public class XMLNode {
 	Node node;
+	
 	
 	public XMLNode (Node aNode) {
 		node = aNode;
@@ -166,7 +169,49 @@ public class XMLNode {
 			return Integer.parseInt (tValue);
 		}
 	}
-	
+
+	public long getThisLongAttribute (AttributeName aAttributeName) {
+		long tAttributeValue;
+		String tAttributeName;
+
+		tAttributeValue = 0;
+		if (aAttributeName.hasValue ()) {
+			tAttributeName = aAttributeName.getString ();
+			tAttributeValue = getThisLongAttribute (tAttributeName, tAttributeValue);
+		}
+
+		return tAttributeValue;
+	}
+
+	public long getThisLongAttribute (AttributeName aAttributeName, long aDefaultValue) {
+		long tAttributeValue;
+		String tAttributeName;
+
+		tAttributeValue = aDefaultValue;
+		if (aAttributeName.hasValue ()) {
+			tAttributeName = aAttributeName.getString ();
+			tAttributeValue = getThisLongAttribute (tAttributeName, aDefaultValue);
+		}
+
+		return tAttributeValue;
+	}
+
+	/* PRIVATE */
+	private long getThisLongAttribute (String aAttributeName, long aDefaultValue) {
+		String tValue;
+		long tLongValue;
+		
+		tValue = getThisAttribute (aAttributeName);
+		if (tValue == null) {
+			tLongValue = aDefaultValue;
+
+		} else {
+			tLongValue = Long.parseLong (tValue);
+		}
+		
+		return tLongValue;
+	}
+
 	@Override
 	public String toString () {
 		return convertNodeToString (node);
