@@ -267,7 +267,7 @@ public class ClientHandler implements Runnable {
 	}
 
 	private boolean handleServerCommands (boolean aContinue, String aMessage) {
-		
+		System.out.println ("Message recieved [" + aMessage + "]");
 		if (aMessage.startsWith ("name")) {
 			aContinue = handleNewPlayer (aContinue, aMessage);
 		} else if (aMessage.startsWith ("GEVersion")) {
@@ -461,9 +461,29 @@ public class ClientHandler implements Runnable {
 	private boolean handleGEVersion (boolean aContinue, String aMessage) {
 		if (! setGEVersionFromMessage (aMessage) ) {
 			aContinue = false;		
+		} else {
+			if (! allGEVersionsMatch ()) {
+				serverBroadcast (name + " Game Engine Version " + geVersion + 
+								" does not match others", SEND_TO.AllClients);
+			}
 		}
 		
 		return aContinue;
+	}
+	
+	private boolean allGEVersionsMatch () {
+		boolean tAllGEVersionsMatch;
+		String tGEVersion;
+		
+		tAllGEVersionsMatch = true;
+		for (ClientHandler tClientHandler : clients) {
+			tGEVersion = tClientHandler.getGEVersion ();
+			if (! geVersion.equals (tGEVersion)) {
+				tAllGEVersionsMatch = false;
+			}
+		}
+		
+		return tAllGEVersionsMatch;
 	}
 	
 	private boolean handleEnvironmentVersionInfo (boolean aContinue, String aMessage) {
