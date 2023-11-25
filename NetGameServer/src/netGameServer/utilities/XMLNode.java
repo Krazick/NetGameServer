@@ -12,8 +12,6 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-//
-//import ge18xx.utilities.AttributeName;
 
 import java.io.StringWriter;
 
