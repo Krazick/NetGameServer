@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
-//import java.util.ArrayList;
 import java.util.LinkedList;
 
 import javax.swing.DefaultListModel;
