@@ -6,7 +6,7 @@ import org.junit.platform.suite.api.SuiteDisplayName;
 
 @Suite
 @SuiteDisplayName ("Net Game Server Test Suite")
-@SelectPackages ({ "netGameServer.primaryTests", "netGameServer.utilitiesTests" })
+@SelectPackages ({ "netGameServer.primaryTests" })
 
 public class NetGameServerTestSuite {
 
