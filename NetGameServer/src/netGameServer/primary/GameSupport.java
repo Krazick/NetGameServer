@@ -8,11 +8,12 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.NodeList;
 
-import netGameServer.utilities.XMLNode;
+
 import netGameServer.utilities.ElementName;
 import netGameServer.utilities.AttributeName;
 import netGameServer.utilities.FileUtils;
 import netGameServer.utilities.XMLDocument;
+import netGameServer.utilities.XMLNode;
 
 public class GameSupport {
 	public static final ElementName EN_PLAYERS = new ElementName ("Players");
@@ -259,9 +260,12 @@ public class GameSupport {
 	}
 
 	public void loadXMLAutoSave (XMLDocument aXMLAutoSaveDocument) {
-		XMLNode tXMLSaveGame, tChildNode;
+		XMLNode tXMLSaveGame;
+		XMLNode tChildNode;
 		NodeList tChildren;
-		int tChildrenCount, tIndex, tLastActionNumber;
+		int tChildrenCount;
+		int tIndex;
+		int tLastActionNumber;
 		String tChildName;
 
 		tXMLSaveGame = aXMLAutoSaveDocument.getDocumentElement ();
