@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.w3c.dom.NodeList;
 
-import netGameServer.utilities.ElementName;
-import netGameServer.utilities.FileUtils;
-import netGameServer.utilities.XMLNode;
+import geUtilities.ElementName;
+import geUtilities.FileUtils;
+import geUtilities.XMLNode;
 
 public class NetworkActions {
 	public static final ElementName EN_NETWORK_ACTIONS = new ElementName ("NetworkActions");

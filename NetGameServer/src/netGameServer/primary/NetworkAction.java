@@ -3,10 +3,10 @@ package netGameServer.primary;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import netGameServer.utilities.AttributeName;
-import netGameServer.utilities.ElementName;
-import netGameServer.utilities.FileUtils;
-import netGameServer.utilities.XMLNode;
+import geUtilities.AttributeName;
+import geUtilities.ElementName;
+import geUtilities.FileUtils;
+import geUtilities.XMLNode;
 
 public class NetworkAction {
 	public static final ElementName EN_ACTION = new ElementName ("Action");

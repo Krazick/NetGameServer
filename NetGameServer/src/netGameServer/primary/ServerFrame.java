@@ -39,7 +39,7 @@ import java.awt.Dimension;
 
 import org.apache.logging.log4j.Logger;
 
-import netGameServer.utilities.FileUtils;
+import geUtilities.FileUtils;
 
 public class ServerFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
