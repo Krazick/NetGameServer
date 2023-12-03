@@ -22,7 +22,6 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.JButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
@@ -40,6 +39,7 @@ import java.awt.Dimension;
 import org.apache.logging.log4j.Logger;
 
 import geUtilities.FileUtils;
+import swingDelays.KButton;
 
 public class ServerFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -61,7 +61,7 @@ public class ServerFrame extends JFrame {
 	private JPanel centerJPanel;
 	private JPanel eastJPanel;
 	
-	private JButton quitButton;
+	private KButton quitButton;
 	private JList<String> clientList;
 	private JList<String> gamesList;
 	private ListSelectionModel gamesListSelectionModel;
@@ -412,7 +412,7 @@ public class ServerFrame extends JFrame {
 		gameActionListPane.setAlignmentX (Component.LEFT_ALIGNMENT);
 		addGameAction (NO_SELECTED_GAME);
 
-		quitButton = new JButton ("Quit");
+		quitButton = new KButton ("Quit");
 		quitButton.setAlignmentX (Component.LEFT_ALIGNMENT);
 	}
 

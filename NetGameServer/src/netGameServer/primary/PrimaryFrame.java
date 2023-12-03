@@ -9,12 +9,13 @@ import java.util.LinkedList;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import swingDelays.KButton;
 
 public class PrimaryFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -24,9 +25,9 @@ public class PrimaryFrame extends JFrame {
 	private final static String NAME_CARDS = "Cards";
 	private String version = "0.6";
 	JPanel primaryPanel;
-	JButton btnQuit;
-	JButton btnManage18XX;
-	JButton btnManageCards;
+	KButton btnQuit;
+	KButton btnManage18XX;
+	KButton btnManageCards;
 	ServerThread serverThread18XX;
 	ServerThread serverThreadCards;
 	private Logger logger;
@@ -82,7 +83,7 @@ public class PrimaryFrame extends JFrame {
 		tPrimaryPanel = new JPanel ();
 		tPrimaryPanel.setLayout (new BoxLayout (tPrimaryPanel, BoxLayout.PAGE_AXIS));
 
-		btnQuit = new JButton ("Quit");
+		btnQuit = new KButton ("Quit");
 		btnQuit.setAlignmentX (Component.CENTER_ALIGNMENT);
 		
 		btnManage18XX = setupManageButton (NAME_18XX);
@@ -114,10 +115,10 @@ public class PrimaryFrame extends JFrame {
 		return tNewPoint;
 	}
 	
-	private JButton setupManageButton (String aButtonName) {
-		JButton tManageButton;
+	private KButton setupManageButton (String aButtonName) {
+		KButton tManageButton;
 		
-		tManageButton = new JButton ("Manage Button");
+		tManageButton = new KButton ("Manage Button");
 		setStartText (tManageButton, aButtonName);
 		tManageButton.setAlignmentX (Component.CENTER_ALIGNMENT);
 		
@@ -176,7 +177,7 @@ public class PrimaryFrame extends JFrame {
 		});
 	}
 
-	public ServerThread manageAction (JButton aServerButton, ServerThread aServerThread, int aPort, String aThreadName) {
+	public ServerThread manageAction (KButton aServerButton, ServerThread aServerThread, int aPort, String aThreadName) {
 		LinkedList<String> tGameNames;
 		ServerThread tServerThread;
 		
@@ -206,11 +207,11 @@ public class PrimaryFrame extends JFrame {
 		}
 	}
 	
-	private void setStartText (JButton aManageButton, String aThreadName) {
+	private void setStartText (KButton aManageButton, String aThreadName) {
 		aManageButton.setText("Start " + aThreadName + " Server");
 	}
 	
-	private void setStopText (JButton aManageButton, String aThreadName) {
+	private void setStopText (KButton aManageButton, String aThreadName) {
 		aManageButton.setText("Stop " + aThreadName + " Server");
 	}
 }
