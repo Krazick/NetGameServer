@@ -13,10 +13,11 @@ public class GameServer {
      */
     private static void createAndShowGUI () {
         //Create and set up the window.
-        PrimaryFrame frame = new PrimaryFrame ();
+        PrimaryFrame frame;
+        
+        frame = new PrimaryFrame ();
         frame.setDefaultCloseOperation (PrimaryFrame.EXIT_ON_CLOSE);
 
- 
         //Display the window.
         frame.pack();
         frame.setVisible(true);
@@ -28,12 +29,12 @@ public class GameServer {
         //creating and showing this application's GUI.
 		
         SwingUtilities.invokeLater (new Runnable () {
-        	@Override
+        		@Override
 			public void run () {
-        		//Turn off metal's use of bold fonts
-        		UIManager.put ("swing.boldMetal", Boolean.FALSE);
+        			//Turn off metal's use of bold fonts
+        			UIManager.put ("swing.boldMetal", Boolean.FALSE);
                  
-        		createAndShowGUI ();
+        			createAndShowGUI ();
             }
         });
 	}

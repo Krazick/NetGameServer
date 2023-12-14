@@ -19,6 +19,7 @@ import swingDelays.KButton;
 
 public class PrimaryFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
+	public static final PrimaryFrame NO_PRIMARY_FRAME = null;
 	private final static int PORT_18XX = 18300;
 	private final static int PORT_CARDS = 52000;
 	private final static String NAME_18XX = "18XX";
@@ -153,10 +154,10 @@ public class PrimaryFrame extends JFrame {
 		btnQuit.addActionListener (new ActionListener () {
 			@Override
 			public void actionPerformed (ActionEvent e) {
-				if (serverThread18XX != null) {
+				if (serverThread18XX != ServerThread.NO_SERVER_THREAD) {
 					serverThread18XX.quitThread ();
 				}
-				if (serverThreadCards != null) {
+				if (serverThreadCards != ServerThread.NO_SERVER_THREAD) {
 					serverThreadCards.quitThread ();
 				}
 				System.exit(0);
@@ -181,11 +182,11 @@ public class PrimaryFrame extends JFrame {
 		LinkedList<String> tGameNames;
 		ServerThread tServerThread;
 		
-		if (aServerThread != null) {
+		if (aServerThread != ServerThread.NO_SERVER_THREAD) {
 			if (aServerThread.isRunning ()); {
 				aServerThread.quitThread ();
 			}
-			tServerThread = null;
+			tServerThread = ServerThread.NO_SERVER_THREAD;
 			setStartText (aServerButton, aThreadName);
 			frameQuitting (aPort);
 		} else {
@@ -199,10 +200,10 @@ public class PrimaryFrame extends JFrame {
 	
 	public void frameQuitting (int serverPort) {
 		if (serverPort == PORT_18XX) {
-			serverThread18XX = null;
+			serverThread18XX = ServerThread.NO_SERVER_THREAD;
 			setStartText (btnManage18XX, NAME_18XX);
 		} else if (serverPort == PORT_CARDS) {
-			serverThreadCards = null;
+			serverThreadCards = ServerThread.NO_SERVER_THREAD;
 			setStartText (btnManageCards, NAME_CARDS);
 		}
 	}

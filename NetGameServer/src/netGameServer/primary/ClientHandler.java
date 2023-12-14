@@ -14,6 +14,8 @@ import javax.swing.DefaultListModel;
 
 import org.apache.logging.log4j.Logger;
 
+import geUtilities.GUI;
+
 public class ClientHandler implements Runnable {
 	public final static String GAME_ACTIVITY_PREFIX = "Game Activity <GA>";
 	public final static String GAME_ACTIVITY_SUFFFIX = "</GA>";
@@ -23,8 +25,12 @@ public class ClientHandler implements Runnable {
 	public static final String GAME_SELECTION = "GameSelection";
 	public static final String PLAYER_ORDER = "PlayerOrder";
 	public enum PlayerStatus { 
-		NotConnected ("NOT CONNECTED"), Connected ("CONNECTED"), 
-		Ready ("READY"), Active ("ACTIVE"), AFK ("AFK");
+		NotConnected ("NOT CONNECTED"),
+		Connected ("CONNECTED"),
+		Ready ("READY"),
+		Active ("ACTIVE"),
+		AFK ("AFK");
+		
 		private String enumString;
 		
 		PlayerStatus (String aEnumString) { enumString = aEnumString; }
@@ -33,8 +39,9 @@ public class ClientHandler implements Runnable {
 		public String toString () { return enumString; }
 		
 		public static PlayerStatus fromString (String aPlayerStatus) {
-			PlayerStatus tFoundPlayerStatus = PlayerStatus.NotConnected;
+			PlayerStatus tFoundPlayerStatus;
 			
+			tFoundPlayerStatus = PlayerStatus.NotConnected;
 			for (PlayerStatus tPlayerStatus : PlayerStatus.values ()) {
 				if (tPlayerStatus.toString ().equalsIgnoreCase (aPlayerStatus)) {
 					tFoundPlayerStatus = tPlayerStatus;
@@ -57,7 +64,7 @@ public class ClientHandler implements Runnable {
 	private Socket socket;
 	private BufferedReader in;
 	private PrintWriter out;
-	private String name;	// Player Name
+	private String playerName;
 	private String geVersion;
 	private String gameName;
 	private ServerFrame serverFrame;
@@ -82,7 +89,7 @@ public class ClientHandler implements Runnable {
 			DefaultListModel<String> aClientListModel,
 			DefaultListModel<String> aGameListModel, boolean aSetupInOut) {
 		serverFrame = aServerFrame;
-		name = "";
+		playerName = GUI.EMPTY_STRING;
 		try {
 			setSocket (aClientSocket);
 		} catch (IOException tException) {
@@ -93,7 +100,7 @@ public class ClientHandler implements Runnable {
 		setGameList (aGameListModel);
 		setLogger (serverFrame.getLogger ());
 		setPlayerStatus (PlayerStatus.Connected);
-		setGEVersion ("");
+		setGEVersion (GUI.EMPTY_STRING);
 		if (aSetupInOut) {
 			SetupSocketInOut ();
 		}
@@ -126,10 +133,11 @@ public class ClientHandler implements Runnable {
 	}
 
 	private boolean setupOutPrintWriter () {
-		boolean tOutBufferGood = false;
+		boolean tOutBufferGood;
 		PrintWriter tPrintWriter;
 		OutputStream tOutputStream;
 		
+		tOutBufferGood = false;
 		try {
 			logger.info ("Getting OutputStream from socket");
 			tOutputStream = socket.getOutputStream ();
@@ -169,11 +177,12 @@ public class ClientHandler implements Runnable {
 	}
 	
 	private boolean setupInBufferedReader() {
-		boolean tInBufferGood = false;
+		boolean tInBufferGood;
 		BufferedReader tInputReader;
 		InputStream tInputStream;
 		InputStreamReader tInputStreamReader;
 		
+		tInBufferGood = false;
 		try {
 			if (socket != null) {
 				tInputStream = socket.getInputStream ();
@@ -200,19 +209,24 @@ public class ClientHandler implements Runnable {
 	
 	@Override
 	public void run () {
-		boolean tContinue = true;
+		boolean tContinue;
 		String tMessage;
 		String tMessageClean;
-		int tNullReadCount = 0;
-		int tMaxNullReadCount = 10;
-		Thread tThread = Thread.currentThread ();
+		int tNullReadCount;
+		int tMaxNullReadCount;
+		Thread tThread;
 		
+		tNullReadCount = 0;
+		tMaxNullReadCount = 10;
+		tContinue = true;
+		tThread = Thread.currentThread ();
 		while (tContinue) {
 			if (inBufferGood) {
 				try {
-					logger.info ("Reading for " + name + " from SocketPort " + socket.getPort () + " Thread ID " + tThread.getId ());
+					logger.info ("Reading for " + playerName + " from SocketPort " + socket.getPort () + " Thread ID " +
+									tThread.getId ());
 					tMessage = in.readLine ();
-					logger.info ("RAW Input from " + name + " [" + tMessage + "]");
+					logger.info ("RAW Input from " + playerName + " [" + tMessage + "]");
 					if (tMessage == null) {
 						tNullReadCount++;
 						Thread.sleep (3000);
@@ -243,7 +257,7 @@ public class ClientHandler implements Runnable {
 	}
 
 	public boolean startsAndEndsWith (String aText, String aStartText, String aEndText) {
-		boolean tStartsAndEndsWith = false;
+		boolean tStartsAndEndsWith;
 		
 		tStartsAndEndsWith = aText.startsWith (aStartText) && aText.endsWith (aEndText);
 		
@@ -251,9 +265,9 @@ public class ClientHandler implements Runnable {
 	}
 
 	public boolean handleMessage (boolean aContinue, String aMessage) {
-		if (aMessage == null) {
+		if (aMessage == GUI.NULL_STRING) {
 			aContinue = false;
-			serverBroadcast (name + " has aborted", SEND_TO.AllButRequestor);
+			serverBroadcast (playerName + " has aborted", SEND_TO.AllButRequestor);
 		} else if (startsAndEndsWith (aMessage, GAME_ACTIVITY_PREFIX, GAME_ACTIVITY_SUFFFIX)) {
 			handleGameActivity (aMessage);
 		} else if (startsAndEndsWith (aMessage, GAME_SUPPORT_PREFIX, GAME_SUPPORT_SUFFFIX)) {
@@ -279,10 +293,10 @@ public class ClientHandler implements Runnable {
 		} else if (aMessage.equals ("stop")) {
 			aContinue = handlePlayerStop ();
 		} else if (aMessage.equals ("AFK")) {
-			serverBroadcast (name + " is AFK", SEND_TO.AllClients);
+			serverBroadcast (playerName + " is AFK", SEND_TO.AllClients);
 			setClientIsAFK (true);
 		} else if (aMessage.equals ("Not AFK")) {
-			serverBroadcast (name + " is Not AFK", SEND_TO.AllClients);
+			serverBroadcast (playerName + " is Not AFK", SEND_TO.AllClients);
 			setClientIsAFK (false);
 		} else if (aMessage.equals ("Active")) {
 			startClient ();
@@ -290,7 +304,7 @@ public class ClientHandler implements Runnable {
 			handleClientIsReady ();
 		} else if (aMessage.equals ("Not Ready")) {
 			setClientIsReady (false);
-			serverBroadcast (name + " is Not Ready to play the Game", SEND_TO.AllButRequestor);
+			serverBroadcast (playerName + " is Not Ready to play the Game", SEND_TO.AllButRequestor);
 		} else {
 			handleUnrecognizedDataReceived (aMessage);
 		}
@@ -303,7 +317,7 @@ public class ClientHandler implements Runnable {
 		
 		tContinue = false;
 		out.println ("stopping");
-		serverBroadcast (name + " has left", SEND_TO.AllButRequestor);
+		serverBroadcast (playerName + " has left", SEND_TO.AllButRequestor);
 		
 		return tContinue;
 	}
@@ -372,9 +386,10 @@ public class ClientHandler implements Runnable {
 	}
 	
 	public GameSupport getMatchingGameSupport (String aGameID) {
-		GameSupport tFoundGameSupport = GameSupport.NO_GAME_SUPPORT;
+		GameSupport tFoundGameSupport;
 		String tFoundGameID;
 		
+		tFoundGameSupport = GameSupport.NO_GAME_SUPPORT;
 		for (ClientHandler tClientHandler : clients) {
 			tFoundGameID = tClientHandler.getGameID ();
 			if (tFoundGameID != GameSupport.NO_GAME_ID) {
@@ -407,8 +422,9 @@ public class ClientHandler implements Runnable {
 
 	public boolean updateGameSupport (String aGameID) {
 		GameSupport tFoundGameSupport;
-		boolean tUpdated = false;
+		boolean tUpdated;
 		
+		tUpdated = false;
 		tFoundGameSupport = getMatchingGameSupport (aGameID);
 		if (tFoundGameSupport == GameSupport.NO_GAME_SUPPORT) {
 			logger.info ("Did not Find a loaded Game Support with id " + aGameID);
@@ -423,12 +439,13 @@ public class ClientHandler implements Runnable {
 	}
 	
 	public boolean handleGameSupport (String aGameSupportText) {
-		boolean tHandledGameSupport = true;
+		boolean tHandledGameSupport;
 		String tGSResponse;
 		SEND_TO tSendTo;
 		String tGameID;
 		int tLastActionNumber;
 		
+		tHandledGameSupport = true;
 		if (gameSupport == GameSupport.NO_GAME_SUPPORT) {
 			setNewGameSupport (logger);
 			tGameID = gameSupport.getGameIdFromRequest (aGameSupportText);
@@ -448,7 +465,7 @@ public class ClientHandler implements Runnable {
 		if (gameSupport.isRequestForHeartbeat (aGameSupportText)) {
 			// Setup Customer Logger for Heartbeat Logging to separate file.
 		} else {
-			logger.info ("----- Client " + name + " Last Action Number " + tLastActionNumber);
+			logger.info ("----- Client " + playerName + " Last Action Number " + tLastActionNumber);
 			logger.info ("Generated Response is [" + tGSResponse + "]");
 		}
 		serverBroadcast (tGSResponse, tSendTo);
@@ -461,7 +478,7 @@ public class ClientHandler implements Runnable {
 			aContinue = false;		
 		} else {
 			if (! allGEVersionsMatch ()) {
-				serverBroadcast (name + " Game Engine Version " + geVersion + 
+				serverBroadcast (playerName + " Game Engine Version " + geVersion + 
 								" does not match others", SEND_TO.AllClients);
 			}
 		}
@@ -514,19 +531,19 @@ public class ClientHandler implements Runnable {
 	}
 	
     private void log (String aMessage, Exception aException) {
-    	logger.error (aMessage + " [" + name + "]", aException);
+    		logger.error (aMessage + " [" + playerName + "]", aException);
     }
 
     public void setGEVersion (String aGEVersion) {
-    	geVersion = aGEVersion;
+    		geVersion = aGEVersion;
     }
     
     public String getGEVersion () {
-    	return geVersion;
+    		return geVersion;
     }
     
 	public String getName () {
-		return name;
+		return playerName;
 	}
 
 	public String getAFKName (String aName) {
@@ -542,7 +559,7 @@ public class ClientHandler implements Runnable {
 	}
 	
 	public String getAFKName () {
-		return getAFKName (name); 
+		return getAFKName (playerName); 
 	}
 	
 	public String getFullName () {
@@ -551,7 +568,7 @@ public class ClientHandler implements Runnable {
 		if (playerStatus == null) {
 			tFullName = "Name UNDEFINED";
 		} else {
-			tFullName = name + " [" + playerStatus.toString () + "]";
+			tFullName = playerName + " [" + playerStatus.toString () + "]";
 			tFullName += " " + geVersion;
 		}
 		
@@ -559,7 +576,8 @@ public class ClientHandler implements Runnable {
 	}
 	
 	public void setClientIsReady (boolean aIsReady) {
-		String tCurrentName, tNewName;
+		String tCurrentName;
+		String tNewName;
 		
 		tCurrentName = getFullName ();
 		ready = aIsReady;
@@ -570,7 +588,8 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void setPlayerStatus (PlayerStatus aNewPlayerStatus) {
-		String tFullName, tNewFullName;
+		String tFullName;
+		String tNewFullName;
 		int tFoundIndex;
 		
 		tFullName = getFullName ();
@@ -583,16 +602,18 @@ public class ClientHandler implements Runnable {
 	}
 	
 	private int tFindIndexFor (String aFullName) {
-		int tIndex, tFoundIndex, tClientCount;
+		int tClientIndex;
+		int tFoundIndex;
+		int tClientCount;
 		String tFullName;
 		
 		tFoundIndex = -1;
 		tClientCount = clientListModel.size ();
 		if (tClientCount > 0) {
-			for (tIndex = 0; tIndex < tClientCount; tIndex++) {
-				tFullName = clientListModel.get (tIndex);
+			for (tClientIndex = 0; tClientIndex < tClientCount; tClientIndex++) {
+				tFullName = clientListModel.get (tClientIndex);
 				if (tFullName.equals (aFullName)) {
-					tFoundIndex = tIndex;
+					tFoundIndex = tClientIndex;
 				}
 			}
 		}
@@ -627,7 +648,8 @@ public class ClientHandler implements Runnable {
 	}
 	
 	public void setClientIsAFK (boolean aIsAFK) {
-		String tCurrentName, tNewName;
+		String tCurrentName;
+		String tNewName;
 		
 		tCurrentName = getFullName ();
 		afk = aIsAFK;
@@ -664,11 +686,14 @@ public class ClientHandler implements Runnable {
 	
 	private boolean clientListContains (String aName) {
 		String tClientName;
-		int tIndex;
-		boolean tContains = false;
+		int tClientIndex;
+		int tClientCount;
+		boolean tContains;
 		
-		for (tIndex = 0; tIndex < clientListModel.size (); tIndex++) {
-			tClientName = clientListModel.get (tIndex);
+		tContains = false;
+		tClientCount = clientListModel.size ();
+		for (tClientIndex = 0; tClientIndex < tClientCount; tClientIndex++) {
+			tClientName = clientListModel.get (tClientIndex);
 			if (tClientName.startsWith (aName)) {
 				tContains = true;
 			}	
@@ -684,12 +709,13 @@ public class ClientHandler implements Runnable {
 	}
 	
 	private boolean setGEVersionFromMessage (String aMessage) {
-		boolean tAccepted = false;
+		boolean tAccepted;
 		String tGEVersion;
 		int tSpaceIndex;
 		String tCurrentName;
 		String tNewName;
 		
+		tAccepted = false;
 		tSpaceIndex = aMessage.indexOf (" ");
 		if (tSpaceIndex > 0) {
 			tGEVersion = aMessage.substring (tSpaceIndex + 1);
@@ -707,10 +733,11 @@ public class ClientHandler implements Runnable {
 	}
 
 	private boolean setEnvironmentVersionInfoFromMessage (String aMessage) {
-		boolean tAccepted = false;
+		boolean tAccepted;
 		String tEnvironmentVersionInfo;
 		int tSpaceIndex;
 		
+		tAccepted = false;
 		tSpaceIndex = aMessage.indexOf (" ");
 		if (tSpaceIndex > 0) {
 			tEnvironmentVersionInfo = aMessage.substring (tSpaceIndex + 1);
@@ -724,10 +751,13 @@ public class ClientHandler implements Runnable {
 	}
 	
 	private boolean setNameFromMessage (String aMessage) {
-		boolean tAccepted = false;
-		String tName, tFullName;
+		boolean tAccepted;
+		String tName;
+		String tFullName;
+		int tSpaceIndex;
 		
-		int tSpaceIndex = aMessage.indexOf (" ");
+		tAccepted = false;
+		tSpaceIndex = aMessage.indexOf (" ");
 		if (tSpaceIndex > 0) {
 			tName = aMessage.substring (tSpaceIndex + 1);
 			if (! clientListContains (tName)) {
@@ -735,7 +765,7 @@ public class ClientHandler implements Runnable {
 				tFullName = getFullName ();
 				addNewUser (tFullName);
 				tAccepted = true;
-				serverBroadcast (name + " has joined", SEND_TO.AllButRequestor);
+				serverBroadcast (playerName + " has joined", SEND_TO.AllButRequestor);
 			}
 		} else {
 			logger.error (">> No Space in Name Command [" + aMessage + "] <<");
@@ -745,7 +775,7 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void setName (String aName) {
-		name = aName;
+		playerName = aName;
 	}
 	
 	// If the "aToAll" flag is false, don't send it the the Client that matches this
@@ -756,15 +786,15 @@ public class ClientHandler implements Runnable {
 	
 	public void serverBroadcast (String aMessage, SEND_TO aSendTo) {
 		for (ClientHandler tClientHandler : clients) {
-			if (name != null) {
+			if (playerName != null) {
 				if (SEND_TO.AllClients == aSendTo) {
 					tClientHandler.serverMessage (aMessage);
 				} else if (SEND_TO.Requestor == aSendTo) {
-					if (name.equals (tClientHandler.getName ())) {
+					if (playerName.equals (tClientHandler.getName ())) {
 						tClientHandler.serverMessage (aMessage);
 					}
 				} else if (SEND_TO.AllButRequestor == aSendTo) {
-					if (! name.equals (tClientHandler.getName ())) {
+					if (! playerName.equals (tClientHandler.getName ())) {
 						tClientHandler.serverMessage (aMessage);
 					}
 				}
@@ -773,11 +803,14 @@ public class ClientHandler implements Runnable {
 	}
 	
 	public int getGameIndex (String aGameActivity) {
-		int tGameIndex = NO_GAME_INDEX;
-		String tPrefix = getGameSelectPrefix ();
-		String tShort, tShortInt;
+		int tGameIndex;
+		String tPrefix;
+		String tShort;
+		String tShortInt;
 		int tGameIndexLoc;
 		
+		tGameIndex = NO_GAME_INDEX;
+		tPrefix = getGameSelectPrefix ();
 		if (aGameActivity.startsWith (tPrefix)) {
 			tGameIndexLoc = aGameActivity.indexOf (GAME_INDEX);
 			
@@ -841,8 +874,9 @@ public class ClientHandler implements Runnable {
 	}
 	
 	public String getGameName (int aGameIndex) {
-		String tFoundName = NO_GAME_NAME;
+		String tFoundName;
 		
+		tFoundName = NO_GAME_NAME;
 		if ((aGameIndex >= 0) && (aGameIndex < getGameListCount ())) {
 			tFoundName = gameListModel.get (aGameIndex);
 		}
@@ -852,8 +886,8 @@ public class ClientHandler implements Runnable {
 	
 	private void broadcastGameActivity (String aGameActivity) {
 		for (ClientHandler tClientHandler : clients) {
-			if (name != null) {
-				if (! name.equals (tClientHandler.getName ())) {
+			if (playerName != GUI.NULL_STRING) {
+				if (! playerName.equals (tClientHandler.getName ())) {
 					tClientHandler.out.println (aGameActivity);
 				}
 			}
@@ -862,8 +896,9 @@ public class ClientHandler implements Runnable {
 
 	public boolean handlePlayerOrder (String aGameActivity) {
 		String tPlayerOrderPrefix;
-		boolean tHandled = false;
+		boolean tHandled;
 		
+		tHandled = false;
 		tPlayerOrderPrefix = getPlayerOrderPrefix ();
 		if (aGameActivity.startsWith (tPlayerOrderPrefix)) {
 			tHandled = true;
@@ -874,8 +909,9 @@ public class ClientHandler implements Runnable {
 
 	public boolean handleGameSelection (String aGameActivity) {
 		String tGameSelectPrefix;
-		boolean tHandled = false;
+		boolean tHandled;
 		
+		tHandled = false;
 		tGameSelectPrefix = getGameSelectPrefix ();
 		if (aGameActivity.startsWith (tGameSelectPrefix)) {
 			setClientIsReady (true);
@@ -888,15 +924,16 @@ public class ClientHandler implements Runnable {
 
 	private boolean playerBroadcast (String aMessage) {
 		String tMessage;
-		boolean tSuccess = false;
+		boolean tSuccess;
 		
+		tSuccess = false;
 		int tSpaceIndex = aMessage.indexOf (" ");
 		if (tSpaceIndex > 0) {
 			tMessage = aMessage.substring (tSpaceIndex + 1);
 			for (ClientHandler tClientHandler : clients) {
-				if (name != null) {
-					if (! name.equals (tClientHandler.getName ())) {
-						tClientHandler.out.println (name + ": " + tMessage);
+				if (playerName != null) {
+					if (! playerName.equals (tClientHandler.getName ())) {
+						tClientHandler.out.println (playerName + ": " + tMessage);
 						tSuccess = tSuccess || true;
 					}
 				}
@@ -910,7 +947,7 @@ public class ClientHandler implements Runnable {
 	}
 
 	private void serverMessage (String aMessage) {
-		logger.info ("Sending to " + name + " over Port " + socket.getPort () + " the following [" + aMessage + "]");
+		logger.info ("Sending to " + playerName + " over Port " + socket.getPort () + " the following [" + aMessage + "]");
 		out.println ("[Server: " + aMessage + "]");
 	}
 
@@ -998,12 +1035,14 @@ public class ClientHandler implements Runnable {
 	
 	public boolean updateClientHandlers (String aClientName, String aGameID, GameSupport aGameSupport) {
 		String tThisClientName;
-		boolean tSuccessfulUpdate = false;;
+		boolean tSuccessfulUpdate;
 		GameSupport tFoundGameSupport;
 		Socket tFoundSocket;
-		int tClientIndex, tClientCount;
+		int tClientIndex;
+		int tClientCount;
 		ClientHandler tClientHandler;
 		
+		tSuccessfulUpdate = false;
 		logger.info ("Before Updating Client Handlers:");
 		printAllClientHandlerNames ();
 //		aGameSupport.printInfo();
@@ -1034,8 +1073,8 @@ public class ClientHandler implements Runnable {
 		}
 		if (! tSuccessfulUpdate) {
 			setName (aClientName);
-			addNewUser (name);
-			serverBroadcast (name + " has reconnected", SEND_TO.AllButRequestor);
+			addNewUser (playerName);
+			serverBroadcast (playerName + " has reconnected", SEND_TO.AllButRequestor);
 			// Need to attach GameSupport Object to this Client Handler.
 			
 			tFoundGameSupport = getMatchingGameSupport (aGameID);

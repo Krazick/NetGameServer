@@ -10,8 +10,9 @@ import javax.swing.JFrame;
 import org.apache.logging.log4j.Logger;
 
 public class ServerThread extends Thread {
-	ServerFrame serverFrame = null;
-	PrimaryFrame primaryFrame = null;
+	public static final ServerThread NO_SERVER_THREAD = null;
+	ServerFrame serverFrame = ServerFrame.NO_SERVER_FRAME;
+	PrimaryFrame primaryFrame = PrimaryFrame.NO_PRIMARY_FRAME;
 	String name;
 	int serverPort;
 	boolean isRunning;
@@ -43,7 +44,7 @@ public class ServerThread extends Thread {
 
 	@Override
 	public void run () {
-		if (serverFrame == null) {
+		if (serverFrame == ServerFrame.NO_SERVER_FRAME) {
 			try {
 				logger.info ("Server Thread trying to Run");
 				serverFrame = new ServerFrame (name, serverPort, gameNames, this);

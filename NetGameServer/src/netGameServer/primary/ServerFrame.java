@@ -43,11 +43,12 @@ import swingDelays.KButton;
 
 public class ServerFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
+	public static final ServerFrame NO_SERVER_FRAME = null;
 	private final int MAX_THREADS = 12;
 	private LinkedList<ClientHandler> clients = new LinkedList <> ();
 	private ExecutorService pool = Executors.newFixedThreadPool (MAX_THREADS);
 	private String NO_SELECTED_GAME = "NO SELECTED GAME";
-	boolean continueThread = true;
+	boolean continueThread;
 	private JLabel frameTitle;
 	private JLabel playersLabel;
 	private JLabel gamesLabel;
@@ -82,14 +83,14 @@ public class ServerFrame extends JFrame {
 	private Logger logger;
 	private SavedGames savedGames;
 	private GameSupport selectedGameSupport;
-//    String selectedGame;
 
 	public ServerFrame (String aName, int aServerPort, LinkedList<String> aGameNames, ServerThread aServerThread) 
 			throws HeadlessException, IOException {
 		super ("");
 		
 		String tAutoSavesDirectory;
-				
+		
+		continueThread = true;
 		setName (aName);
 		setPort (aServerPort);
 		setServerThread (aServerThread);
@@ -380,14 +381,10 @@ public class ServerFrame extends JFrame {
 		
 		playersLabel = new JLabel ("Clients");
 		playersLabel.setAlignmentX (Component.CENTER_ALIGNMENT);
-		clientList = new JList<String> (clientListModel = new DefaultListModel<String> ());
-		clientListPane = new JScrollPane (clientList);
-		clientListPane.setMinimumSize (new Dimension (300, 100));
-		clientListPane.setPreferredSize (new Dimension (300, 200));
-		clientListPane.setMaximumSize (new Dimension (300, 250));
-		playersLabel.setLabelFor (clientList);
 		
+		setupClientList ();
 		setupGamesList ();		
+		setupGameActionList ();
 		
 		tMyIPAddress = whatIsMyIPAddress ();
 		serverIPLabel = new JLabel ("Server IP: " + tMyIPAddress);
@@ -400,20 +397,50 @@ public class ServerFrame extends JFrame {
 		
 		connectionsLabel = new JLabel ("Connections: 0");
 		connectionsLabel.setAlignmentX (Component.LEFT_ALIGNMENT);
-		
+
+		quitButton = new KButton ("Quit");
+		quitButton.setAlignmentX (Component.LEFT_ALIGNMENT);
+	}
+
+	public void setupClientList () {
+		clientList = new JList<String> (clientListModel);
+		clientListPane = new JScrollPane (clientList);
+		clientListPane.setMinimumSize (new Dimension (300, 100));
+		clientListPane.setPreferredSize (new Dimension (300, 200));
+		clientListPane.setMaximumSize (new Dimension (300, 250));
+		playersLabel.setLabelFor (clientList);
+	}
+
+	public void setupGameActionList () {
 		gameActionsLabel = new JLabel ("Game Actions");
 		gameActionsLabel.setAlignmentX (Component.LEFT_ALIGNMENT);
 		
-		gameActionList = new JList<String> (gameActionListModel = new DefaultListModel<String> ());
+		gameActionList = new JList<String> (gameActionListModel);
 		gameActionListPane = new JScrollPane (gameActionList);
 		gameActionListPane.setMinimumSize (new Dimension (260, 500));
 		gameActionListPane.setPreferredSize (new Dimension (260, 100));
 		gameActionListPane.setMaximumSize (new Dimension (260, 100));
 		gameActionListPane.setAlignmentX (Component.LEFT_ALIGNMENT);
 		addGameAction (NO_SELECTED_GAME);
-
-		quitButton = new KButton ("Quit");
-		quitButton.setAlignmentX (Component.LEFT_ALIGNMENT);
+	}
+	
+	private void setupGamesList () {
+		gameListSelectionHandler = new SharedListSelectionHandler (this);
+		gamesLabel = new JLabel ("Active Games");
+		gamesLabel.setAlignmentX (Component.CENTER_ALIGNMENT);
+		gamesList = new JList<String> (gameListModel);
+		gamesListPane = new JScrollPane (gamesList);
+		gamesListPane.setMinimumSize (new Dimension (180, 100));
+		gamesListPane.setPreferredSize (new Dimension (180, 200));
+		gamesListPane.setMaximumSize (new Dimension (180, 250));
+		gamesListSelectionModel = gamesList.getSelectionModel ();
+		gamesListSelectionModel.setSelectionMode (ListSelectionModel.SINGLE_SELECTION);
+		gamesListSelectionModel.addListSelectionListener (gameListSelectionHandler);
+		gamesLabel.setLabelFor (gamesList);
+	}
+	
+	public void clearGameActionList () {
+		gameActionListModel.clear ();
 	}
 
 	private void setGameActionsLabel () {
@@ -428,26 +455,7 @@ public class ServerFrame extends JFrame {
 			gameActionsLabel.setText ("(" + tGameID + ") Game Actions [" + tActionCount + "]");
 		}
 	}
-	
-	private void setupGamesList () {
-		gameListSelectionHandler = new SharedListSelectionHandler (this);
-		gamesLabel = new JLabel ("Active Games");
-		gamesLabel.setAlignmentX (Component.CENTER_ALIGNMENT);
-		gamesList = new JList<String> (gameListModel = new DefaultListModel<String> ());
-		gamesListPane = new JScrollPane (gamesList);
-		gamesListPane.setMinimumSize (new Dimension (180, 100));
-		gamesListPane.setPreferredSize (new Dimension (180, 200));
-		gamesListPane.setMaximumSize (new Dimension (180, 250));
-		gamesListSelectionModel = gamesList.getSelectionModel ();
-		gamesListSelectionModel.setSelectionMode (ListSelectionModel.SINGLE_SELECTION);
-		gamesListSelectionModel.addListSelectionListener (gameListSelectionHandler);
-		gamesLabel.setLabelFor (gamesList);
-	}
-	
-	public void clearGameActionList () {
-		gameActionListModel.clear ();
-	}
-	
+
 	public void addGameAction (String aGameAction) {
 		gameActionListModel.add (0, aGameAction);
 		setGameActionsLabel ();
@@ -474,15 +482,16 @@ public class ServerFrame extends JFrame {
 		
 		@Override
 		public void valueChanged (ListSelectionEvent aLSEvent) { 
-            ListSelectionModel tLSM = (ListSelectionModel) aLSEvent.getSource ();
+            ListSelectionModel tLSM;
             int tMinIndex;
             int tMaxIndex;
             int tSelectedID;
 
+            tLSM = (ListSelectionModel) aLSEvent.getSource ();
             tSelectedID = -1;
-             if (! tLSM.isSelectionEmpty ()) {
-                 // Find out which indexes are selected.
-                tMinIndex = tLSM.getMinSelectionIndex ();
+            if (! tLSM.isSelectionEmpty ()) {
+            		// Find out which indexes are selected.
+            		tMinIndex = tLSM.getMinSelectionIndex ();
                 tMaxIndex = tLSM.getMaxSelectionIndex ();
                 for (int i = tMinIndex; i <= tMaxIndex; i++) {
                     if (tLSM.isSelectedIndex (i)) {
