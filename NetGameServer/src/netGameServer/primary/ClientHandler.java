@@ -116,7 +116,15 @@ public class ClientHandler implements Runnable {
 		}
 		socket = aSocket;
 	}
-	
+
+	public void setClientList (DefaultListModel<String> aClientListModel) {
+		clientListModel = aClientListModel;
+	}
+
+	public void setGameList (DefaultListModel<String> aGameListModel) {
+		gameListModel = aGameListModel;
+	}
+
 	private Socket getSocket () {
 		return socket;
 	}
@@ -587,7 +595,7 @@ public class ClientHandler implements Runnable {
 		swapUser (tCurrentName, tNewName);
 	}
 
-	public void setPlayerStatus (PlayerStatus aNewPlayerStatus) {
+	public synchronized void setPlayerStatus (PlayerStatus aNewPlayerStatus) {
 		String tFullName;
 		String tNewFullName;
 		int tFoundIndex;
@@ -643,7 +651,7 @@ public class ClientHandler implements Runnable {
 		addNewUser (aNewName);
 	}
 	
-	private void removeUser (String aCurrentName) {
+	private synchronized void removeUser (String aCurrentName) {
 		clientListModel.removeElement (aCurrentName);
 	}
 	
@@ -675,14 +683,6 @@ public class ClientHandler implements Runnable {
 	public boolean isClientActive () {
 		return playerStatus == PlayerStatus.Active;
 	}
-
-	public void setClientList (DefaultListModel<String> aClientListModel) {
-		clientListModel = aClientListModel;
-	}
-
-	public void setGameList (DefaultListModel<String> aGameListModel) {
-		gameListModel = aGameListModel;
-	}
 	
 	private boolean clientListContains (String aName) {
 		String tClientName;
@@ -702,7 +702,7 @@ public class ClientHandler implements Runnable {
 		return tContains;
 	}
 	
-	private void addNewUser (String aName) {
+	private synchronized void addNewUser (String aName) {
 		if (! clientListContains (aName)) {
 			clientListModel.addElement (aName);
 		}
