@@ -11,6 +11,7 @@ import org.w3c.dom.NodeList;
 import geUtilities.ElementName;
 import geUtilities.AttributeName;
 import geUtilities.FileUtils;
+import geUtilities.GUI;
 import geUtilities.XMLDocument;
 import geUtilities.XMLNode;
 
@@ -18,48 +19,48 @@ public class GameSupport {
 	public static final ElementName EN_PLAYERS = new ElementName ("Players");
 	public static final ElementName EN_PLAYER = new ElementName ("Player");
 	public static final AttributeName AN_NAME = new AttributeName ("name");
-	public final String NOT_CONNECTED = "Not Connected";
-	private final String BAD_REQUEST = "<GSResponse><BadRequest/></GSResponse>";
-	private final String BAD_GAME_ID = "<GSResponse><BadGameID/></GSResponse>";
-	private final static String ACTION_NUMBER = "actionNumber=\"(\\d+)\"";
-	private final static String REQUEST_ACTION = "<RequestAction " + ACTION_NUMBER + ">";
-	private final static Pattern REQUEST_ACTION_PATTERN = Pattern.compile (REQUEST_ACTION);
-	private final static String GAME_ID = "(\\d\\d\\d\\d-\\d\\d-\\d\\d-\\d\\d\\d\\d)";
-	private final static Pattern GAME_ID_PATTERN = Pattern.compile (GAME_ID);
-	private final static String GS_WITH_GAME_ID = "<GS gameID=\"" + GAME_ID + "\">(.*)</GS>";
-	private final static Pattern GS_WITH_GAME_ID_PATTERN = Pattern.compile (GS_WITH_GAME_ID);
-	private final static String GS_WITH_NO_GAME_ID = "<GS>(.*)</GS>";
-	private final static Pattern GS_WITH_NO_GAME_ID_PATTERN = Pattern.compile (GS_WITH_NO_GAME_ID);
+	public static final String NOT_CONNECTED = "Not Connected";
+	private static final String BAD_REQUEST = "<GSResponse><BadRequest/></GSResponse>";
+	private static final String BAD_GAME_ID = "<GSResponse><BadGameID/></GSResponse>";
+	private static final String ACTION_NUMBER = "actionNumber=\"(\\d+)\"";
+	private static final String REQUEST_ACTION = "<RequestAction " + ACTION_NUMBER + ">";
+	private static final Pattern REQUEST_ACTION_PATTERN = Pattern.compile (REQUEST_ACTION);
+	private static final String GAME_ID = "(\\d\\d\\d\\d-\\d\\d-\\d\\d-\\d\\d\\d\\d)";
+	private static final Pattern GAME_ID_PATTERN = Pattern.compile (GAME_ID);
+	private static final String GS_WITH_GAME_ID = "<GS gameID=\"" + GAME_ID + "\">(.*)</GS>";
+	private static final Pattern GS_WITH_GAME_ID_PATTERN = Pattern.compile (GS_WITH_GAME_ID);
+	private static final String GS_WITH_NO_GAME_ID = "<GS>(.*)</GS>";
+	private static final Pattern GS_WITH_NO_GAME_ID_PATTERN = Pattern.compile (GS_WITH_NO_GAME_ID);
 	
-	private final static String GA_WITH_ACTION = "<GA>(<Action.*)</GA>";
-	private final static Pattern GA_WITH_NO_GAME_ID_PATTERN = Pattern.compile (GA_WITH_ACTION);
-	private final static String GA_REMOVE_ACTION = "<GA>(<RemoveAction number=\"(\\d+)\").*></GA>";
-	private final static Pattern GA_REMOVE_NO_GAME_ID_PATTERN = Pattern.compile (GA_REMOVE_ACTION);
+	private static final String GA_WITH_ACTION = "<GA>(<Action.*)</GA>";
+	private static final Pattern GA_WITH_NO_GAME_ID_PATTERN = Pattern.compile (GA_WITH_ACTION);
+	private static final String GA_REMOVE_ACTION = "<GA>(<RemoveAction number=\"(\\d+)\").*></GA>";
+	private static final Pattern GA_REMOVE_NO_GAME_ID_PATTERN = Pattern.compile (GA_REMOVE_ACTION);
 	
-	private final static String REQUEST_HEARTBEAT = "<Heartbeat>";
-	private final static Pattern REQUEST_HEARTBEAT_PATTERN = Pattern.compile (REQUEST_HEARTBEAT);
-	private final String REQUEST_ACTION_NUMBER = "<ActionNumber requestNew=\"TRUE\">";
-	private final static String REQUEST_SAVED_GAMES_FOR = "<RequestSavedGames player=\"([A-Za-z][A-Za-z0-9]+)\"/?>";
-	private final static Pattern REQUEST_SAVED_GAMES_FOR_PATTERN = Pattern.compile (REQUEST_SAVED_GAMES_FOR);
-	private final String REQUEST_LAST_ACTION = "<ActionNumber requestLast=\"TRUE\">";
-	private final String REQUEST_LAST_ACTION_COMPLETE = "<LastAction isComplete=\"TRUE\">";
-	private final String REQUEST_LAST_ACTION_PENDING = "<ActionNumber requestPending=\"TRUE\">";
-	private final String REQUEST_GAME_ID = "<GameIDRequest>";
-	private final static String REQUEST_GAME_LOAD_SETUP = "<LoadGameSetup " + ACTION_NUMBER + " gameID=\"" + GAME_ID + "\" gameName=\"([A-Z0-9\\+]+)\"/>";
-	private final static Pattern REQUEST_WITH_GAME_LOAD_SETUP_PATTERN = Pattern.compile (REQUEST_GAME_LOAD_SETUP);
-	private final static String PLAYER_RECONNECT = "<Reconnect name=\"(.*)\">";
-	private final static Pattern REQUEST_RECONNECT_WITH_NAME_PATTERN = Pattern.compile (PLAYER_RECONNECT);
-	private final String PLAYER_READY = "<Ready>";
-	private final String GAME_START = "<Start>";
-	private final String PLAYER_ACTIVE = "<Active>";
-	private final int NO_ACTION_NUMBER = -1;
-	private final String STATUS_COMPLETE = "Complete";
-	private final String STATUS_PENDING = "Pending";
-	private final String STATUS_RECEIVED = "Received";
-	private final int MIN_ACTION_NUMBER = 100;
-	public final static String NO_GAME_ID = "NOID";
+	private static final String REQUEST_HEARTBEAT = "<Heartbeat>";
+	private static final Pattern REQUEST_HEARTBEAT_PATTERN = Pattern.compile (REQUEST_HEARTBEAT);
+	private static final String REQUEST_ACTION_NUMBER = "<ActionNumber requestNew=\"TRUE\">";
+	private static final String REQUEST_SAVED_GAMES_FOR = "<RequestSavedGames player=\"([A-Za-z][A-Za-z0-9]+)\"/?>";
+	private static final Pattern REQUEST_SAVED_GAMES_FOR_PATTERN = Pattern.compile (REQUEST_SAVED_GAMES_FOR);
+	private static final String REQUEST_LAST_ACTION = "<ActionNumber requestLast=\"TRUE\">";
+	private static final String REQUEST_LAST_ACTION_COMPLETE = "<LastAction isComplete=\"TRUE\">";
+	private static final String REQUEST_LAST_ACTION_PENDING = "<ActionNumber requestPending=\"TRUE\">";
+	private static final String REQUEST_GAME_ID = "<GameIDRequest>";
+	private static final String REQUEST_GAME_LOAD_SETUP = "<LoadGameSetup " + ACTION_NUMBER + " gameID=\"" + GAME_ID + "\" gameName=\"([A-Z0-9\\+]+)\"/>";
+	private static final Pattern REQUEST_WITH_GAME_LOAD_SETUP_PATTERN = Pattern.compile (REQUEST_GAME_LOAD_SETUP);
+	private static final String PLAYER_RECONNECT = "<Reconnect name=\"(.*)\">";
+	private static final Pattern REQUEST_RECONNECT_WITH_NAME_PATTERN = Pattern.compile (PLAYER_RECONNECT);
+	private static final String PLAYER_READY = "<Ready>";
+	private static final String GAME_START = "<Start>";
+	private static final String PLAYER_ACTIVE = "<Active>";
+	private static final int NO_ACTION_NUMBER = -1;
+	private static final String STATUS_COMPLETE = "Complete";
+	private static final String STATUS_PENDING = "Pending";
+	private static final String STATUS_RECEIVED = "Received";
+	private static final int MIN_ACTION_NUMBER = 100;
+	public static final String NO_GAME_ID = "NOID";
 	public static final GameSupport NO_GAME_SUPPORT = null;
-	public static String NO_FILE_NAME = "";
+	public static final String NO_FILE_NAME = GUI.EMPTY_STRING;
 
 	NetworkActions networkActions;
 	private LinkedList<ClientHandler> clients;
@@ -75,8 +76,16 @@ public class GameSupport {
 	boolean goodFileWriter = false;
 	boolean doAutoSave = true;
 
-	public void setDoAutoSave (boolean aDoAutoSave) {
-		doAutoSave = aDoAutoSave;
+	public GameSupport (ServerFrame aServerFrame, String aNewGameID, Logger aLogger) {
+		setServerFrame (aServerFrame);
+		networkActions = new NetworkActions ();
+		clientNames = new LinkedList<String> ();
+		clients = new LinkedList<ClientHandler> ();
+		setActionNumber (MIN_ACTION_NUMBER);
+		setGameID (aNewGameID);
+		setLogger (aLogger);
+		setupAllAutoSaveFunctionality (aLogger);
+		setGameStatus (SavedGame.STATUS_PREPARED);
 	}
 
 	public void printInfo () {
@@ -108,18 +117,6 @@ public class GameSupport {
 //		networkActions.printInfo ();
 	}
 
-	public GameSupport (ServerFrame aServerFrame, String aNewGameID, Logger aLogger) {
-		setServerFrame (aServerFrame);
-		networkActions = new NetworkActions ();
-		clientNames = new LinkedList<String> ();
-		clients = new LinkedList<ClientHandler> ();
-		setActionNumber (MIN_ACTION_NUMBER);
-		setGameID (aNewGameID);
-		setLogger (aLogger);
-		setupAllAutoSaveFunctionality (aLogger);
-		setGameStatus (SavedGame.STATUS_PREPARED);
-	}
-
 	public void setServerFrame (ServerFrame aServerFrame) {
 		serverFrame = aServerFrame;
 	}
@@ -145,7 +142,9 @@ public class GameSupport {
 		String tBaseRequest;
 
 		tBaseRequest = getBaseRequest (aRequest);
-		if (isRequestForStart (tBaseRequest) || isRequestForReady (tBaseRequest) || isRequestForActive (tBaseRequest)) {
+		if (isRequestForStart (tBaseRequest) || 
+			isRequestForReady (tBaseRequest) || 
+			isRequestForActive (tBaseRequest)) {
 			tWhoGetsResponse = ClientHandler.SEND_TO.AllButRequestor;
 		}
 
@@ -161,6 +160,10 @@ public class GameSupport {
 		setFileUtils (tFileUtils);
 		tGameID = getGameID ();
 		setupAutoSaveFile (tGameID);
+	}
+
+	public void setDoAutoSave (boolean aDoAutoSave) {
+		doAutoSave = aDoAutoSave;
 	}
 
 	public void setFileUtils (FileUtils aFileUtils) {
@@ -200,8 +203,6 @@ public class GameSupport {
 		fileUtils.setFile (aFile);
 	}
 
-	// -------------------- End Auto Save Functions ----------------
-
 	public void autoSave () {
 		SavedGame tSavedGame;
 
@@ -212,8 +213,9 @@ public class GameSupport {
 			}
 			if (goodFileWriter) {
 				fileUtils.startXMLFileOutput ();
-				fileUtils.outputToFile ("<NetworkSaveGame gameID=\"" + getGameID () + "\" status=\"" + getGameStatus ()
-						+ "\" lastActionNumber=\"" + getLastActionNumber () + "\">");
+				fileUtils.outputToFile ("<NetworkSaveGame gameID=\"" + getGameID () + 
+							"\" status=\"" + getGameStatus () +
+							"\" lastActionNumber=\"" + getLastActionNumber () + "\">");
 				writeClientsInXML ();
 				networkActions.writeAllActions (fileUtils);
 				fileUtils.outputToFile ("</NetworkSaveGame>");
@@ -222,21 +224,6 @@ public class GameSupport {
 				tSavedGame.setLastActionNumber (actionNumber);
 			}
 		}
-	}
-
-	private void writeClientsInXML () {
-		String tPlayerStatus;
-
-		fileUtils.outputToFile ("<Players>");
-		for (String tPlayerName : clientNames) {
-			tPlayerStatus = getPlayerStatus (tPlayerName);
-			if (tPlayerName.length () > 0) {
-				tPlayerName = "<Player name=\"" + tPlayerName + "\" status=\"" + tPlayerStatus + "\"/>";
-				fileUtils.outputToFile (tPlayerName);
-			}
-		}
-
-		fileUtils.outputToFile ("</Players>");
 	}
 
 	public void loadAutoSave () {
@@ -284,6 +271,23 @@ public class GameSupport {
 		}
 		System.out.println (
 				"Total Actions Found " + networkActions.getCount () + " Last Action Number " + tLastActionNumber);
+	}
+	
+	// -------------------- End Auto Save Functions ----------------
+
+	private void writeClientsInXML () {
+		String tPlayerStatus;
+
+		fileUtils.outputToFile ("<Players>");
+		for (String tPlayerName : clientNames) {
+			tPlayerStatus = getPlayerStatus (tPlayerName);
+			if (tPlayerName.length () > 0) {
+				tPlayerName = "<Player name=\"" + tPlayerName + "\" status=\"" + tPlayerStatus + "\"/>";
+				fileUtils.outputToFile (tPlayerName);
+			}
+		}
+
+		fileUtils.outputToFile ("</Players>");
 	}
 
 	public String handleGameSupportRequest (String aRequest, ClientHandler aClientHandler) {
