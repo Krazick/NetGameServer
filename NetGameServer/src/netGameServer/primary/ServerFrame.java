@@ -39,16 +39,13 @@ import java.awt.Dimension;
 import org.apache.logging.log4j.Logger;
 
 import geUtilities.FileUtils;
+import geUtilities.GUI;
 import swingDelays.KButton;
 
 public class ServerFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	public static final ServerFrame NO_SERVER_FRAME = null;
 	private final int MAX_THREADS = 12;
-	private LinkedList<ClientHandler> clients = new LinkedList <> ();
-	private ExecutorService pool = Executors.newFixedThreadPool (MAX_THREADS);
-	private String NO_SELECTED_GAME = "NO SELECTED GAME";
-	boolean continueThread;
 	private JLabel frameTitle;
 	private JLabel playersLabel;
 	private JLabel gamesLabel;
@@ -61,21 +58,24 @@ public class ServerFrame extends JFrame {
 	private JPanel westJPanel;
 	private JPanel centerJPanel;
 	private JPanel eastJPanel;
-	
-	private KButton quitButton;
-	private JList<String> clientList;
-	private JList<String> gamesList;
-	private ListSelectionModel gamesListSelectionModel;
-	private SharedListSelectionHandler gameListSelectionHandler;
 	private JList<String> gameActionList;
 	private JScrollPane clientListPane;
 	private JScrollPane gamesListPane;
 	private JScrollPane gameActionListPane;
+	private JList<String> clientList;
+	private JList<String> gamesList;
+	private KButton quitButton;
+
+	private LinkedList<ClientHandler> clients = new LinkedList <> ();
+	private ExecutorService pool = Executors.newFixedThreadPool (MAX_THREADS);
+	private ListSelectionModel gamesListSelectionModel;
+	private SharedListSelectionHandler gameListSelectionHandler;
 	private DefaultListModel<String> clientListModel = new DefaultListModel<String> ();
 	private DefaultListModel<String> gameListModel = new DefaultListModel<String> ();
 	private DefaultListModel<String> gameActionListModel = new DefaultListModel<String> ();
 	private LinkedList<String> gameNames;
 	private List<GameSupport> activeGames;
+	private String NO_SELECTED_GAME = "NO SELECTED GAME";
 	private String name;
 	private int serverPort;
 	private ServerThread serverThread;
@@ -83,10 +83,11 @@ public class ServerFrame extends JFrame {
 	private Logger logger;
 	private SavedGames savedGames;
 	private GameSupport selectedGameSupport;
+	boolean continueThread;
 
 	public ServerFrame (String aName, int aServerPort, LinkedList<String> aGameNames, ServerThread aServerThread) 
 			throws HeadlessException, IOException {
-		super ("");
+		super (GUI.EMPTY_STRING);
 		
 		String tAutoSavesDirectory;
 		
@@ -139,8 +140,8 @@ public class ServerFrame extends JFrame {
 	}
 
 	public GameSupport createNewGameSupport (ClientHandler aClientHandler) {
-		String tNewGameID;
 		GameSupport tNewGameSupport;
+		String tNewGameID;
 		String tFilePath;
 		String tPlayerName;
 		
@@ -259,8 +260,9 @@ public class ServerFrame extends JFrame {
 	}
 
 	public Socket acceptServerSocket (String aCaller) {
-		Socket tClientSocket = null;
+		Socket tClientSocket;
 		
+		tClientSocket = null;
 		try {
 			tClientSocket = serverSocket.accept ();
 			logger.info ("New Socket created with Name [" + tClientSocket.toString () + "]");
@@ -329,10 +331,11 @@ public class ServerFrame extends JFrame {
 
 	public void quitFrame () {
 		ClientHandler tClientHandler;
-		JFrame thisFrame = getThisFrame ();
+		JFrame tThisFrame;
 		
+		tThisFrame = getThisFrame ();
 		continueThread = false;
-		thisFrame.dispose ();
+		tThisFrame.dispose ();
 		if (clients.size () > 0) {
 			tClientHandler = clients.get (0);
 			tClientHandler.shutdownAll ();
@@ -605,8 +608,9 @@ public class ServerFrame extends JFrame {
 	
 	public String getGameName (String aGameID) {
 		String tGameName;
-		String tFoundGameName = ClientHandler.NO_GAME_NAME;
+		String tFoundGameName;
 		
+		tFoundGameName = ClientHandler.NO_GAME_NAME;
 		for (ClientHandler tClientHandler : clients) {
 			if (tClientHandler.getGameID ().equals (aGameID)) {
 				
