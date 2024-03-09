@@ -466,11 +466,31 @@ public class ServerFrame extends JFrame {
 		setGameActionsLabel ();
 	}
 	
+	public void handleGameSelection () {
+		int tServerFrameIndex;
+		
+		tServerFrameIndex = 0;		// Need to get the Index for this Server Frame in list of Games to pass in.
+		handleGameSelection (tServerFrameIndex);
+	}
+	
 	public void handleGameSelection (int aSelectedGameIndex) {
-		selectedGameSupport = activeGames.get (aSelectedGameIndex);
+		GameSupport tGameSupport;
+		int tCountActiveGames;
+		
 		clearGameActionList ();
-		selectedGameSupport.addGameActionsToFrame ();
-		setGameActionsLabel ();
+		tCountActiveGames = activeGames.size ();
+		if (tCountActiveGames > 0) {
+			if (aSelectedGameIndex < tCountActiveGames) {
+				tGameSupport = activeGames.get (aSelectedGameIndex);
+				setSelectedGameSupport (tGameSupport);
+				selectedGameSupport.addGameActionsToFrame ();
+				setGameActionsLabel ();
+			}
+		}
+	}
+	
+	public void setSelectedGameSupport (GameSupport aGameSupport) {
+		selectedGameSupport = aGameSupport;
 	}
 	
 	class SharedListSelectionHandler implements ListSelectionListener {
