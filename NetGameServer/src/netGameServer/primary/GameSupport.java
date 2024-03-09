@@ -20,6 +20,9 @@ public class GameSupport {
 	public static final ElementName EN_PLAYER = new ElementName ("Player");
 	public static final AttributeName AN_NAME = new AttributeName ("name");
 	public static final String NOT_CONNECTED = "Not Connected";
+	public static final String NO_GAME_ID = "NOID";
+	public static final String NO_FILE_NAME = GUI.EMPTY_STRING;
+	public static final GameSupport NO_GAME_SUPPORT = null;
 	private static final String BAD_REQUEST = "<GSResponse><BadRequest/></GSResponse>";
 	private static final String BAD_GAME_ID = "<GSResponse><BadGameID/></GSResponse>";
 	private static final String ACTION_NUMBER = "actionNumber=\"(\\d+)\"";
@@ -58,13 +61,9 @@ public class GameSupport {
 	private static final String STATUS_PENDING = "Pending";
 	private static final String STATUS_RECEIVED = "Received";
 	private static final int MIN_ACTION_NUMBER = 100;
-	public static final String NO_GAME_ID = "NOID";
-	public static final GameSupport NO_GAME_SUPPORT = null;
-	public static final String NO_FILE_NAME = GUI.EMPTY_STRING;
-
-	NetworkActions networkActions;
 	private LinkedList<ClientHandler> clients;
 	private LinkedList<String> clientNames;
+	NetworkActions networkActions;
 	ServerFrame serverFrame;
 	String gameStatus;
 	int actionNumber;
@@ -138,9 +137,10 @@ public class GameSupport {
 	}
 
 	public ClientHandler.SEND_TO whoGetsResponse (String aRequest) {
-		ClientHandler.SEND_TO tWhoGetsResponse = ClientHandler.SEND_TO.Requestor;
+		ClientHandler.SEND_TO tWhoGetsResponse;
 		String tBaseRequest;
 
+		tWhoGetsResponse = ClientHandler.SEND_TO.Requestor;
 		tBaseRequest = getBaseRequest (aRequest);
 		if (isRequestForStart (tBaseRequest) || 
 			isRequestForReady (tBaseRequest) || 
@@ -183,7 +183,7 @@ public class GameSupport {
 	}
 
 	public String constructAutoSaveFileName (String tDirectoryName, String aGameID) {
-		String tAutoSaveFileName = NO_FILE_NAME;
+		String tAutoSaveFileName;
 
 		// When running via Eclipse, will save AutoSaves to
 		// /Volumes/Public/GIT/NetGameServer/NetGameServer/NetworkAutoSaves/18XX
@@ -191,6 +191,7 @@ public class GameSupport {
 		// /Users/marksmith/git/NetGameServer/NetGameServer/NetworkAutoSaves/18XX
 		// on Local Mac
 
+		tAutoSaveFileName = NO_FILE_NAME;
 		if (!GameSupport.NO_GAME_ID.equals (aGameID)) {
 			tAutoSaveFileName = tDirectoryName + File.separator + aGameID + ".autoSave";
 		}
@@ -249,10 +250,10 @@ public class GameSupport {
 		XMLNode tXMLSaveGame;
 		XMLNode tChildNode;
 		NodeList tChildren;
+		String tChildName;
+		int tLastActionNumber;
 		int tChildrenCount;
 		int tIndex;
-		int tLastActionNumber;
-		String tChildName;
 
 		tXMLSaveGame = aXMLAutoSaveDocument.getDocumentNode ();
 		tChildren = tXMLSaveGame.getChildNodes ();
@@ -269,8 +270,8 @@ public class GameSupport {
 				loadClientNames (tChildNode);
 			}
 		}
-		System.out.println (
-				"Total Actions Found " + networkActions.getCount () + " Last Action Number " + tLastActionNumber);
+		System.out.println ("Total Actions Found " + networkActions.getCount () + 
+							" Last Action Number " + tLastActionNumber);
 	}
 	
 	// -------------------- End Auto Save Functions ----------------
@@ -292,8 +293,9 @@ public class GameSupport {
 
 	public String handleGameSupportRequest (String aRequest, ClientHandler aClientHandler) {
 		String tBaseRequest;
-		String tGSResponse = BAD_REQUEST;
+		String tGSResponse;
 
+		tGSResponse = BAD_REQUEST;
 		if (NO_GAME_ID.equals (gameID)) {
 			updateGameID (aRequest);
 		}
@@ -312,9 +314,10 @@ public class GameSupport {
 	}
 
 	public String getGameIdFromRequest (String aRequest) {
-		String tGameID = NO_GAME_ID;
+		String tGameID;
 		String tBaseRequest;
 
+		tGameID = NO_GAME_ID;
 		if (isRequestWithGameID (aRequest)) {
 			tBaseRequest = getBaseRequest (aRequest);
 			if (isRequestForReady (tBaseRequest)) {
@@ -403,8 +406,9 @@ public class GameSupport {
 
 	public String generateGSResponse (String aRequest, ClientHandler aClientHandler) {
 		int tNewActionNumber;
-		String tGSResponse = BAD_REQUEST;
+		String tGSResponse;
 
+		tGSResponse = BAD_REQUEST;
 		if (isRequestForHeartbeat (aRequest)) {
 			tGSResponse = generateGSResponseHearbeat (aClientHandler);
 		} else {
@@ -440,9 +444,9 @@ public class GameSupport {
 	}
 
 	private String handleClientIsReady (ClientHandler aClientHandler) {
+		ClientHandler tFirstClientHandler;
 		String tGameName;
 		String tGSResponse;
-		ClientHandler tFirstClientHandler;
 		String tPlayerName;
 
 		tFirstClientHandler = clients.get (0);
@@ -459,9 +463,9 @@ public class GameSupport {
 	}
 
 	public String handleClientIsActive (ClientHandler aClientHandler) {
+		ClientHandler tFirstClientHandler;
 		String tGameName;
 		String tGSResponse;
-		ClientHandler tFirstClientHandler;
 		String tPlayerName;
 
 		tFirstClientHandler = clients.get (0);
@@ -509,8 +513,9 @@ public class GameSupport {
 	
 	public String getGameID (String aRequest) {
 		Matcher tMatcher = GS_WITH_GAME_ID_PATTERN.matcher (aRequest);
-		String tFoundGameID = NO_GAME_ID;
+		String tFoundGameID;
 
+		tFoundGameID = NO_GAME_ID;
 		if (tMatcher.find ()) {
 			tFoundGameID = tMatcher.group (1);
 		}
@@ -521,9 +526,10 @@ public class GameSupport {
 	// Various routines to test if a Request matches what is expected
 
 	public boolean isRequestForAnyGame (String aRequest) {
-		boolean tRequestIsValid = false;
+		boolean tRequestIsValid;
 		Matcher tMatcher1 = GS_WITH_NO_GAME_ID_PATTERN.matcher (aRequest);
 
+		tRequestIsValid = false;
 		if (tMatcher1.find ()) {
 			tRequestIsValid = true;
 		}
@@ -532,9 +538,10 @@ public class GameSupport {
 	}
 
 	public boolean isRequestWithGameID (String aRequest) {
-		boolean tRequestIsValid = false;
+		boolean tRequestIsValid;
 		Matcher tMatcher1 = GS_WITH_GAME_ID_PATTERN.matcher (aRequest);
 
+		tRequestIsValid = false;
 		if (tMatcher1.find ()) {
 			tRequestIsValid = true;
 		}
@@ -543,10 +550,11 @@ public class GameSupport {
 	}
 
 	public boolean isRequestForThisGame (String aRequest) {
-		boolean tRequestIsValid = false;
+		boolean tRequestIsValid;
 		Matcher tMatcher = GS_WITH_GAME_ID_PATTERN.matcher (aRequest);
 		String tFoundGameID;
 
+		tRequestIsValid = false;
 		if (tMatcher.find ()) {
 			tFoundGameID = tMatcher.group (1);
 			tRequestIsValid = gameID.equals (tFoundGameID);
@@ -557,8 +565,9 @@ public class GameSupport {
 
 	public String getBaseRequest (String aRequest) {
 		Matcher tMatcher = GS_WITH_GAME_ID_PATTERN.matcher (aRequest);
-		String tBaseRequest = BAD_REQUEST;
+		String tBaseRequest;
 
+		tBaseRequest = BAD_REQUEST;
 		if (tMatcher.find ()) {
 			tBaseRequest = tMatcher.group (2);
 		}
@@ -568,8 +577,9 @@ public class GameSupport {
 
 	public String getBaseRequestNoGameID (String aRequest) {
 		Matcher tMatcher = GS_WITH_NO_GAME_ID_PATTERN.matcher (aRequest);
-		String tBaseRequest = BAD_REQUEST;
+		String tBaseRequest;
 
+		tBaseRequest = BAD_REQUEST;
 		if (tMatcher.find ()) {
 			tBaseRequest = tMatcher.group (1);
 		}
@@ -578,9 +588,10 @@ public class GameSupport {
 	}
 
 	public boolean isRequestForGameActivity (String aRequest) {
-		boolean tRequestIsValid = false;
+		boolean tRequestIsValid;
 		Matcher tMatcher = GA_WITH_NO_GAME_ID_PATTERN.matcher (aRequest);
 
+		tRequestIsValid = false;
 		if (tMatcher.matches ()) {
 			tRequestIsValid = true;
 		}
@@ -589,8 +600,9 @@ public class GameSupport {
 	}
 
 	private boolean isValidRequestFor (String aRequest, String aMatch) {
-		boolean tRequestIsValid = false;
+		boolean tRequestIsValid;
 
+		tRequestIsValid = false;
 		if (aMatch.equals (aRequest)) {
 			tRequestIsValid = true;
 		}
@@ -631,9 +643,10 @@ public class GameSupport {
 	}
 
 	public boolean isRequestForReconnect (String aRequest) {
-		boolean tRequestIsValid = false;
+		boolean tRequestIsValid;
 		Matcher tMatcher = REQUEST_RECONNECT_WITH_NAME_PATTERN.matcher (aRequest);
 
+		tRequestIsValid = false;
 		if (tMatcher.matches ()) {
 			tRequestIsValid = true;
 		}
@@ -642,9 +655,10 @@ public class GameSupport {
 	}
 
 	public boolean isRequestForAction (String aRequest) {
-		boolean tRequestIsValid = false;
+		boolean tRequestIsValid;
 		Matcher tMatcher = REQUEST_ACTION_PATTERN.matcher (aRequest);
 
+		tRequestIsValid = false;
 		if (tMatcher.matches ()) {
 			tRequestIsValid = true;
 		}
@@ -653,9 +667,10 @@ public class GameSupport {
 	}
 
 	public boolean isRequestForGameLoadSetup (String aRequest) {
-		boolean tRequestIsValid = false;
+		boolean tRequestIsValid;
 		Matcher tMatcher = REQUEST_WITH_GAME_LOAD_SETUP_PATTERN.matcher (aRequest);
 
+		tRequestIsValid = false;
 		if (tMatcher.matches ()) {
 			tRequestIsValid = true;
 		}
@@ -664,9 +679,10 @@ public class GameSupport {
 	}
 
 	public boolean isRequestForSavedGamesFor (String aRequest) {
-		boolean tRequestIsValid = false;
+		boolean tRequestIsValid;
 		Matcher tMatcher = REQUEST_SAVED_GAMES_FOR_PATTERN.matcher (aRequest);
 
+		tRequestIsValid = false;
 		if (tMatcher.matches ()) {
 			tRequestIsValid = true;
 		}
@@ -675,9 +691,10 @@ public class GameSupport {
 	}
 
 	public boolean isRequestForHeartbeat (String aRequest) {
-		boolean tRequestIsValid = false;
+		boolean tRequestIsValid;
 		Matcher tMatcher = REQUEST_HEARTBEAT_PATTERN.matcher (aRequest);
 
+		tRequestIsValid = false;
 		if (tMatcher.matches ()) {
 			tRequestIsValid = true;
 		}
@@ -732,11 +749,13 @@ public class GameSupport {
 	}
 
 	public boolean setStatus (String aNewStatus) {
-		boolean tStatusUpdated = false;
+		boolean tStatusUpdated;
 		NetworkAction tNetworkAction;
 
-		if (STATUS_COMPLETE.equals (aNewStatus) || STATUS_PENDING.equals (aNewStatus)
-				|| STATUS_RECEIVED.equals (aNewStatus)) {
+		tStatusUpdated = false;
+		if (STATUS_COMPLETE.equals (aNewStatus) || 
+			STATUS_PENDING.equals (aNewStatus) || 
+			STATUS_RECEIVED.equals (aNewStatus)) {
 			if (networkActions.getCount () > 0) {
 				tNetworkAction = networkActions.getLastNetworkAction ();
 				tNetworkAction.setStatus (aNewStatus);
@@ -833,16 +852,18 @@ public class GameSupport {
 	}
 
 	public String generateGSResponseRequestAction (String aRequest) {
-		String tGSResponse = BAD_REQUEST;
+		String tGSResponse;
 		String tNumberMatched, tBadResponse, tActionFound;
 		int tActionNumber;
 		Matcher tMatcher = REQUEST_ACTION_PATTERN.matcher (aRequest);
 
+		tGSResponse = BAD_REQUEST;
 		if (tMatcher.find ()) {
 			tNumberMatched = tMatcher.group (1);
 			tActionNumber = Integer.parseInt (tNumberMatched);
 			System.out.println (
-					"Handling Request Action Number " + tActionNumber + " current Last Action Number " + actionNumber);
+					"Handling Request Action Number " + tActionNumber + 
+					" current Last Action Number " + actionNumber);
 			if ((tActionNumber > MIN_ACTION_NUMBER) && (tActionNumber <= actionNumber)) {
 				tActionFound = getThisAction (tActionNumber);
 				tGSResponse = wrapWithGSResponse (tActionFound);
@@ -863,7 +884,8 @@ public class GameSupport {
 
 		if (tMatcher.find ()) {
 			tClientName = tMatcher.group (1);
-			logger.info ("Ready to Update Client Handlers with Client Name " + tClientName + " to Game ID " + gameID);
+			logger.info ("Ready to Update Client Handlers with Client Name " + 
+							tClientName + " to Game ID " + gameID);
 			tSuccessfulUpdate = aClientHandler.updateClientHandlers (tClientName, gameID, this);
 			if (tSuccessfulUpdate) {
 				logger.info ("Successfully Updated to new Socket");
@@ -873,8 +895,9 @@ public class GameSupport {
 
 	public String getGameIDFromLoadRequest (String aRequest) {
 		Matcher tMatcher = REQUEST_WITH_GAME_LOAD_SETUP_PATTERN.matcher (aRequest);
-		String tGameID = NO_GAME_ID;
+		String tGameID;
 
+		tGameID = NO_GAME_ID;
 		if (tMatcher.find ()) {
 			tGameID = tMatcher.group (2);
 		}
@@ -883,11 +906,14 @@ public class GameSupport {
 	}
 
 	public String handleGSResponseGameLoadSetup (String aRequest, ClientHandler aClientHandler) {
-		String tGSResponse = BAD_REQUEST;
 		Matcher tMatcher = REQUEST_WITH_GAME_LOAD_SETUP_PATTERN.matcher (aRequest);
-		String tGameID, tGameName, tActionNumberText;
+		String tGSResponse;
+		String tGameID;
+		String tGameName;
+		String tActionNumberText;
 		int tActionNumber;
 
+		tGSResponse = BAD_REQUEST;
 		if (tMatcher.find ()) {
 			tGameID = tMatcher.group (2);
 			// If the GameID found in the request does not match the Game ID in the Client
@@ -915,12 +941,13 @@ public class GameSupport {
 	}
 
 	public String handleGSResponseRequestSavedGamesFor (String aRequest) {
-		String tGSResponse = BAD_REQUEST;
+		String tGSResponse;
 		Matcher tMatcher = REQUEST_SAVED_GAMES_FOR_PATTERN.matcher (aRequest);
 		String tPlayerName;
 		String tAllSavedGamesFor;
 		String tSavedGamesFor;
 
+		tGSResponse = BAD_REQUEST;
 		if (tMatcher.find ()) {
 			tPlayerName = tMatcher.group (1);
 			tSavedGamesFor = serverFrame.getSavedGamesFor (tPlayerName);
@@ -952,8 +979,9 @@ public class GameSupport {
 
 	public String getPlayerStatus (String aPlayerName) {
 		ClientHandler tFoundClientHandler;
-		String tPlayerStatus = NOT_CONNECTED;
+		String tPlayerStatus;
 
+		tPlayerStatus = NOT_CONNECTED;
 		tFoundClientHandler = getClientHandlerFor (aPlayerName);
 		if (tFoundClientHandler != ClientHandler.NO_CLIENT_HANDLER) {
 			tPlayerStatus = tFoundClientHandler.getPlayerStatus ();
@@ -1033,7 +1061,8 @@ public class GameSupport {
 	public void loadClientNames (XMLNode aClientNames) {
 		XMLNode tChildNode;
 		NodeList tChildren;
-		int tChildrenCount, tIndex;
+		int tChildrenCount;
+		int tIndex;
 		String tChildName;
 		String tPlayerName;
 
