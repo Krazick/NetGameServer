@@ -83,8 +83,10 @@ public class NetworkActions {
 	}
 	
 	public void remove (int aActionNumber) {
-		int tIndex, tFoundIndex, tActionNumber;
 		NetworkAction tNetworkAction;
+		int tIndex;
+		int tFoundIndex;
+		int tActionNumber;
 		
 		tFoundIndex = 0;
 		for (tIndex = (getCount () - 1); (tIndex > 0) && (tFoundIndex == 0); tIndex--) {
@@ -101,8 +103,9 @@ public class NetworkActions {
 	
 	public String getStatusAt (int aIndex) {
 		NetworkAction tNetworkAction;
-		String tStatus = NetworkAction.NO_STATUS;
+		String tStatus;
 		
+		tStatus = NetworkAction.NO_STATUS;
 		tNetworkAction = getNetworkActionAt (aIndex);
 		if (tNetworkAction != NetworkAction.NO_ACTION) {
 			tStatus = tNetworkAction.getStatus ();
@@ -112,10 +115,13 @@ public class NetworkActions {
 	}
 	
 	public String getActionXMLFor (int aActionNumber) {
-		String tActionXMLFor = NetworkAction.NO_ACTION_RECIEVED_XML;
-		int tActionNumber, tCount, tIndex;
 		NetworkAction tNetworkAction;
+		String tActionXMLFor;
+		int tActionNumber;
+		int tCount;
+		int tIndex;
 		
+		tActionXMLFor = NetworkAction.NO_ACTION_RECIEVED_XML;
 		tCount = actions.size ();
 		for (tIndex = tCount - 1; 
 				(tIndex > 0) && 
@@ -133,8 +139,9 @@ public class NetworkActions {
 	
 	public String getActionXMLAt (int aIndex) {
 		NetworkAction tNetworkAction;
-		String tActionXMLAt = NetworkAction.NO_ACTION_RECIEVED_XML;
+		String tActionXMLAt;
 		
+		tActionXMLAt = NetworkAction.NO_ACTION_RECIEVED_XML;
 		tNetworkAction = getNetworkActionAt (aIndex);
 		if (tNetworkAction != NetworkAction.NO_ACTION) {
 			tActionXMLAt = tNetworkAction.getActionXML ();
@@ -145,8 +152,9 @@ public class NetworkActions {
 	
 	public String getLastActionStatus () {
 		NetworkAction tNetworkAction;
-		String tStatus = NetworkAction.ACTION_COMPLETE;
+		String tStatus;
 		
+		tStatus = NetworkAction.ACTION_COMPLETE;
 		tNetworkAction = getLastNetworkAction ();
 		if (tNetworkAction != NetworkAction.NO_ACTION) {
 			tStatus = tNetworkAction.getStatus ();
@@ -166,9 +174,10 @@ public class NetworkActions {
 	public void loadSavedActions (XMLNode aXMLNetworkActions) {
 		XMLNode tChildNode;
 		NodeList tChildren;
-		int tChildrenCount, tIndex;
 		String tChildName;
 		NetworkAction tNetworkAction;
+		int tChildrenCount;
+		int tIndex;
 		
 		tChildren = aXMLNetworkActions.getChildNodes ();
 		tChildrenCount = tChildren.getLength ();
