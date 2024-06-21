@@ -922,11 +922,11 @@ public class GameSupport {
 				// Then update the Game Support for this GameID - Expected for first person to
 				// join a saved Game
 				if (!aClientHandler.updateGameSupport (tGameID)) {
-					logger.info ("The Client Handler updated to Game ID " + tGameID);
 					tActionNumberText = tMatcher.group (1);
+					tActionNumber = Integer.parseInt (tActionNumberText);
+					logger.info ("The Client Handler updated to Game ID " + tGameID + " Action Number Text [" + tActionNumberText + "] Number " + tActionNumber);
 					tGameName = tMatcher.group (3);
 					setGameID (tGameID);
-					tActionNumber = Integer.parseInt (tActionNumberText);
 					setActionNumber (tActionNumber);
 					setupAutoSaveFile (tGameID);
 					loadAutoSave ();
