@@ -40,7 +40,7 @@ import org.apache.logging.log4j.Logger;
 
 import geUtilities.FileUtils;
 import geUtilities.GUI;
-import swingDelays.KButton;
+import swingTweaks.KButton;
 
 public class ServerFrame extends JFrame {
 	private static final long serialVersionUID = 1L;

@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import swingDelays.KButton;
+import swingTweaks.KButton;
 
 public class PrimaryFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
