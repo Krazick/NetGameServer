@@ -8,12 +8,12 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.NodeList;
 
-import geUtilities.ElementName;
-import geUtilities.AttributeName;
 import geUtilities.FileUtils;
 import geUtilities.GUI;
-import geUtilities.XMLDocument;
-import geUtilities.XMLNode;
+import geUtilities.xml.AttributeName;
+import geUtilities.xml.ElementName;
+import geUtilities.xml.XMLDocument;
+import geUtilities.xml.XMLNode;
 
 public class GameSupport {
 	public static final ElementName EN_PLAYERS = new ElementName ("Players");
