@@ -53,13 +53,15 @@ public class GameSupport {
 	private static final Pattern REQUEST_WITH_GAME_LOAD_SETUP_PATTERN = Pattern.compile (REQUEST_GAME_LOAD_SETUP);
 	private static final String PLAYER_RECONNECT = "<Reconnect name=\"(.*)\">";
 	private static final Pattern REQUEST_RECONNECT_WITH_NAME_PATTERN = Pattern.compile (PLAYER_RECONNECT);
+	private static final String CHECKSUM_SUBMIT = "<Checksum .*>";
+	private static final Pattern REQUEST_CHECKSUM_SUBMIT_PATTERN = Pattern.compile (CHECKSUM_SUBMIT);
 	private static final String PLAYER_READY = "<Ready>";
 	private static final String GAME_START = "<Start>";
 	private static final String PLAYER_ACTIVE = "<Active>";
-	private static final int NO_ACTION_NUMBER = -1;
 	private static final String STATUS_COMPLETE = "Complete";
 	private static final String STATUS_PENDING = "Pending";
 	private static final String STATUS_RECEIVED = "Received";
+	private static final int NO_ACTION_NUMBER = -1;
 	private static final int MIN_ACTION_NUMBER = 100;
 	private LinkedList<ClientHandler> clients;
 	private LinkedList<String> clientNames;
@@ -146,6 +148,8 @@ public class GameSupport {
 			isRequestForReady (tBaseRequest) || 
 			isRequestForActive (tBaseRequest)) {
 			tWhoGetsResponse = ClientHandler.SEND_TO.AllButRequestor;
+		} else if (isRequestForChecksumSubmit (tBaseRequest)) {
+			tWhoGetsResponse = ClientHandler.SEND_TO.AllClients;
 		}
 
 		return tWhoGetsResponse;
@@ -415,7 +419,10 @@ public class GameSupport {
 			if (isRequestForActionNumber (aRequest)) {
 				tNewActionNumber = getNewActionNumber ();
 				tGSResponse = generateGSReponseNewAN (tNewActionNumber);
-			} else if (isRequestForLastAction (aRequest) || isRequestForLastActionIsComplete (aRequest)) {
+			} else if (isRequestForChecksumSubmit (aRequest)) {
+				tGSResponse = generateGSReponseChecksumSubmit (aRequest);
+			} else if (isRequestForLastAction (aRequest) || 
+						isRequestForLastActionIsComplete (aRequest)) {
 				tGSResponse = generateGSReponseRequestLast ();
 			} else if (isRequestForLastActionIsPending (aRequest)) {
 				tGSResponse = generateGSReponsePending (actionNumber);
@@ -642,6 +649,18 @@ public class GameSupport {
 		return isValidRequestFor (aRequest, REQUEST_LAST_ACTION_PENDING);
 	}
 
+	public boolean isRequestForChecksumSubmit (String aRequest) {
+		boolean tRequestIsValid;
+		Matcher tMatcher = REQUEST_CHECKSUM_SUBMIT_PATTERN.matcher (aRequest);
+
+		tRequestIsValid = false;
+		if (tMatcher.matches ()) {
+			tRequestIsValid = true;
+		}
+
+		return tRequestIsValid;
+	}
+
 	public boolean isRequestForReconnect (String aRequest) {
 		boolean tRequestIsValid;
 		Matcher tMatcher = REQUEST_RECONNECT_WITH_NAME_PATTERN.matcher (aRequest);
@@ -826,6 +845,14 @@ public class GameSupport {
 		return tGSResponse;
 	}
 
+	public String generateGSReponseChecksumSubmit (String aRequest) {
+		String tGSResponse;
+		
+		tGSResponse = wrapWithGSResponse (aRequest);
+		
+		return tGSResponse;
+	}
+	
 	public String generateGSReponseRequestLast () {
 		String tGSResponse = "NONE";
 
