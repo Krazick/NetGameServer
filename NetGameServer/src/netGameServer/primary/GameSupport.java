@@ -39,7 +39,9 @@ public class GameSupport {
 	private static final Pattern GA_WITH_NO_GAME_ID_PATTERN = Pattern.compile (GA_WITH_ACTION);
 	private static final String GA_REMOVE_ACTION = "<GA>(<RemoveAction number=\"(\\d+)\").*></GA>";
 	private static final Pattern GA_REMOVE_NO_GAME_ID_PATTERN = Pattern.compile (GA_REMOVE_ACTION);
-	
+	private static final String GA_WITH_CHECKSUM = "<GA>(<Checksum.*)</GA>";
+	private static final Pattern GA_WITH_CHECKSUM_PATTERN = Pattern.compile (GA_WITH_CHECKSUM);
+
 	private static final String REQUEST_HEARTBEAT = "<Heartbeat>";
 	private static final Pattern REQUEST_HEARTBEAT_PATTERN = Pattern.compile (REQUEST_HEARTBEAT);
 	private static final String REQUEST_ACTION_NUMBER = "<ActionNumber requestNew=\"TRUE\">";
@@ -360,6 +362,7 @@ public class GameSupport {
 		int tActionNumber;
 		Matcher tMatcher = GA_WITH_NO_GAME_ID_PATTERN.matcher (aRequest);
 		Matcher tMatcherRemoval = GA_REMOVE_NO_GAME_ID_PATTERN.matcher (aRequest);
+		Matcher tMatcherChecksum = GA_WITH_CHECKSUM_PATTERN.matcher (aRequest);
 
 		if (tMatcherRemoval.find ()) {
 			tNumberMatched = tMatcherRemoval.group (2);
@@ -370,6 +373,7 @@ public class GameSupport {
 			updateLastAction (tAction);
 			setGameStatus (SavedGame.STATUS_ACTIVE);
 			autoSave ();
+		} else if (tMatcherChecksum.find ()) {
 		} else {
 			System.err.println ("Handle Action not matched [" + aRequest + "]");
 		}
