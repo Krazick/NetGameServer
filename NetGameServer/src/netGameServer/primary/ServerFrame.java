@@ -70,9 +70,9 @@ public class ServerFrame extends JFrame {
 	private ExecutorService pool = Executors.newFixedThreadPool (MAX_THREADS);
 	private ListSelectionModel gamesListSelectionModel;
 	private SharedListSelectionHandler gameListSelectionHandler;
-	private DefaultListModel<String> clientListModel = new DefaultListModel<String> ();
-	private DefaultListModel<String> gameListModel = new DefaultListModel<String> ();
-	private DefaultListModel<String> gameActionListModel = new DefaultListModel<String> ();
+	private DefaultListModel<String> clientListModel;
+	private DefaultListModel<String> gameListModel;
+	private DefaultListModel<String> gameActionListModel;
 	private LinkedList<String> gameNames;
 	private List<GameSupport> activeGames;
 	private String NO_SELECTED_GAME = "NO SELECTED GAME";
@@ -91,6 +91,10 @@ public class ServerFrame extends JFrame {
 		
 		String tAutoSavesDirectory;
 		
+		clientListModel = new DefaultListModel<String> ();
+		gameListModel = new DefaultListModel<String> ();
+		gameActionListModel = new DefaultListModel<String> ();
+
 		continueThread = true;
 		setName (aName);
 		setPort (aServerPort);
