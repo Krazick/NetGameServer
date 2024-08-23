@@ -40,6 +40,7 @@ public class NetworkAction {
 		setStatus (ACTION_COMPLETE);
 		tAction = aXMLAction.toString ();
 		tAction = tAction.replaceAll ("\r", "").replaceAll ("\n", "");
+		tAction = tAction.replaceAll ("&", "&amp;").replaceAll ("&amp;amp;", "&amp;");
 		setActionXML (tAction);
 	}
 	
