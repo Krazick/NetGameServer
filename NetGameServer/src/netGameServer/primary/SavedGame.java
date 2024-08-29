@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import geUtilities.GUI;
+
 public class SavedGame {
 	String gameID;
 	String gameStatus;
@@ -32,7 +34,7 @@ public class SavedGame {
 	
 	public SavedGame (String aFileName) throws FileNotFoundException {
 		setupPlayers();
-		if (aFileName != null) {
+		if (aFileName != GUI.NULL_STRING) {
 			readFile (aFileName);
 		} else {
 			throw (new FileNotFoundException ("Null File Name"));
@@ -54,7 +56,10 @@ public class SavedGame {
 	private void readFile (String aFileName) {
 		FileReader tFile;
 		BufferedReader tReader;
-		String tLine, tGameID, tPlayerName, tGameStatus;
+		String tLine;
+		String tGameID;
+		String tPlayerName;
+		String tGameStatus;
 		int tLastActionNumber;
 		
 		if (! TEST_FILE.equals (aFileName)) {
@@ -124,9 +129,11 @@ public class SavedGame {
 	
 	public int getLastActionNumberFromLine (String aRequest) {
 		Matcher tMatcher = NSG_WITH_GAME_ID_PATTERN.matcher (aRequest);
-		int tLastActionNumber = BAD_ACTION_NUMBER;
-		String tLANText = "";
+		int tLastActionNumber;
+		String tLANText;
 		
+		tLastActionNumber = BAD_ACTION_NUMBER;
+		tLANText = GUI.EMPTY_STRING;
 		if (tMatcher.find ()) {
 			tLANText = tMatcher.group (3);
 			tLastActionNumber = Integer.parseInt (tLANText);
@@ -137,8 +144,9 @@ public class SavedGame {
 	
 	public String getGameIDFromLine (String aRequest) {
 		Matcher tMatcher = NSG_WITH_GAME_ID_PATTERN.matcher (aRequest);
-		String tGameID = NO_GAME_ID;
+		String tGameID;
 		
+		tGameID = NO_GAME_ID;
 		if (tMatcher.find ()) {
 			tGameID = tMatcher.group (1);
 		}
@@ -148,8 +156,9 @@ public class SavedGame {
 	
 	public String getGameStatusFromLine (String aRequest) {
 		Matcher tMatcher = NSG_WITH_GAME_ID_PATTERN.matcher (aRequest);
-		String tGameStatus = NO_STATUS;
+		String tGameStatus;
 		
+		tGameStatus = NO_STATUS;
 		if (tMatcher.find ()) {
 			tGameStatus = tMatcher.group (2);
 		}
@@ -159,8 +168,9 @@ public class SavedGame {
 	
 	public String getPlayerNameFromLine (String aRequest) {
 		Matcher tMatcher = PLAYER_WITH_NAME_PATTERN.matcher (aRequest);
-		String tPlayerName = NO_NAME;
+		String tPlayerName;
 		
+		tPlayerName = NO_NAME;
 		if (tMatcher.find ()) {
 			tPlayerName = tMatcher.group (1);
 		}
@@ -171,11 +181,11 @@ public class SavedGame {
 	public String getPlayers () {
 		String tPlayers;
 		
-		tPlayers = "";
+		tPlayers = GUI.EMPTY_STRING;
 		if (players.size () > 0) {
 			for (String tPlayer : players) {
 				if (tPlayers.length () > 0) {
-					tPlayers += ", ";
+					tPlayers += GUI.COMMA_SPACE;
 				}
 				tPlayers += tPlayer;
 			}
@@ -185,8 +195,9 @@ public class SavedGame {
 	}
 	
 	public boolean hasPlayer (String aPlayerName) {
-		boolean tHasPlayer = false;
+		boolean tHasPlayer;
 		
+		tHasPlayer = false;
 		if (players.size () > 0) {
 			for (String tPlayer : players) {
 				if (tPlayer.equals(aPlayerName)) {
@@ -203,9 +214,10 @@ public class SavedGame {
 	}
 	
 	public String getSavedGameXML () {
-		String tSavedGameXML = "";
+		String tSavedGameXML;
 		String tPlayers;
 		
+		tSavedGameXML = GUI.EMPTY_STRING;
 		tPlayers = getPlayers ();
 		tSavedGameXML = "<Game gameID=\"" + gameID + "\" lastActionNumber=\"" + lastActionNumber + 
 				"\" players=\"" + tPlayers + "\" status=\"" + gameStatus + "\">";
