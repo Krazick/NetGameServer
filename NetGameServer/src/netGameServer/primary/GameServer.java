@@ -5,7 +5,12 @@ import java.io.IOException;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-public class GameServer {	
+public class GameServer {
+	
+	GameServer () {
+		createAndShowGUI ();
+	}
+	
     /**
      * Create the GUI and show it.  For thread safety,
      * this method should be invoked from the
@@ -24,6 +29,7 @@ public class GameServer {
     }
  
 	public static void main (String [] args) throws IOException {
+//		new GameServer ();
 		
 	    //Schedule a job for the event dispatch thread:
         //creating and showing this application's GUI.
