@@ -997,9 +997,15 @@ public class ClientHandler implements Runnable {
 	}
 
 	public void shutdownAll () {
+		int tIndex;
+		int tCount;
+		ClientHandler tClientHandler;
+		
 		if (clients != NO_CLIENT_HANDLERS) {
-			if (clients.size () > 0) {
-				for (ClientHandler tClientHandler : clients) {
+			tCount = clients.size () - 1;
+			if (tCount >= 0) {
+				for (tIndex = tCount; tIndex >= 0; tIndex--) {
+					tClientHandler = clients.get (tIndex);
 					tClientHandler.shutdown ();
 				}
 			}
