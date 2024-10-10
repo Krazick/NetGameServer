@@ -605,7 +605,12 @@ public class ClientHandler implements Runnable {
 		playerStatus = aNewPlayerStatus;
 		if (tFoundIndex >= 0) {
 			tNewFullName = getFullName ();
-			clientListModel.set (tFoundIndex, tNewFullName);
+			if (tFoundIndex >= clientListModel.size ()) {
+				logger.error ("Setting Player Status, FoundIndex is " + tFoundIndex + 
+								" Client List Model size is " + clientListModel.size ());
+			} else {
+				clientListModel.set (tFoundIndex, tNewFullName);
+			}
 		}
 	}
 	
