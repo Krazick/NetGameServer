@@ -464,8 +464,10 @@ public class ServerFrame extends JFrame {
 	}
 
 	public void addGameAction (String aGameAction) {
-		gameActionListModel.add (0, aGameAction);
-		setGameActionsLabel ();
+		if (gameActionListModel.size () > 0) {
+			gameActionListModel.add (0, aGameAction);
+			setGameActionsLabel ();
+		}
 	}
 	
 	public void removeLastGameAction () {
