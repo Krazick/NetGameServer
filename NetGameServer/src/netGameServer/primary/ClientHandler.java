@@ -66,6 +66,7 @@ public class ClientHandler implements Runnable {
 	private PrintWriter out;
 	private String playerName;
 	private String geVersion;
+	private String javaVersion;
 	private String gameName;
 	private ServerFrame serverFrame;
 	private PlayerStatus playerStatus;
@@ -292,6 +293,8 @@ public class ClientHandler implements Runnable {
 			aContinue = handleNewPlayer (aContinue, aMessage);
 		} else if (aMessage.startsWith ("GEVersion")) {
 			aContinue = handleGEVersion (aContinue, aMessage);
+		} else if (aMessage.startsWith ("JavaVersion")) {
+			aContinue = handleJavaVersion (aContinue, aMessage);
 		} else if (aMessage.startsWith ("EnvironmentVersionInfo")) {
 			aContinue = handleEnvironmentVersionInfo (aContinue, aMessage);
 		} else if (aMessage.startsWith ("say")) {
@@ -481,6 +484,14 @@ public class ClientHandler implements Runnable {
 		return tHandledGameSupport;
 	}
 
+	private boolean handleJavaVersion (boolean aContinue, String aMessage) {
+		if (! setJavaVersionFromMessage (aMessage) ) {
+			aContinue = false;		
+		}
+		
+		return aContinue;
+	}
+
 	private boolean handleGEVersion (boolean aContinue, String aMessage) {
 		if (! setGEVersionFromMessage (aMessage) ) {
 			aContinue = false;		
@@ -542,6 +553,14 @@ public class ClientHandler implements Runnable {
     		logger.error (aMessage + " [" + playerName + "]", aException);
     }
 
+    public void setJavaVersion (String aJavaVersion) {
+    		javaVersion = aJavaVersion;
+    }
+    
+    public String getJavaVersion () {
+    		return javaVersion;
+    }
+
     public void setGEVersion (String aGEVersion) {
     		geVersion = aGEVersion;
     }
@@ -577,7 +596,7 @@ public class ClientHandler implements Runnable {
 			tFullName = "Name UNDEFINED";
 		} else {
 			tFullName = playerName + " [" + playerStatus.toString () + "]";
-			tFullName += " " + geVersion;
+			tFullName += " " + geVersion + " Java " + javaVersion;
 		}
 		
 		return tFullName;
@@ -713,6 +732,30 @@ public class ClientHandler implements Runnable {
 		}
 	}
 	
+	private boolean setJavaVersionFromMessage (String aMessage) {
+		boolean tAccepted;
+		String tJavaVersion;
+		int tSpaceIndex;
+		String tCurrentName;
+		String tNewName;
+		
+		tAccepted = false;
+		tSpaceIndex = aMessage.indexOf (" ");
+		if (tSpaceIndex > 0) {
+			tJavaVersion = aMessage.substring (tSpaceIndex + 1);
+			tCurrentName = getFullName ();
+			setJavaVersion (tJavaVersion);
+			logger.info (tCurrentName + " " + tJavaVersion);
+			tNewName = getFullName ();
+			swapUser (tCurrentName, tNewName);
+			tAccepted = true;
+		} else {
+			logger.error (">> No Space in JavaVersion Command [" + aMessage + "] <<");
+		}
+		
+		return tAccepted;
+	}
+
 	private boolean setGEVersionFromMessage (String aMessage) {
 		boolean tAccepted;
 		String tGEVersion;
