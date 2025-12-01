@@ -955,7 +955,8 @@ public class GameSupport {
 				if (!aClientHandler.updateGameSupport (tGameID)) {
 					tActionNumberText = tMatcher.group (1);
 					tActionNumber = Integer.parseInt (tActionNumberText);
-					logger.info ("The Client Handler updated to Game ID " + tGameID + " Action Number Text [" + tActionNumberText + "] Number " + tActionNumber);
+					logger.info ("The Client Handler updated to Game ID " + tGameID + 
+							" Action Number Text [" + tActionNumberText + "] Number " + tActionNumber);
 					tGameName = tMatcher.group (3);
 					setGameID (tGameID);
 					setActionNumber (tActionNumber);
