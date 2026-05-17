@@ -17,10 +17,10 @@ import org.apache.logging.log4j.Logger;
 import geUtilities.GUI;
 
 public class ClientHandler implements Runnable {
-	public final static String GAME_ACTIVITY_PREFIX = "Game Activity <GA>";
-	public final static String GAME_ACTIVITY_SUFFFIX = "</GA>";
-	public final static String GAME_SUPPORT_PREFIX = "Game Support ";
-	public final static String GAME_SUPPORT_SUFFFIX = "</GS>";
+	public static final String GAME_ACTIVITY_PREFIX = "Game Activity <GA>";
+	public static final String GAME_ACTIVITY_SUFFFIX = "</GA>";
+	public static final String GAME_SUPPORT_PREFIX = "Game Support ";
+	public static final String GAME_SUPPORT_SUFFFIX = "</GS>";
 	public static final String GAME_INDEX = "gameIndex";
 	public static final String GAME_SELECTION = "GameSelection";
 	public static final String PLAYER_ORDER = "PlayerOrder";

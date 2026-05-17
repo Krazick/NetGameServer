@@ -20,17 +20,17 @@ public class SavedGame {
 	private final static Pattern NSG_WITH_GAME_ID_PATTERN = Pattern.compile (NSG_WITH_GAME_ID);
 	private final static String PLAYER_WITH_NAME = "<Player name=\"(.*)\" status=\"(.*)\"/?>"; 
 	private final static Pattern PLAYER_WITH_NAME_PATTERN = Pattern.compile (PLAYER_WITH_NAME);
-	public final static SavedGame NO_GAME = null;
-	public final static ArrayList<String> NO_PLAYERS = null;
-	public final static String STATUS_PREPARED = "PREPARED";
-	public final static String STATUS_ACTIVE = "ACTIVE";
-	public final static String STATUS_INACTIVE = "INACTIVE";
-	public final static String STATUS_COMPLETED = "COMPLETED";
-	public final static String NO_STATUS = "NO_STATUS";
-	public final static String NO_GAME_ID = "NOID";
-	public final static String NO_NAME = "NO_NAME";
-	public final static String TEST_FILE = "JunitTestFile";
-	public final static int BAD_ACTION_NUMBER = -1;
+	public static final SavedGame NO_GAME = null;
+	public static final ArrayList<String> NO_PLAYERS = null;
+	public static final String STATUS_PREPARED = "PREPARED";
+	public static final String STATUS_ACTIVE = "ACTIVE";
+	public static final String STATUS_INACTIVE = "INACTIVE";
+	public static final String STATUS_COMPLETED = "COMPLETED";
+	public static final String NO_STATUS = "NO_STATUS";
+	public static final String NO_GAME_ID = "NOID";
+	public static final String NO_NAME = "NO_NAME";
+	public static final String TEST_FILE = "JunitTestFile";
+	public static final int BAD_ACTION_NUMBER = -1;
 	
 	public SavedGame (String aFileName) throws FileNotFoundException {
 		setupPlayers();
