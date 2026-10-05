@@ -40,10 +40,12 @@ public class ClientHandler implements Runnable {
 		
 		public static PlayerStatus fromString (String aPlayerStatus) {
 			PlayerStatus tFoundPlayerStatus;
+			String tPlayerStatusString;
 			
 			tFoundPlayerStatus = PlayerStatus.NotConnected;
 			for (PlayerStatus tPlayerStatus : PlayerStatus.values ()) {
-				if (tPlayerStatus.toString ().equalsIgnoreCase (aPlayerStatus)) {
+				tPlayerStatusString = tPlayerStatus.toString ();
+				if (tPlayerStatusString.equalsIgnoreCase (aPlayerStatus)) {
 					tFoundPlayerStatus = tPlayerStatus;
 				}
 			}
@@ -365,9 +367,10 @@ public class ClientHandler implements Runnable {
 	}
 
 	public String getGameID () {
-		String tGameID = GameSupport.NO_GAME_ID;
+		String tGameID;
 		
-		if (gameSupport != null) {
+		tGameID = GameSupport.NO_GAME_ID;
+		if (gameSupport != GameSupport.NO_GAME_SUPPORT) {
 			tGameID = gameSupport.getGameID ();
 		}
 		
@@ -591,11 +594,16 @@ public class ClientHandler implements Runnable {
 	
 	public String getFullName () {
 		String tFullName;
+		String tFullStatus;
 		
 		if (playerStatus == null) {
 			tFullName = "Name UNDEFINED";
 		} else {
-			tFullName = playerName + " [" + playerStatus.toString () + "]";
+			tFullStatus = playerStatus.toString ();
+			if (afk) {
+				tFullStatus += " - " + playerStatus.AFK.toString (); 
+			}
+			tFullName = playerName + " [" + tFullStatus + "]";
 			tFullName += " " + geVersion + " Java " + javaVersion;
 		}
 		
