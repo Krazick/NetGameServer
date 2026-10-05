@@ -1,6 +1,5 @@
 package netGameServer.primaryTests;
 
-
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -348,7 +347,6 @@ class ClientHandlerTests {
 			GameSupport tFoundGameSupport;
 			GameSupport tGameSupport;
 			
-			
 			tGameSupport = new GameSupport (mServerFrame, "Client Handler 1", logger);
 			tGameSupport.addClientHandler (ClientHandler.NO_CLIENT_HANDLER);
 			assertEquals (0, tGameSupport.getPlayerCount ());
@@ -418,7 +416,6 @@ class ClientHandlerTests {
 			tHandleResult = tClientHandlerTesterAlpha.handleMessage (true, tMessageGood1);
 			assertFalse (tHandleResult);
 		
-
 			tClientHandlerTesterBeta = buildClientHandler (clients, "TesterBeta");
 			tClientHandlerTesterBeta.setOutputWriter (mPrintWriter);
 			
@@ -448,7 +445,6 @@ class ClientHandlerTests {
 			tHandleResult = tClientHandlerTesterAlpha.handleMessage (true, tMessageGood);
 			assertEquals (true, tHandleResult);
 		}
-		
 		
 		@Test
 		@DisplayName ("Handle Say Test")
@@ -606,6 +602,5 @@ class ClientHandlerTests {
 			assertEquals (true, tHandleResult);
 			assertFalse (tClientHandlerTesterBeta.getClientIsReady ());
 		}
-
 	}
 }

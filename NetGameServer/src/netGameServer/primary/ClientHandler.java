@@ -24,6 +24,12 @@ public class ClientHandler implements Runnable {
 	public static final String GAME_INDEX = "gameIndex";
 	public static final String GAME_SELECTION = "GameSelection";
 	public static final String PLAYER_ORDER = "PlayerOrder";
+	public static final int NO_GAME_INDEX = -1;
+	public static final String NO_CLIENT_NAME = null;
+	public static final String NO_GAME_NAME = null;
+	public static final ClientHandler NO_CLIENT_HANDLER = null;
+	public static final LinkedList<ClientHandler> NO_CLIENT_HANDLERS = null;
+	public static enum SEND_TO { Requestor, AllClients, AllButRequestor };
 	public enum PlayerStatus { 
 		NotConnected ("NOT CONNECTED"),
 		Connected ("CONNECTED"),
@@ -36,7 +42,9 @@ public class ClientHandler implements Runnable {
 		PlayerStatus (String aEnumString) { enumString = aEnumString; }
 		
 		@Override
-		public String toString () { return enumString; }
+		public String toString () { 
+			return enumString;
+		}
 		
 		public static PlayerStatus fromString (String aPlayerStatus) {
 			PlayerStatus tFoundPlayerStatus;
@@ -54,12 +62,6 @@ public class ClientHandler implements Runnable {
 		}
 	};
 
-	public static final int NO_GAME_INDEX = -1;
-	public static final String NO_CLIENT_NAME = null;
-	public static final String NO_GAME_NAME = null;
-	public static final ClientHandler NO_CLIENT_HANDLER = null;
-	public static final LinkedList<ClientHandler> NO_CLIENT_HANDLERS = null;
-	public static enum SEND_TO { Requestor, AllClients, AllButRequestor };
 	private LinkedList<ClientHandler> clients;
 	private DefaultListModel<String> clientListModel;
 	private DefaultListModel<String> gameListModel;
@@ -601,7 +603,7 @@ public class ClientHandler implements Runnable {
 		} else {
 			tFullStatus = playerStatus.toString ();
 			if (afk) {
-				tFullStatus += " - " + playerStatus.AFK.toString (); 
+				tFullStatus += " - " + PlayerStatus.AFK.toString (); 
 			}
 			tFullName = playerName + " [" + tFullStatus + "]";
 			tFullName += " " + geVersion + " Java " + javaVersion;
@@ -712,6 +714,7 @@ public class ClientHandler implements Runnable {
 	public boolean isClientAFK () {
 		return afk;
 	}
+	
 	public boolean isClientActive () {
 		return playerStatus == PlayerStatus.Active;
 	}
