@@ -32,6 +32,7 @@ public class ClientHandler implements Runnable {
 	public static enum SEND_TO { Requestor, AllClients, AllButRequestor };
 	public enum PlayerStatus { 
 		NotConnected ("NOT CONNECTED"),
+		Disconnected ("DISCONNECTED"),
 		Connected ("CONNECTED"),
 		Ready ("READY"),
 		Active ("ACTIVE"),
@@ -225,6 +226,7 @@ public class ClientHandler implements Runnable {
 		boolean tContinue;
 		String tMessage;
 		String tMessageClean;
+		String tSource;
 		int tNullReadCount;
 		int tMaxNullReadCount;
 		Thread tThread;
@@ -239,7 +241,12 @@ public class ClientHandler implements Runnable {
 					logger.info ("Reading for " + playerName + " from SocketPort " + socket.getPort () + " Thread ID " +
 									tThread.getId ());
 					tMessage = in.readLine ();
-					logger.info ("RAW Input from " + playerName + " [" + tMessage + "]");
+					if (playerName != GUI.EMPTY_STRING) {
+						tSource = playerName;
+					} else {
+						tSource = "Unknown Player";
+					}
+					logger.info ("RAW Input from " + tSource + " [" + tMessage + "]");
 					if (tMessage == null) {
 						tNullReadCount++;
 						Thread.sleep (3000);
@@ -333,6 +340,7 @@ public class ClientHandler implements Runnable {
 		tContinue = false;
 		out.println ("stopping");
 		serverBroadcast (playerName + " has left", SEND_TO.AllButRequestor);
+		setPlayerStatus (PlayerStatus.Disconnected);
 		
 		return tContinue;
 	}
@@ -666,14 +674,14 @@ public class ClientHandler implements Runnable {
 	public String getPlayerStatus () {
 		String tPlayerStatus;
 		
-		tPlayerStatus = "NotConnected";
-		if (isClientReady ()) {
-			tPlayerStatus = "READY";
-		} else if (isClientAFK ()) {
-			tPlayerStatus = "AFK";
-		} else if (this.isClientActive ()) {
-			tPlayerStatus = "Active";
-		}
+//		tPlayerStatus = "NotConnected";
+//		if (isClientReady ()) {
+//			tPlayerStatus = "READY";
+//		} else if (isClientAFK ()) {
+//			tPlayerStatus = "AFK";
+//		} else if (this.isClientActive ()) {
+//			tPlayerStatus = "Active";
+//		}
 		
 		tPlayerStatus = playerStatus.toString ();
 		
@@ -1125,12 +1133,12 @@ public class ClientHandler implements Runnable {
 						try {
 							setName (tThisClientName);
 							setGameSupport (aGameSupport);
-							logger.info ("Ready to remove Client at " + tClientIndex);
+							logger.info ("Ready to remove Client " + tThisClientName + " at " + tClientIndex);
 							clients.remove (tClientIndex);
 							tClientCount--;
 							tSuccessfulUpdate = true;
-						} catch (Exception tException) {
-							logger.error ("Replacing Client Handler - Exception Thrown", tException);
+						} catch (Exception eException) {
+							logger.error ("Replacing Client Handler - Exception Thrown", eException);
 						}
 					}
 				}
