@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 
 import javax.swing.DefaultListModel;
@@ -238,14 +239,14 @@ public class ClientHandler implements Runnable {
 		while (tContinue) {
 			if (inBufferGood) {
 				try {
-					logger.info ("Reading for " + playerName + " from SocketPort " + socket.getPort () + " Thread ID " +
-									tThread.getId ());
-					tMessage = in.readLine ();
 					if (playerName != GUI.EMPTY_STRING) {
 						tSource = playerName;
 					} else {
 						tSource = "Unknown Player";
 					}
+					logger.info ("Reading for " + tSource + " from SocketPort " + socket.getPort () + " Thread ID " +
+									tThread.getId ());
+					tMessage = in.readLine ();
 					logger.info ("RAW Input from " + tSource + " [" + tMessage + "]");
 					if (tMessage == null) {
 						tNullReadCount++;
@@ -563,23 +564,23 @@ public class ClientHandler implements Runnable {
 	}
 	
     private void log (String aMessage, Exception aException) {
-    		logger.error (aMessage + " [" + playerName + "]", aException);
+    	logger.error (aMessage + " [" + playerName + "]", aException);
     }
 
     public void setJavaVersion (String aJavaVersion) {
-    		javaVersion = aJavaVersion;
+    	javaVersion = aJavaVersion;
     }
     
     public String getJavaVersion () {
-    		return javaVersion;
+    	return javaVersion;
     }
 
     public void setGEVersion (String aGEVersion) {
-    		geVersion = aGEVersion;
+    	geVersion = aGEVersion;
     }
     
     public String getGEVersion () {
-    		return geVersion;
+    	return geVersion;
     }
     
 	public String getName () {
@@ -614,10 +615,29 @@ public class ClientHandler implements Runnable {
 				tFullStatus += " - " + PlayerStatus.AFK.toString (); 
 			}
 			tFullName = playerName + " [" + tFullStatus + "]";
-			tFullName += " " + geVersion + " Java " + javaVersion;
+			if (hasValue (geVersion)) {
+				tFullName += " " + geVersion;
+			}
+			if (hasValue (javaVersion)) {
+				tFullName += " Java " + javaVersion;
+			}
 		}
 		
 		return tFullName;
+	}
+	
+	public boolean hasValue (String aString) {
+		boolean tHasValue;
+		
+		if (aString == GUI.NULL_STRING) {
+			tHasValue = false;
+		} else if (aString.equals (GUI.EMPTY_STRING)) {
+			tHasValue = false;
+		} else {
+			tHasValue = true;
+		}
+		
+		return tHasValue;
 	}
 	
 	public void setClientIsReady (boolean aIsReady) {
@@ -852,20 +872,24 @@ public class ClientHandler implements Runnable {
 	// Something else we want them to get back anyway.
 	
 	public void serverBroadcast (String aMessage, SEND_TO aSendTo) {
-		for (ClientHandler tClientHandler : clients) {
-			if (playerName != null) {
-				if (SEND_TO.AllClients == aSendTo) {
-					tClientHandler.serverMessage (aMessage);
-				} else if (SEND_TO.Requestor == aSendTo) {
-					if (playerName.equals (tClientHandler.getName ())) {
+		try {
+			for (ClientHandler tClientHandler : clients) {
+				if (playerName != null) {
+					if (SEND_TO.AllClients == aSendTo) {
 						tClientHandler.serverMessage (aMessage);
-					}
-				} else if (SEND_TO.AllButRequestor == aSendTo) {
-					if (! playerName.equals (tClientHandler.getName ())) {
-						tClientHandler.serverMessage (aMessage);
+					} else if (SEND_TO.Requestor == aSendTo) {
+						if (playerName.equals (tClientHandler.getName ())) {
+							tClientHandler.serverMessage (aMessage);
+						}
+					} else if (SEND_TO.AllButRequestor == aSendTo) {
+						if (! playerName.equals (tClientHandler.getName ())) {
+							tClientHandler.serverMessage (aMessage);
+						}
 					}
 				}
 			}
+		} catch (ConcurrentModificationException eException) { // Catch log but ignore
+			logger.error ("ConcurrentModificationException ", eException);
 		}
 	}
 	
@@ -1090,24 +1114,28 @@ public class ClientHandler implements Runnable {
 	public void printAllClientHandlerNames () {
 		String tClientName;
 		Socket tSocket;
-		String tGameName;
+		String tGameID;
 		
 		logger.info ("There are " + clients.size () + " Clients in the list");
 		for (ClientHandler tClientHandler : clients) {
 			tClientName = tClientHandler.getName ();
 			tSocket = tClientHandler.getSocket ();
-			tGameName = tClientHandler.getGameID ();
+			tGameID = tClientHandler.getGameID ();
 			if (tClientName == null) {
 				logger.info ("Client Name is NULL - Replacing this one");
 			} else {
+				if (tClientName.equals (GUI.EMPTY_STRING)) {
+					tClientName = "Unknown Player Name";
+				}
 				logger.info ("Client Name is " + tClientName + " Socket on Port " + 
-						tSocket.getPort () + " Game Name " + tGameName);
+						tSocket.getPort () + " Game ID " + tGameID);
 			}
 		}
 	}
 	
 	public boolean updateClientHandlers (String aClientName, String aGameID, GameSupport aGameSupport) {
 		String tThisClientName;
+		String tFullName;
 		boolean tSuccessfulUpdate;
 		GameSupport tFoundGameSupport;
 		Socket tFoundSocket;
@@ -1146,7 +1174,10 @@ public class ClientHandler implements Runnable {
 		}
 		if (! tSuccessfulUpdate) {
 			setName (aClientName);
-			addNewUser (playerName);
+			tFullName = getFullName ();
+			System.out.println ("Swap user " + aClientName + " with " + tFullName);
+			swapUser (aClientName, tFullName);
+//			addNewUser (playerName);
 			serverBroadcast (playerName + " has reconnected", SEND_TO.AllButRequestor);
 			// Need to attach GameSupport Object to this Client Handler.
 			
