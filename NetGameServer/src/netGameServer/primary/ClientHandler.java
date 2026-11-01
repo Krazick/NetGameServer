@@ -694,15 +694,6 @@ public class ClientHandler implements Runnable {
 	public String getPlayerStatus () {
 		String tPlayerStatus;
 		
-//		tPlayerStatus = "NotConnected";
-//		if (isClientReady ()) {
-//			tPlayerStatus = "READY";
-//		} else if (isClientAFK ()) {
-//			tPlayerStatus = "AFK";
-//		} else if (this.isClientActive ()) {
-//			tPlayerStatus = "Active";
-//		}
-		
 		tPlayerStatus = playerStatus.toString ();
 		
 		return tPlayerStatus;
