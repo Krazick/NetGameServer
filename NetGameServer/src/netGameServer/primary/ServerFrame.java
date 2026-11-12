@@ -232,16 +232,18 @@ public class ServerFrame extends JFrame {
 				
 				logger.info ("Thread Loop Start");
 				tClientSocket = acceptServerSocket ("Operate Frame first time");
-				tClientHandler = new ClientHandler (this, tClientSocket, clients, 
-								clientListModel, gameListModel);
-				
-				if (clients.size () < MAX_THREADS) {
-					clients.add (tClientHandler);
-					pool.execute (tClientHandler);
-				} else {
-					tClientHandler.reportFull ();
+				if (tClientSocket != null) {
+					tClientHandler = new ClientHandler (this, tClientSocket, clients, 
+									clientListModel, gameListModel);
+					
+					if (clients.size () < MAX_THREADS) {
+						clients.add (tClientHandler);
+						pool.execute (tClientHandler);
+					} else {
+						tClientHandler.reportFull ();
+					}
+					updateLabelConnections (clients.size ());
 				}
-				updateLabelConnections (clients.size ());
 				logger.info  ("Thread Loop End");
 			}
 		} catch (SocketException tException) {
@@ -265,19 +267,33 @@ public class ServerFrame extends JFrame {
 
 	public Socket acceptServerSocket (String aCaller) {
 		Socket tClientSocket;
+		int tClientPort;
+		int tAccepted;
 		
 		tClientSocket = null;
-		try {
-			tClientSocket = serverSocket.accept ();
-			logger.info ("New Socket created with Name [" + tClientSocket.toString () + "]");
-		} catch (SocketException tException) {
-			if (continueThread) {
-				log (aCaller + " -- Server Socket Exception - Trying to Accept Socket", tException);
-			}
-		} catch (Exception tException) { 
-			log (aCaller + " -- Exception thrown from Server Main Class", tException); 
-		} 
-
+		tAccepted = 0;
+		while (tAccepted < 10) {
+			try {
+				tClientSocket = serverSocket.accept ();
+				tClientPort = tClientSocket.getPort ();
+				if (tClientPort < 9999) {
+					logger.error ("Server Socket accepted connection from Port " + tClientPort + " CLOSING.");
+					tClientSocket.close ();
+					tAccepted++;
+					tClientSocket = null;
+				} else {
+					tAccepted = 10;
+					logger.info ("New Socket created with Name [" + tClientSocket.toString () + "]");
+				}
+			} catch (SocketException tException) {
+				if (continueThread) {
+					log (aCaller + " -- Server Socket Exception - Trying to Accept Socket", tException);
+				}
+			} catch (Exception tException) { 
+				log (aCaller + " -- Exception thrown from Server Main Class", tException); 
+			} 
+		}
+		
 		return tClientSocket;
 	}
 	
